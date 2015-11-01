@@ -1,0 +1,22 @@
+<codegen>
+    <entity name="Person">
+        <attribute name="firstName" />
+        <attribute name="lastName" />
+        
+        <relationship to-many="Address" />
+    </entity>
+    
+    <entity name="Address">
+    </entity>
+    
+    <entity name="PhoneNumber">
+    </entity>
+    
+    <entity name="Company">
+    </entity>
+    
+    <code 
+        namespace="Acme\Example">
+    </code>
+</codegen>
+
