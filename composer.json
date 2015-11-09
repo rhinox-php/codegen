@@ -1,0 +1,10 @@
+{
+    "require": {
+        "icanboogie/inflector": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rhino\\Codegen\\": "classes/"
+        }
+    }
+}

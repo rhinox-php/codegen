@@ -54,9 +54,21 @@ class XmlParser {
                     $entity->addAttribute($attribute);
                     break;
                 }
+                case 'relationship': {
+                    if ($child['to-many']) {
+                        $to = $this->codegen->findEntity((string) $child['to-many']);
+                        $relationship = new Relationship\ToMany();
+                        $relationship->setFrom($entity);
+                        $relationship->setTo($to);
+                        $entity->addRelationship($relationship);
+                        $to->addRelationship($relationship);
+                    } elseif ($child['to-one']) {
+
+                    }
+                    break;
+                }
             }
         }
-        var_dump($entity);
         $this->codegen->addEntity($entity);
     }
     

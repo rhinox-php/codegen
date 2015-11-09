@@ -1,0 +1,36 @@
+<codegen>
+    <entity name="Address">
+        <attribute name="type" />
+        <attribute name="street" />
+        <attribute name="suburb" />
+        <attribute name="city" />
+        <attribute name="country" />
+        <attribute name="postCode" />
+    </entity>
+
+    <entity name="PhoneNumber">
+        <attribute name="type" />
+        <attribute name="number" />
+    </entity>
+
+    <entity name="Person">
+        <attribute name="firstName" />
+        <attribute name="lastName" />
+        <attribute name="emailAddress" />
+
+        <relationship to-many="Address" />
+        <relationship to-many="PhoneNumber" />
+    </entity>
+    
+    <entity name="Company">
+        <attribute name="name" />
+
+        <relationship to-many="Address" />
+        <relationship to-many="PhoneNumber" />
+    </entity>
+    
+    <code 
+        namespace="Acme\Example">
+    </code>
+</codegen>
+

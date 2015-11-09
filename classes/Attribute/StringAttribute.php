@@ -1,18 +1,7 @@
 <?php
 namespace Rhino\Codegen\Attribute;
 
-class StringAttribute {
-    
-    protected $name;
-    protected $entity;
-    
-    public function getName() {
-        return $this->name;
-    }
+use Rhino\Codegen\Attribute;
 
-    public function setName($name) {
-        $this->name = $name;
-        return $this;
-    }
-    
+class StringAttribute extends Attribute {
 }
