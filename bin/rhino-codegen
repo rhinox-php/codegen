@@ -1,7 +1,11 @@
 #!/usr/bin/env php
 <?php
 if (!class_exists('Rhino\Codegen\Codegen')) {
-    require __DIR__ . '/../vendor/autoload.php';
+    if (is_file(__DIR__ . '/../vendor/autoload.php')) {
+        require __DIR__ . '/../vendor/autoload.php';
+    } elseif (is_file(__DIR__ . '/../../vendor/autoload.php')) {
+        require __DIR__ . '/../../vendor/autoload.php';
+    }
 }
 
 use Symfony\Component\Console\Application;
