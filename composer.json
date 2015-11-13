@@ -8,5 +8,8 @@
         "psr-4": {
             "Rhino\\Codegen\\": "classes/"
         }
-    }
+    },
+    "bin": [
+        "bin/rhino-codegen"
+    ]
 }
