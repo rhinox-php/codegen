@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+if (!class_exists('Rhino\Codegen\Codegen')) {
+    require __DIR__ . '/../vendor/autoload.php';
+}
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+$application = new Application();
+$application->add(new class() extends Command {
+    protected function configure() {
+        $this->setName('gen')
+            ->setDescription('Generate code')
+            ->addArgument('schema', InputArgument::REQUIRED, 'Codegen schema file to load.')
+            ->addArgument('outputPath', InputArgument::REQUIRED, 'Path to output generated files to.');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        $schema = $input->getArgument('schema');
+        $xmlParser = new \Rhino\Codegen\XmlParser($schema);
+        $codegen = $xmlParser->parse();
+        $codegen->generate($input->getArgument('outputPath'));
+    }
+});
+$application->run();

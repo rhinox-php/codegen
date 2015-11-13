@@ -6,14 +6,14 @@ class XmlParser {
     protected $file;
     protected $codegen;
     
-    public function __construct($file) {
+    public function __construct(string $file) {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
         
         $this->file = $file;
         $this->codegen = new Codegen();
     }
     
-    public function parse() {
+    public function parse(): Codegen {
         $errorMode = libxml_use_internal_errors(true);
         try {
             $file = $this->getFile();
@@ -21,13 +21,14 @@ class XmlParser {
             foreach ($xml as $child) {
                 $this->parseNode($child);
             }
-            $this->codegen->generate();
         } catch (\Exception $exception) {
             throw new \Exception('Error parsing XML in ' . $file, 1, $exception);
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors($errorMode);
         }
+
+        return $this->codegen;
     }
     
     protected function parseNode($node) {

@@ -1,7 +1,8 @@
 {
     "name": "rhinox/codegen",
     "require": {
-        "icanboogie/inflector": "^1.4"
+        "icanboogie/inflector": "^1.4",
+        "symfony/console": "^2.7"
     },
     "autoload": {
         "psr-4": {
