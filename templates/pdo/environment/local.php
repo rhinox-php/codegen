@@ -4,7 +4,8 @@ $whoops = new \Whoops\Run();
 $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
 $whoops->register();
 
-$application = new <?= $codegen->getNamespace(); ?>\Application('http://localhost:8001/', function() {
+$application->setUrl('http://localhost:8001/');
+$application->setPdoCallback(function() {
     return new PDO('mysql:host=127.0.0.1;dbname=<?= $codegen->getDatabaseName(); ?>', 'root', 'root', [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_EMULATE_PREPARES => true,

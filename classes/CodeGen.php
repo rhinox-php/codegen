@@ -15,6 +15,7 @@ class Codegen {
         $this->renderTemplate('pdo/bin/server', __DIR__ . '/../example/bin/server.bat');
         $this->renderTemplate('pdo/composer', __DIR__ . '/../example/composer.json');
         $this->renderTemplate('pdo/environment/local', __DIR__ . '/../example/environment/local.php');
+        $this->renderTemplate('pdo/sql/create-database', __DIR__ . '/../example/sql/create-database.sql');
         $this->renderTemplate('pdo/public/index', __DIR__ . '/../example/public/index.php', [
             'entities' => $this->entities,
         ]);
@@ -69,7 +70,9 @@ class Codegen {
     }
 
     public function getDatabaseName() {
-        return $this->getInflector()->underscore($this->getNamespace());
+        $databaseName = str_replace('\\', '_', $this->getNamespace());
+        $databaseName = $this->getInflector()->underscore($databaseName);
+        return $databaseName;
     }
 
     public function getEntities() {

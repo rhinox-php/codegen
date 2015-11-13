@@ -1,4 +1,5 @@
 {
+    "name": "rhinox/codegen",
     "require": {
         "icanboogie/inflector": "^1.4"
     },

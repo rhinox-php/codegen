@@ -3,6 +3,7 @@
 namespace <?= $codegen->getNamespace(); ?>\Model;
 
 class <?= $entity->getName(); ?> {
+    use \Rhino\Core\Model\MySqlModel;
 
     protected $id;
     
