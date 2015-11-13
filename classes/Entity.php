@@ -8,7 +8,7 @@ class Entity {
     protected $attributes = [];
     protected $relationships = [];
 
-    public function getName(): string {
+    protected function getName(): string {
         return $this->name;
     }
 
@@ -17,12 +17,16 @@ class Entity {
         return $this;
     }
 
-    public function getPluralName(): string {
-        return $this->getInflector()->pluralize($this->getName());
+    public function getClassName(): string {
+        return $this->camelize($this->getName());
+    }
+
+    public function getPluralClassName(): string {
+        return $this->pluralize($this->getClassName());
     }
 
     public function getTableName(): string {
-        return $this->getInflector()->underscore($this->getName());
+        return $this->underscore($this->getName());
     }
 
     public function getPropertyName(): string {
@@ -32,22 +36,15 @@ class Entity {
     }
 
     public function getFileName(): string {
-        $inflector = $this->getInflector();
-        $propertyName = $inflector->underscore($this->getName());
-        return $inflector->dasherize($propertyName);
+        return $this->hyphenate($this->getName());
     }
 
     public function getRouteName(): string {
-        $inflector = $this->getInflector();
-        $propertyName = $inflector->underscore($this->getName());
-        return $inflector->dasherize($propertyName);
+        return $this->hyphenate($this->getName());
     }
 
     public function getPluralRouteName(): string {
-        $inflector = $this->getInflector();
-        $propertyName = $inflector->underscore($this->getName());
-        $propertyName = $inflector->pluralize($propertyName);
-        return $inflector->dasherize($propertyName);
+        return $this->pluralize($this->getRouteName());
     }
 
     public function getLabel(): string {

@@ -16,12 +16,16 @@ class Attribute {
         return $this;
     }
 
+    public function getPropertyName(): string {
+        return $this->camelize($this->getName(), true);
+    }
+
     public function getMethodName(): string {
-        return $this->getInflector()->camelize($this->getName());
+        return $this->camelize($this->getName());
     }
 
     public function getColumnName(): string {
-        return $this->getInflector()->underscore($this->getName());
+        return $this->underscore($this->getName());
     }
 
     public function getLabel(): string {

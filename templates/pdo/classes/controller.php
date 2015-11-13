@@ -1,12 +1,12 @@
 <?= '<?php'; ?>
 
 namespace <?= $codegen->getNamespace(); ?>\Controller;
-use <?= $codegen->getNamespace(); ?>\Model\<?= $entity->getName(); ?>;
+use <?= $codegen->getNamespace(); ?>\Model\<?= $entity->getClassName(); ?>;
 
-class <?= $entity->getName(); ?>Controller {
+class <?= $entity->getClassName(); ?>Controller extends \Rhino\Core\Controller {
 
     public function index() {
-        $dataTable = <?= $entity->getName(); ?>::getDataTable();
+        $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
         if ($dataTable->process($this->request, $this->response)) {
             return;
         }
@@ -16,11 +16,11 @@ class <?= $entity->getName(); ?>Controller {
     }
 
     public function create() {
-        $this->form(new <?= $entity->getName(); ?>());
+        $this->form(new <?= $entity->getClassName(); ?>());
     }
 
     public function edit() {
-        $entity = <?= $entity->getName(); ?>::findById();
+        $entity = <?= $entity->getClassName(); ?>::findById();
         if (!$entity) {
             $this->response->notFound();
             return;
@@ -28,7 +28,7 @@ class <?= $entity->getName(); ?>Controller {
         $this->form($entity);
     }
 
-    protected function form(<?= $entity->getName(); ?> $entity) {
+    protected function form(<?= $entity->getClassName(); ?> $entity) {
         $this->render('<?= $entity->getFileName(); ?>/form', [
             'entity' => $entity,
         ]);

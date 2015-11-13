@@ -2,13 +2,13 @@
 
 namespace <?= $codegen->getNamespace(); ?>\Model;
 
-class <?= $entity->getName(); ?> {
+class <?= $entity->getClassName(); ?> {
     use \Rhino\Core\Model\MySqlModel;
 
     protected $id;
     
     <?php foreach ($entity->getAttributes() as $attribute): ?>
-    protected $<?= $attribute->getName(); ?>;
+    protected $<?= $attribute->getPropertyName(); ?>;
     <?php endforeach; ?>
         
     protected $updated;
@@ -19,7 +19,7 @@ class <?= $entity->getName(); ?> {
     protected static $columns = '
         <?= $entity->getTableName(); ?>.id,
         <?php foreach ($entity->getAttributes() as $attribute): ?>
-            <?= $entity->getTableName(); ?>.<?= $attribute->getColumnName(); ?> AS <?= $attribute->getName(); ?>,
+            <?= $entity->getTableName(); ?>.<?= $attribute->getColumnName(); ?> AS <?= $attribute->getPropertyName(); ?>,
         <?php endforeach; ?>
 
         <?= $entity->getTableName(); ?>.created,
@@ -52,7 +52,7 @@ class <?= $entity->getName(); ?> {
     }
 
     public function findById($id) {
-        return $this->fetch<?= $entity->getName(); ?>($this->query('
+        return $this->fetch<?= $entity->getClassName(); ?>($this->query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
             WHERE id = :id;
@@ -61,15 +61,15 @@ class <?= $entity->getName(); ?> {
         ]));
     }
     
-    protected function fetch<?= $entity->getName(); ?>($result) {
+    protected function fetch<?= $entity->getClassName(); ?>($result) {
         $entity = $result->fetchObject(static::class);
         $entity->setCreated(new \DateTimeImmutable($this->created));
         $entity->setUpdated(new \DateTimeImmutable($this->updated));
         return $entity;
     }
 
-    protected function fetch<?= $entity->getPluralName(); ?>() {
-        while ($entity = $this->fetch<?= $entity->getName(); ?>()) {
+    protected function fetch<?= $entity->getPluralClassName(); ?>() {
+        while ($entity = $this->fetch<?= $entity->getClassName(); ?>()) {
             yield $entity;
         }
     }
@@ -78,9 +78,9 @@ class <?= $entity->getName(); ?> {
 
     <?php if ($entity == $relationship->getFrom()): ?>
 
-    public function fetch<?= $relationship->getTo()->getPluralName(); ?>() {
+    public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
         if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this->$this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getName(); ?>::findBy<?= $entity->getName(); ?>Id($this->getId());
+            $this->$this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
     }
@@ -89,7 +89,7 @@ class <?= $entity->getName(); ?> {
 
     <?php if ($entity == $relationship->getTo()): ?>
 
-    public static function findBy<?= $relationship->getFrom()->getName(); ?>Id($id) {
+    public static function findBy<?= $relationship->getFrom()->getClassName(); ?>Id($id) {
         return static::fetchAddresses(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
@@ -117,11 +117,11 @@ class <?= $entity->getName(); ?> {
     <?php foreach ($entity->getAttributes() as $attribute): ?>
     
     public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getName(); ?>;
+        return $this-><?= $attribute->getPropertyName(); ?>;
     }
         
     public function set<?= $attribute->getMethodName(); ?>($value) {
-        $this-><?= $attribute->getName(); ?> = $value;
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
     

@@ -7,6 +7,7 @@ class Codegen {
     protected $namespace;
     protected $entities = [];
     protected $relationships = [];
+    protected $dryRun = true;
 
     public function generate(string $path) {
         if (!is_dir($path)) {
@@ -19,20 +20,22 @@ class Codegen {
         $this->renderTemplate('pdo/composer', $path . '/composer.json');
         $this->renderTemplate('pdo/environment/local', $path . '/environment/local.php');
         $this->renderTemplate('pdo/sql/create-database', $path . '/sql/create-database.sql');
+        $this->renderTemplate('pdo/views/home', $path . '/views/home.php');
+        $this->renderTemplate('pdo/classes/home-controller', $path . '/classes/Controller/HomeController.php');
         $this->renderTemplate('pdo/public/index', $path . '/public/index.php', [
             'entities' => $this->entities,
         ]);
         foreach ($this->entities as $entity) {
-            $this->renderTemplate('pdo/classes/model', $path . '/classes/Model/' . $entity->getName() . '.php', [
+            $this->renderTemplate('pdo/classes/model', $path . '/classes/Model/' . $entity->getClassName() . '.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/classes/controller', $path . '/classes/Controller/' . $entity->getName() . 'Controller.php', [
+            $this->renderTemplate('pdo/classes/controller', $path . '/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/views/index', $path . '/views/' . $entity->getFileName() . '/index.php', [
+            $this->renderTemplate('pdo/views/model/index', $path . '/views/' . $entity->getFileName() . '/index.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/views/form', $path . '/views/' . $entity->getFileName() . '/form.php', [
+            $this->renderTemplate('pdo/views/model/form', $path . '/views/' . $entity->getFileName() . '/form.php', [
                 'entity' => $entity,
             ]);
             $this->renderTemplate('pdo/classes/application', $path . '/classes/Application.php', [
@@ -52,18 +55,32 @@ class Codegen {
     }
 
     protected function renderTemplate(string $template, string $outputFile, array $data = []) {
-        // @todo inject a logger
-        echo 'Rendering ' . $template . ' to ' . $outputFile . PHP_EOL;
-
         $codegen = $this;
         extract($data, EXTR_SKIP);
         ob_start();
         require __DIR__ . '/../templates/' . $template . '.php';
         $output = ob_get_clean();
-        if (!file_exists(dirname($outputFile))) {
-            mkdir(dirname($outputFile), 0777, true);
+        $directory = dirname($outputFile);
+        if (!file_exists($directory)) {
+            $this->log('Creating directory ' . $directory);
+            if (!$this->dryRun) {
+                mkdir($directory, 0755, true);
+            }
         }
-        file_put_contents($outputFile, $output);
+
+        if (is_file($outputFile) && md5($output) == md5_file($outputFile)) {
+            return;
+        }
+
+        $this->log((file_exists($outputFile) ? 'Overwriting' : 'Creating') . ' ' . $outputFile . ' from template ' . $template);
+        if (!$this->dryRun) {
+            file_put_contents($outputFile, $output);
+        }
+    }
+
+    protected function log($message) {
+        // @todo inject a logger
+        echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
     }
 
     public function getNamespace() {
@@ -115,6 +132,15 @@ class Codegen {
 
     public function addRelationships($relationship) {
         $this->relationships[] = $relationship;
+        return $this;
+    }
+
+    public function isDryRun() {
+        return $this->dryRun;
+    }
+
+    public function setDryRun($dryRun) {
+        $this->dryRun = $dryRun;
         return $this;
     }
 

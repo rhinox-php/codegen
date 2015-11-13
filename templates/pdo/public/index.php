@@ -7,17 +7,18 @@ $dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r)
 
     <?php foreach ($entities as $entity): ?>
 
-    $r->addRoute('GET', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'index']);
-    $r->addRoute('POST', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'index']);
-    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'create']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'create']);
-    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'edit']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'edit']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getName(); ?>Controller", 'delete']);
+    $r->addRoute('GET', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
+    $r->addRoute('POST', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
+    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
+    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
+    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
+    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
+    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'delete']);
     <?php endforeach; ?>
 });
 
-$request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+$request = \Rhino\Core\Http\Request::createFromGlobals();
+$response = new \Rhino\Core\Http\Response();
 $routeInfo = $dispatcher->dispatch($request->getMethod(), $request->getPathInfo());
 switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::NOT_FOUND: {
@@ -33,8 +34,10 @@ switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::FOUND: {
         list($status, $handler, $parameters) = $routeInfo;
         list($controllerName, $methodName) = $handler;
-        $controller = new $controllerName($request, $application);
-        if (!method_exists($controller, 'filterRoute') || !$controller->filterRoute($methodName, $parameters)) {
+        $controller = new $controllerName();
+        $controller->setRequest($request);
+        $controller->setResponse($response);
+        if (!$controller->filterRoute($methodName, $parameters)) {
             call_user_func_array([$controller, $methodName], $parameters);
         }
         break;
