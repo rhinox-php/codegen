@@ -7,12 +7,21 @@
         "symfony/validator": "^2.7",
         "rhinox/core": "dev-master",
         "rhinox/data-table": "dev-master",
-        "filp/whoops": "dev-php7"
+        "filp/whoops": "dev-php7",
+        "rhinox/rhino": "dev-master"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@bitbucket.org:PetahNZ/rhino-core"
+            "url": "git@bitbucket.org:PetahNZ/rhino"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:PetahNZ/rhino-asset"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:PetahNZ/rhino-form"
         },
         {
             "type": "vcs",
@@ -25,6 +34,10 @@
         {
             "type": "vcs",
             "url": "git@bitbucket.org:PetahNZ/rhino-data-table"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:PetahNZ/rhino-codegen"
         }
     ],
     "autoload": {
