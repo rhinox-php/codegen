@@ -21,6 +21,7 @@ class Codegen {
         $this->renderTemplate('pdo/environment/local', $path . '/environment/local.php');
         $this->renderTemplate('pdo/sql/create-database', $path . '/sql/create-database.sql');
         $this->renderTemplate('pdo/views/home', $path . '/views/home.php');
+        $this->renderTemplate('pdo/views/layouts/default', $path . '/views/layouts/default.php');
         $this->renderTemplate('pdo/classes/home-controller', $path . '/classes/Controller/HomeController.php');
         $this->renderTemplate('pdo/public/index', $path . '/public/index.php', [
             'entities' => $this->entities,
