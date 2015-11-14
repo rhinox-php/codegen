@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/styles/application.css" />
 </head>
 <body>
+    <?= '<?= $this->body(); ?>'; ?>
+
     <script src="/scripts/application.js"></script>
 </body>
 </html>

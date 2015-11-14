@@ -40,6 +40,7 @@ switch ($routeInfo[0]) {
         if (!$controller->filterRoute($methodName, $parameters)) {
             call_user_func_array([$controller, $methodName], $parameters);
         }
+        $response->process();
         break;
     }
 }

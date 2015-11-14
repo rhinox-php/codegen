@@ -3,8 +3,9 @@ namespace Rhino\Codegen;
 
 class Codegen {
     use Inflector;
-    
+
     protected $namespace;
+    protected $projectName;
     protected $entities = [];
     protected $relationships = [];
     protected $dryRun = true;
@@ -14,6 +15,17 @@ class Codegen {
             throw new \Exception('Expected path to be a valid directory: ' . $path);
         }
 
+        $this->createFiles([
+            $path . '/private/scripts/application.js',
+            $path . '/private/styles/layout.scss',
+            $path . '/private/styles/tags.scss',
+            $path . '/private/styles/mixins.scss',
+            $path . '/private/styles/variables.scss',
+        ]);
+        $this->renderTemplate('pdo/private/styles/application', $path . '/private/styles/application.scss');
+        $this->renderTemplate('pdo/bower', $path . '/bower.json');
+        $this->renderTemplate('pdo/gulpfile', $path . '/gulpfile.js');
+        $this->renderTemplate('pdo/package', $path . '/package.json');
         $this->renderTemplate('pdo/include', $path . '/include.php');
         $this->renderTemplate('pdo/router', $path . '/router.php');
         $this->renderTemplate('pdo/bin/server', $path . '/bin/server.bat');
@@ -79,6 +91,24 @@ class Codegen {
         }
     }
 
+    protected function createFiles(array $files) {
+        foreach ($files as $file) {
+            $directory = dirname($file);
+            if (!file_exists($directory)) {
+                $this->log('Creating directory ' . $directory);
+                if (!$this->dryRun) {
+                    mkdir($directory, 0755, true);
+                }
+            }
+            if (!file_exists($file)) {
+                $this->log('Creating file ' . $file);
+                if (!$this->dryRun) {
+                    file_put_contents($file, '');
+                }
+            }
+        }
+    }
+
     protected function log($message) {
         // @todo inject a logger
         echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
@@ -86,6 +116,15 @@ class Codegen {
 
     public function getNamespace() {
         return $this->namespace;
+    }
+
+    public function getProjectName() {
+        return $this->projectName;
+    }
+
+    public function setProjectName($projectName) {
+        $this->projectName = $projectName;
+        return $this;
     }
 
     public function setNamespace($namespace) {

@@ -39,6 +39,7 @@ class XmlParser {
             }
             case 'code': {
                 $this->codegen->setNamespace((string) $node['namespace']);
+                $this->codegen->setProjectName((string) $node['projectName']);
                 break;
             }
         }
