@@ -48,9 +48,11 @@ class Entity {
     }
 
     public function getLabel(): string {
-        $inflector = $this->getInflector();
-        $label = $inflector->underscore($this->getName());
-        return $inflector->humanize($label, true);
+        return $this->humanize($this->getName());
+    }
+
+    public function getPluralLabel(): string {
+        return $this->pluralize($this->getLabel());
     }
 
     public function getAttributes(): array {

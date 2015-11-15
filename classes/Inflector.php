@@ -42,4 +42,10 @@ trait Inflector {
         return $inflector->pluralize($result);
     }
 
+    public function humanize($result): string {
+        $inflector = $this->getInflector();
+        $result = $inflector->underscore($result);
+        return $inflector->humanize($result, true);
+    }
+
 }

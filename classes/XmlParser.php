@@ -10,7 +10,7 @@ class XmlParser {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
         
         $this->file = $file;
-        $this->codegen = new Codegen();
+        $this->codegen = new Codegen($this);
     }
     
     public function parse(): Codegen {
@@ -39,7 +39,8 @@ class XmlParser {
             }
             case 'code': {
                 $this->codegen->setNamespace((string) $node['namespace']);
-                $this->codegen->setProjectName((string) $node['projectName']);
+                $this->codegen->setProjectName((string) $node['project-name']);
+                $this->codegen->setTemplatePath(dirname($this->getFile()) . '/' . $node['template-path']);
                 break;
             }
         }
@@ -74,7 +75,7 @@ class XmlParser {
         $this->codegen->addEntity($entity);
     }
     
-    protected function getFile() {
+    public function getFile() {
         return $this->file;
     }
     

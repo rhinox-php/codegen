@@ -9,6 +9,12 @@ class Codegen {
     protected $entities = [];
     protected $relationships = [];
     protected $dryRun = true;
+    protected $xmlParser;
+    protected $templatePath;
+
+    public function __construct(XmlParser $xmlParser) {
+        $this->xmlParser = $xmlParser;
+    }
 
     public function generate(string $path) {
         if (!is_dir($path)) {
@@ -22,44 +28,44 @@ class Codegen {
             $path . '/private/styles/mixins.scss',
             $path . '/private/styles/variables.scss',
         ]);
-        $this->renderTemplate('pdo/private/styles/application', $path . '/private/styles/application.scss');
-        $this->renderTemplate('pdo/bower', $path . '/bower.json');
-        $this->renderTemplate('pdo/gulpfile', $path . '/gulpfile.js');
-        $this->renderTemplate('pdo/package', $path . '/package.json');
-        $this->renderTemplate('pdo/include', $path . '/include.php');
-        $this->renderTemplate('pdo/router', $path . '/router.php');
-        $this->renderTemplate('pdo/bin/server', $path . '/bin/server.bat');
-        $this->renderTemplate('pdo/composer', $path . '/composer.json');
-        $this->renderTemplate('pdo/environment/local', $path . '/environment/local.php');
-        $this->renderTemplate('pdo/sql/create-database', $path . '/sql/create-database.sql');
-        $this->renderTemplate('pdo/views/home', $path . '/views/home.php');
-        $this->renderTemplate('pdo/views/layouts/default', $path . '/views/layouts/default.php');
-        $this->renderTemplate('pdo/classes/home-controller', $path . '/classes/Controller/HomeController.php');
-        $this->renderTemplate('pdo/public/index', $path . '/public/index.php', [
+        $this->renderTemplate('private/styles/application', $path . '/private/styles/application.scss');
+        $this->renderTemplate('bower', $path . '/bower.json');
+        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
+        $this->renderTemplate('package', $path . '/package.json');
+        $this->renderTemplate('include', $path . '/include.php');
+        $this->renderTemplate('router', $path . '/router.php');
+        $this->renderTemplate('bin/server', $path . '/bin/server.bat');
+        $this->renderTemplate('composer', $path . '/composer.json');
+        $this->renderTemplate('environment/local', $path . '/environment/local.php');
+        $this->renderTemplate('sql/create-database', $path . '/sql/create-database.sql');
+        $this->renderTemplate('views/home', $path . '/views/home.php');
+        $this->renderTemplate('views/layouts/default', $path . '/views/layouts/default.php');
+        $this->renderTemplate('classes/home-controller', $path . '/classes/Controller/HomeController.php');
+        $this->renderTemplate('public/index', $path . '/public/index.php', [
             'entities' => $this->entities,
         ]);
         foreach ($this->entities as $entity) {
-            $this->renderTemplate('pdo/classes/model', $path . '/classes/Model/' . $entity->getClassName() . '.php', [
+            $this->renderTemplate('classes/model', $path . '/classes/Model/' . $entity->getClassName() . '.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/classes/controller', $path . '/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
+            $this->renderTemplate('classes/controller', $path . '/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/views/model/index', $path . '/views/' . $entity->getFileName() . '/index.php', [
+            $this->renderTemplate('views/model/index', $path . '/views/' . $entity->getFileName() . '/index.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/views/model/form', $path . '/views/' . $entity->getFileName() . '/form.php', [
+            $this->renderTemplate('views/model/form', $path . '/views/' . $entity->getFileName() . '/form.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/classes/application', $path . '/classes/Application.php', [
+            $this->renderTemplate('classes/application', $path . '/classes/Application.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('pdo/sql/full/create-table', $path . '/sql/full/' . $entity->getTableName() . '.sql', [
+            $this->renderTemplate('sql/full/create-table', $path . '/sql/full/' . $entity->getTableName() . '.sql', [
                 'entity' => $entity,
             ]);
 
             foreach ($entity->getRelationships() as $relationship) {
-                $this->renderTemplate('pdo/sql/full/create-relationship-table', $path . '/sql/full/' . $entity->getTableName() . '_' . $relationship->getTo()->getTableName() . '.sql', [
+                $this->renderTemplate('sql/full/create-relationship-table', $path . '/sql/full/' . $entity->getTableName() . '_' . $relationship->getTo()->getTableName() . '.sql', [
                     'entity' => $entity,
                     'relationship' => $relationship,
                 ]);
@@ -69,9 +75,11 @@ class Codegen {
 
     protected function renderTemplate(string $template, string $outputFile, array $data = []) {
         $codegen = $this;
+        $file = $this->getTemplateFile($template);
+        extract(get_object_vars($this), EXTR_SKIP);
         extract($data, EXTR_SKIP);
         ob_start();
-        require __DIR__ . '/../templates/' . $template . '.php';
+        require $file;
         $output = ob_get_clean();
         $directory = dirname($outputFile);
         if (!file_exists($directory)) {
@@ -89,6 +97,16 @@ class Codegen {
         if (!$this->dryRun) {
             file_put_contents($outputFile, $output);
         }
+    }
+
+    protected function getTemplateFile($name) {
+        $file = $this->templatePath . '/' . $name . '.php';
+        if (is_file($file)) {
+            return $file;
+        }
+        $file = __DIR__ . '/../templates/pdo/' . $name . '.php';
+        assert(is_file($file), 'Could not find template file: ' . $name);
+        return $file;
     }
 
     protected function createFiles(array $files) {
@@ -182,6 +200,14 @@ class Codegen {
     public function setDryRun($dryRun) {
         $this->dryRun = $dryRun;
         return $this;
+    }
+
+    public function getTemplatePath() {
+        return $this->templatePath;
+    }
+
+    public function setTemplatePath($templatePath) {
+        $this->templatePath = $templatePath;
     }
 
 }

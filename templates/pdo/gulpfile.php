@@ -10,7 +10,7 @@ gulp.task('default', ['lib-styles', 'scripts'], function () {
 });
 
 gulp.task('site-styles', function () {
-    return gulp.src('private/scss/application.scss')
+    return gulp.src('private/styles/application.scss')
         .pipe(sass({
             outputStyle: 'compressed',
         }).on('error', sass.logError))

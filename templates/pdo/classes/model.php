@@ -37,7 +37,7 @@ class <?= $entity->getClassName(); ?> {
     <?php endforeach; ?>
 
     public static function getDataTable() {
-        $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), 'contacts');
+        $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), '<?= $entity->getTableName(); ?>');
         $table->insertColumn('actions', function($column, $row) {
         // @todo fix delete button, make post, confirm
         return '
