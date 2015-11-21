@@ -41,6 +41,10 @@ class XmlParser {
                 $this->codegen->setNamespace((string) $node['namespace']);
                 $this->codegen->setProjectName((string) $node['project-name']);
                 $this->codegen->setTemplatePath(dirname($this->getFile()) . '/' . $node['template-path']);
+                $this->codegen->setUrlPrefix((string) $node['url-prefix']);
+                $this->codegen->setViewPathPrefix((string) $node['view-path-prefix']);
+                $this->codegen->setClassPathPrefix((string) $node['class-path-prefix']);
+                $this->codegen->setDatabaseName((string) $node['database-name']);
                 break;
             }
         }
@@ -51,8 +55,26 @@ class XmlParser {
         $entity->setName((string) $node['name']);
         foreach ($node->children() as $child) {
             switch ($child->getName()) {
-                case 'attribute': {
+                case 'string-attribute': {
                     $attribute = new Attribute\StringAttribute();
+                    $attribute->setName((string) $child['name']);
+                    $entity->addAttribute($attribute);
+                    break;
+                }
+                case 'date-attribute': {
+                    $attribute = new Attribute\DateAttribute();
+                    $attribute->setName((string) $child['name']);
+                    $entity->addAttribute($attribute);
+                    break;
+                }
+                case 'text-attribute': {
+                    $attribute = new Attribute\TextAttribute();
+                    $attribute->setName((string) $child['name']);
+                    $entity->addAttribute($attribute);
+                    break;
+                }
+                case 'bool-attribute': {
+                    $attribute = new Attribute\BoolAttribute();
                     $attribute->setName((string) $child['name']);
                     $entity->addAttribute($attribute);
                     break;

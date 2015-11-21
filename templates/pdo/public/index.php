@@ -2,19 +2,21 @@
 
 require_once __DIR__ . '/../include.php';
 
-$dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/', ['<?= $codegen->getNamespace(); ?>\Controller\HomeController', 'home']);
+$dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $router) {
+    $router->addRoute('GET', '/', ['<?= $codegen->getNamespace(); ?>\Controller\HomeController', 'home']);
 
     <?php foreach ($entities as $entity): ?>
 
-    $r->addRoute('GET', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
-    $r->addRoute('POST', "/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
-    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
-    $r->addRoute('GET', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
-    $r->addRoute('POST', "/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'delete']);
+    $router->addRoute('GET', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'index']);
+    $router->addRoute('GET', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'create']);
+    $router->addRoute('GET', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'delete']);
     <?php endforeach; ?>
+    
+    require __DIR__ . '/../routes.php';
 });
 
 $request = \Rhino\Core\Http\Request::createFromGlobals();

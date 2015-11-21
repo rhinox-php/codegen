@@ -6,7 +6,15 @@ var sass = require('gulp-sass');
 var zip = require('gulp-zip');
 var autoprefixer = require('gulp-autoprefixer');
 
-gulp.task('default', ['lib-styles', 'scripts'], function () {
+gulp.task('default', ['lib-styles', 'scripts', 'fonts'], function () {
+});
+
+gulp.task('fonts', function () {
+    return gulp.src([
+            'bower_components/bootstrap/fonts/*.*',
+        ])
+        .pipe(flatten())
+        .pipe(gulp.dest('public/fonts'));
 });
 
 gulp.task('site-styles', function () {
@@ -21,6 +29,7 @@ gulp.task('site-styles', function () {
 gulp.task('lib-styles', ['site-styles'], function () {
     return gulp.src([
             'bower_components/bootstrap/dist/css/bootstrap.min.css',
+            'bower_components/datatables/media/css/dataTables.bootstrap.min.css',
             'temp/application.css',
         ])
         .pipe(autoprefixer({
@@ -35,6 +44,8 @@ gulp.task('scripts', function () {
     return gulp.src([
             'bower_components/jquery/dist/jquery.min.js',
             'bower_components/bootstrap/dist/js/bootstrap.min.js',
+            'bower_components/datatables/media/js/jquery.dataTables.min.js',
+            'bower_components/datatables/media/js/dataTables.bootstrap.min.js',
             'private/scripts/application.js',
         ])
         .pipe(concat('application.js'))

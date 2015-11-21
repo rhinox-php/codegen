@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <link rel="stylesheet" href="/styles/application.css"/>
+    <script src="/scripts/application.js"></script>
 </head>
 <body>
 <div>
@@ -65,14 +66,13 @@
         </div>
     </nav>
 </div>
-<div class="rx-sidebar">
+<div class="n-sidebar">
     <?php foreach ($entities as $entity): ?>
-        <a href="<?= $entity->getRouteName(); ?>"><?= $entity->getPluralLabel(); ?></a>
+        <a href="/<?= $entity->getPluralRouteName(); ?>" class="btn btn-default btn-block"><?= $entity->getPluralLabel(); ?></a>
     <?php endforeach; ?>
 </div>
-<div class="rx-body">
+<div class="n-body">
     <?= '<?= $this->body(); ?>'; ?>
 </div>
-<script src="/scripts/application.js"></script>
 </body>
 </html>

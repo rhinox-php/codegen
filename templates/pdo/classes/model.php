@@ -6,11 +6,9 @@ class <?= $entity->getClassName(); ?> {
     use \Rhino\Core\Model\MySqlModel;
 
     protected $id;
-    
-    <?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php foreach ($entity->getAttributes() as $attribute): ?>
     protected $<?= $attribute->getPropertyName(); ?>;
-    <?php endforeach; ?>
-        
+<?php endforeach; ?>
     protected $updated;
     protected $created;
     
@@ -18,77 +16,149 @@ class <?= $entity->getClassName(); ?> {
     
     protected static $columns = '
         <?= $entity->getTableName(); ?>.id,
-        <?php foreach ($entity->getAttributes() as $attribute): ?>
-            <?= $entity->getTableName(); ?>.<?= $attribute->getColumnName(); ?> AS <?= $attribute->getPropertyName(); ?>,
-        <?php endforeach; ?>
-
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+        <?= $entity->getTableName(); ?>.<?= $attribute->getColumnName(); ?> AS <?= $attribute->getPropertyName(); ?>,
+<?php endforeach; ?>
         <?= $entity->getTableName(); ?>.created,
         <?= $entity->getTableName(); ?>.updated
     ';
 
-    <?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php if ($entity == $relationship->getFrom()): ?>
 
-        <?php if ($entity == $relationship->getFrom()): ?>
+    protected $<?= $relationship->getTo()->getPropertyName(); ?>;
 
-            protected $<?= $relationship->getTo()->getPropertyName(); ?>;
-
-        <?php endif; ?>
-
-    <?php endforeach; ?>
+<?php endif; ?>
+<?php endforeach; ?>
 
     public static function getDataTable() {
         $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), '<?= $entity->getTableName(); ?>');
         $table->insertColumn('actions', function($column, $row) {
         // @todo fix delete button, make post, confirm
         return '
-            <a href="/contact/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
-            <a href="/contact/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
+            <a href="/<?= $entity->getRouteName(); ?>/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
+            <a href="/<?= $entity->getRouteName(); ?>/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
         ';
         })->setLabel('Actions');
         $table->addColumn('id')->setLabel('ID');
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+        $table->addColumn('<?= $attribute->getColumnName(); ?>')->setLabel('<?= $attribute->getLabel(); ?>');
+<?php endforeach; ?>
         $table->addColumn('created')->setLabel('Created');
         $table->addColumn('updated')->setLabel('Updated');
         return $table;
     }
 
-    public function findById($id) {
-        return $this->fetch<?= $entity->getClassName(); ?>($this->query('
+    public function save() {
+        if ($this->getId()) {
+            $this->update();
+        } else {
+            $this->insert();
+        }
+    }
+
+    protected function insert() {
+        $this->query('
+            INSERT INTO <?= $entity->getTableName(); ?> (
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+                <?= $attribute->getColumnName(); ?>,
+<?php endforeach; ?>
+                created
+            ) VALUES (
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+                :<?= $attribute->getColumnName(); ?>,
+<?php endforeach; ?>
+                UTC_TIMESTAMP()
+            );
+        ', [
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d'),
+<?php else: ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php endif; ?>
+<?php endforeach; ?>
+        ]);
+    }
+
+    protected function update() {
+        $this->query('
+            UPDATE <?= $entity->getTableName(); ?>
+            SET
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+                <?= $attribute->getColumnName(); ?> = :<?= $attribute->getColumnName(); ?>,
+<?php endforeach; ?>
+                updated = UTC_TIMESTAMP()
+            WHERE id = :id
+            LIMIT 1;
+        ', [
+            ':id' => $this->getId(),
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d'),
+<?php else: ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php endif; ?>
+<?php endforeach; ?>
+        ]);
+    }
+
+    public static function findById($id) {
+        return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
             WHERE id = :id;
         ', [
-            ':id' => $this->getId(),
+            ':id' => $id,
         ]));
     }
-    
-    protected function fetch<?= $entity->getClassName(); ?>($result) {
+
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute): ?>
+    public static function findBy<?= $attribute->getMethodName(); ?>($value) {
+        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . '
+            WHERE <?= $attribute->getColumnName(); ?> = :value;
+        ', [
+            ':value' => $value,
+        ]));
+    }
+<?php endif; ?>
+<?php endforeach; ?>
+
+    protected static function fetch<?= $entity->getClassName(); ?>($result) {
         $entity = $result->fetchObject(static::class);
-        $entity->setCreated(new \DateTimeImmutable($this->created));
-        $entity->setUpdated(new \DateTimeImmutable($this->updated));
+        if (!$entity) {
+            return null;
+        }
+
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+        $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($entity-><?= $attribute->getPropertyName(); ?>));
+<?php endif; ?>
+<?php endforeach; ?>
+        $entity->setCreated(new \DateTimeImmutable($entity->created));
+        $entity->setUpdated(new \DateTimeImmutable($entity->updated));
         return $entity;
     }
 
-    protected function fetch<?= $entity->getPluralClassName(); ?>() {
+    protected static function fetch<?= $entity->getPluralClassName(); ?>() {
         while ($entity = $this->fetch<?= $entity->getClassName(); ?>()) {
             yield $entity;
         }
     }
 
-    <?php foreach ($entity->getRelationships() as $relationship): ?>
-
-    <?php if ($entity == $relationship->getFrom()): ?>
-
+<?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php if ($entity == $relationship->getFrom()): ?>
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
         if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
             $this->$this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
     }
-
-    <?php endif; ?>
-
-    <?php if ($entity == $relationship->getTo()): ?>
-
+<?php endif; ?>
+<?php if ($entity == $relationship->getTo()): ?>
     public static function findBy<?= $relationship->getFrom()->getClassName(); ?>Id($id) {
         return static::fetchAddresses(static::query('
             SELECT ' . static::$columns . '
@@ -100,11 +170,8 @@ class <?= $entity->getClassName(); ?> {
             ':id' => $id,
         ]));
     }
-
-    <?php endif; ?>
-
-    <?php endforeach; ?>
-    
+<?php endif; ?>
+<?php endforeach; ?>
     public function getId() {
         return $this->id;
     }
@@ -114,19 +181,40 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
     
-    <?php foreach ($entity->getAttributes() as $attribute): ?>
-    
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
+    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
-        
-    public function set<?= $attribute->getMethodName(); ?>($value) {
+
+    public function set<?= $attribute->getMethodName(); ?>(string $value) {
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
-    
-    <?php endforeach; ?>
+<?php endif; ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+    public function get<?= $attribute->getMethodName(); ?>() {
+        return $this-><?= $attribute->getPropertyName(); ?>;
+    }
 
+    public function set<?= $attribute->getMethodName(); ?>(\DateTimeInterface $value) {
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
+        return $this;
+    }
+<?php endif; ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+    public function get<?= $attribute->getMethodName(); ?>() {
+        return $this-><?= $attribute->getPropertyName(); ?>;
+    }
+
+    public function set<?= $attribute->getMethodName(); ?>(bool $value) {
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
+        return $this;
+    }
+<?php endif; ?>
+<?php endforeach; ?>
     public function getCreated(): \DateTimeImmutable {
         return $this->created;
     }

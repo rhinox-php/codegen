@@ -11,6 +11,10 @@ class Codegen {
     protected $dryRun = true;
     protected $xmlParser;
     protected $templatePath;
+    protected $urlPrefix;
+    protected $viewPathPrefix;
+    protected $classPathPrefix;
+    protected $databaseName;
 
     public function __construct(XmlParser $xmlParser) {
         $this->xmlParser = $xmlParser;
@@ -20,6 +24,8 @@ class Codegen {
         if (!is_dir($path)) {
             throw new \Exception('Expected path to be a valid directory: ' . $path);
         }
+
+        $path .= '/';
 
         $this->createFiles([
             $path . '/private/scripts/application.js',
@@ -32,32 +38,30 @@ class Codegen {
         $this->renderTemplate('bower', $path . '/bower.json');
         $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
         $this->renderTemplate('package', $path . '/package.json');
-        $this->renderTemplate('include', $path . '/include.php');
+//        $this->renderTemplate('include', $path . '/include.php');
         $this->renderTemplate('router', $path . '/router.php');
         $this->renderTemplate('bin/server', $path . '/bin/server.bat');
-        $this->renderTemplate('composer', $path . '/composer.json');
+//        $this->renderTemplate('composer', $path . '/composer.json');
         $this->renderTemplate('environment/local', $path . '/environment/local.php');
         $this->renderTemplate('sql/create-database', $path . '/sql/create-database.sql');
-        $this->renderTemplate('views/home', $path . '/views/home.php');
-        $this->renderTemplate('views/layouts/default', $path . '/views/layouts/default.php');
-        $this->renderTemplate('classes/home-controller', $path . '/classes/Controller/HomeController.php');
-        $this->renderTemplate('public/index', $path . '/public/index.php', [
-            'entities' => $this->entities,
-        ]);
+        $this->renderTemplate('views/home', $path . $this->getViewPathPrefix() . '/home.php');
+        $this->renderTemplate('views/layouts/default', $path . $this->getViewPathPrefix() . '/layouts/default.php');
+//        $this->renderTemplate('classes/home-controller', $path . $this->getClassPathPrefix() . '/Controller/HomeController.php');
+//        $this->renderTemplate('classes/application', $path . $this->getClassPathPrefix() . '/Application.php');
+//        $this->renderTemplate('public/index', $path . '/public/index.php', [
+//            'entities' => $this->entities,
+//        ]);
         foreach ($this->entities as $entity) {
-            $this->renderTemplate('classes/model', $path . '/classes/Model/' . $entity->getClassName() . '.php', [
+            $this->renderTemplate('classes/model', $path . $this->getClassPathPrefix() . '/Model/' . $entity->getClassName() . '.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('classes/controller', $path . '/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
+            $this->renderTemplate('classes/controller', $path . $this->getClassPathPrefix() . '/Controller/' . $entity->getClassName() . 'Controller.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('views/model/index', $path . '/views/' . $entity->getFileName() . '/index.php', [
+            $this->renderTemplate('views/model/index', $path . $this->getViewPathPrefix() . '/' . $entity->getFileName() . '/index.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('views/model/form', $path . '/views/' . $entity->getFileName() . '/form.php', [
-                'entity' => $entity,
-            ]);
-            $this->renderTemplate('classes/application', $path . '/classes/Application.php', [
+            $this->renderTemplate('views/model/form', $path . $this->getViewPathPrefix() . '/' . $entity->getFileName() . '/form.php', [
                 'entity' => $entity,
             ]);
             $this->renderTemplate('sql/full/create-table', $path . '/sql/full/' . $entity->getTableName() . '.sql', [
@@ -90,6 +94,7 @@ class Codegen {
         }
 
         if (is_file($outputFile) && md5($output) == md5_file($outputFile)) {
+//            $this->log('Skipped ' . $outputFile . ' from template ' . $template);
             return;
         }
 
@@ -150,12 +155,6 @@ class Codegen {
         return $this;
     }
 
-    public function getDatabaseName() {
-        $databaseName = str_replace('\\', '_', $this->getNamespace());
-        $databaseName = $this->getInflector()->underscore($databaseName);
-        return $databaseName;
-    }
-
     public function getEntities() {
         return $this->entities;
     }
@@ -208,6 +207,41 @@ class Codegen {
 
     public function setTemplatePath($templatePath) {
         $this->templatePath = $templatePath;
+    }
+
+    public function getUrlPrefix() {
+        return $this->urlPrefix;
+    }
+
+    public function setUrlPrefix($urlPrefix) {
+        $this->urlPrefix = $urlPrefix;
+        return $this;
+    }
+
+    public function getViewPathPrefix() {
+        return $this->viewPathPrefix;
+    }
+
+    public function setViewPathPrefix($viewPathPrefix) {
+        $this->viewPathPrefix = $viewPathPrefix;
+        return $this;
+    }
+
+    public function getClassPathPrefix() {
+        return $this->classPathPrefix;
+    }
+
+    public function setClassPathPrefix($classPathPrefix) {
+        $this->classPathPrefix = $classPathPrefix;
+        return $this;
+    }
+
+    public function getDatabaseName() {
+        return $this->databaseName;
+    }
+
+    public function setDatabaseName($databaseName) {
+        $this->databaseName = $databaseName;
     }
 
 }
