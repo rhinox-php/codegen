@@ -127,6 +127,13 @@ class <?= $entity->getClassName(); ?> {
 <?php endif; ?>
 <?php endforeach; ?>
 
+    public static function iterateAll() {
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . ';
+        '));
+    }
+
     protected static function fetch<?= $entity->getClassName(); ?>($result) {
         $entity = $result->fetchObject(static::class);
         if (!$entity) {
@@ -143,8 +150,8 @@ class <?= $entity->getClassName(); ?> {
         return $entity;
     }
 
-    protected static function fetch<?= $entity->getPluralClassName(); ?>() {
-        while ($entity = $this->fetch<?= $entity->getClassName(); ?>()) {
+    protected static function fetch<?= $entity->getPluralClassName(); ?>($result) {
+        while ($entity = static::fetch<?= $entity->getClassName(); ?>($result)) {
             yield $entity;
         }
     }
@@ -183,10 +190,11 @@ class <?= $entity->getClassName(); ?> {
     
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute
+    || $attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
 
     public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+        return $this-><?= $attribute->getPropertyName(); ?> ?: '';
     }
 
     public function set<?= $attribute->getMethodName(); ?>(string $value) {

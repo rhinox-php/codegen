@@ -2,7 +2,7 @@
 
 $whoops = new \Whoops\Run();
 $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
-$whoops->register();
+// $whoops->register();
 
 $application->setUrl('http://localhost:8001/');
 $application->setPdoCallback(function() {

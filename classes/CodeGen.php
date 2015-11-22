@@ -15,6 +15,7 @@ class Codegen {
     protected $viewPathPrefix;
     protected $classPathPrefix;
     protected $databaseName;
+    protected $port = 3000;
 
     public function __construct(XmlParser $xmlParser) {
         $this->xmlParser = $xmlParser;
@@ -35,11 +36,11 @@ class Codegen {
             $path . '/private/styles/variables.scss',
         ]);
         $this->renderTemplate('private/styles/application', $path . '/private/styles/application.scss');
-        $this->renderTemplate('bower', $path . '/bower.json');
-        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
-        $this->renderTemplate('package', $path . '/package.json');
+//        $this->renderTemplate('bower', $path . '/bower.json');
+//        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
+//        $this->renderTemplate('package', $path . '/package.json');
 //        $this->renderTemplate('include', $path . '/include.php');
-        $this->renderTemplate('router', $path . '/router.php');
+        $this->renderTemplate('bin/router', $path . '/bin/router.php');
         $this->renderTemplate('bin/server', $path . '/bin/server.bat');
 //        $this->renderTemplate('composer', $path . '/composer.json');
         $this->renderTemplate('environment/local', $path . '/environment/local.php');
@@ -242,6 +243,15 @@ class Codegen {
 
     public function setDatabaseName($databaseName) {
         $this->databaseName = $databaseName;
+    }
+
+    public function getPort(): int {
+        return $this->port;
+    }
+
+    public function setPort(int $port) {
+        $this->port = $port;
+        return $this;
     }
 
 }

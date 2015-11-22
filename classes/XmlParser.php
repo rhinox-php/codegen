@@ -45,6 +45,7 @@ class XmlParser {
                 $this->codegen->setViewPathPrefix((string) $node['view-path-prefix']);
                 $this->codegen->setClassPathPrefix((string) $node['class-path-prefix']);
                 $this->codegen->setDatabaseName((string) $node['database-name']);
+                $this->codegen->setPort((int) $node['port']);
                 break;
             }
         }
@@ -57,6 +58,12 @@ class XmlParser {
             switch ($child->getName()) {
                 case 'string-attribute': {
                     $attribute = new Attribute\StringAttribute();
+                    $attribute->setName((string) $child['name']);
+                    $entity->addAttribute($attribute);
+                    break;
+                }
+                case 'int-attribute': {
+                    $attribute = new Attribute\IntAttribute();
                     $attribute->setName((string) $child['name']);
                     $entity->addAttribute($attribute);
                     break;
