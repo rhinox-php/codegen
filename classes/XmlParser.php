@@ -56,6 +56,14 @@ class XmlParser {
         $entity->setName((string) $node['name']);
         foreach ($node->children() as $child) {
             switch ($child->getName()) {
+                case 'authentication': {
+                    $entity->setAuthentication(true);
+
+                    $attribute = new Attribute\StringAttribute();
+                    $attribute->setName('Password Hash');
+                    $entity->addAttribute($attribute);
+                    break;
+                }
                 case 'string-attribute': {
                     $attribute = new Attribute\StringAttribute();
                     $attribute->setName((string) $child['name']);
@@ -86,19 +94,29 @@ class XmlParser {
                     $entity->addAttribute($attribute);
                     break;
                 }
-                case 'relationship': {
-                    if ($child['to-many']) {
-                        $to = $this->codegen->findEntity((string) $child['to-many']);
-                        $relationship = new Relationship\ToMany();
-                        $relationship->setFrom($entity);
-                        $relationship->setTo($to);
-                        $entity->addRelationship($relationship);
-                        $to->addRelationship($relationship);
-                    } elseif ($child['to-one']) {
+                case 'one-to-many-relationship': {
+                    $to = $this->codegen->findEntity((string) $child['entity']);
 
-                    }
+                    $attribute = new Attribute\IntAttribute();
+                    $attribute->setName($entity->getName() . ' ID');
+                    $to->addAttribute($attribute);
+
+                    $relationship = new Relationship\OneToMany();
+                    $relationship->setFrom($entity);
+                    $relationship->setTo($to);
+                    $entity->addRelationship($relationship);
+                    $to->addRelationship($relationship);
                     break;
                 }
+//                case 'to-many-relationship': {
+//                    $to = $this->codegen->findEntity((string) $child['entity']);
+//                    $relationship = new Relationship\ToMany();
+//                    $relationship->setFrom($entity);
+//                    $relationship->setTo($to);
+//                    $entity->addRelationship($relationship);
+//                    $to->addRelationship($relationship);
+//                    break;
+//                }
             }
         }
         $this->codegen->addEntity($entity);

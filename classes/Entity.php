@@ -5,10 +5,11 @@ class Entity {
     use Inflector;
 
     protected $name;
+    protected $authentication = false;
     protected $attributes = [];
     protected $relationships = [];
 
-    protected function getName(): string {
+    public function getName(): string {
         return $this->name;
     }
 
@@ -89,6 +90,15 @@ class Entity {
 
     public function setCodegen(Codegen $codegen) {
         $this->codegen = $codegen;
+    }
+
+    public function hasAuthentication() {
+        return $this->authentication;
+    }
+
+    public function setAuthentication($authentication) {
+        $this->authentication = $authentication;
+        return $this;
     }
 
 }

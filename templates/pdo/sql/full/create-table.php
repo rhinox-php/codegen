@@ -1,4 +1,8 @@
 DROP TABLE IF EXISTS <?= $entity->getTableName(); ?>;
+<?php if ($entity->hasAuthentication()): ?>
+DROP TABLE IF EXISTS <?= $entity->getTableName(); ?>_sessions;
+<?php endif; ?>
+
 CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?> (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -14,3 +18,20 @@ CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?> (
 ENGINE = InnoDB
 DEFAULT CHARSET = utf8
 COLLATE = utf8_unicode_ci;
+
+<?php if ($entity->hasAuthentication()): ?>
+CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?>_sessions (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    <?= $entity->getTableName(); ?>_id INT UNSIGNED NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expire DATETIME NOT NULL,
+    created DATETIME NOT NULL,
+    updated DATETIME NULL,
+    INDEX token (token),
+    INDEX expire (expire)
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = utf8
+COLLATE = utf8_unicode_ci;
+<?php endif; ?>
+

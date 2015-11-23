@@ -84,6 +84,7 @@ class <?= $entity->getClassName(); ?> {
     protected function update() {
         $this->query('
             UPDATE <?= $entity->getTableName(); ?>
+
             SET
 <?php foreach ($entity->getAttributes() as $attribute): ?>
                 <?= $attribute->getColumnName(); ?> = :<?= $attribute->getColumnName(); ?>,
@@ -114,9 +115,10 @@ class <?= $entity->getClassName(); ?> {
     }
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute ||
+        $attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
     public static function findBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
             WHERE <?= $attribute->getColumnName(); ?> = :value;
@@ -157,17 +159,27 @@ class <?= $entity->getClassName(); ?> {
     }
 
 <?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
         if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this->$this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+            $this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+        }
+        return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
+    }
+<?php endif; ?>
+<?php else: ?>
+<?php if ($entity == $relationship->getFrom()): ?>
+    public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
+        if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
+            $this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
     }
 <?php endif; ?>
 <?php if ($entity == $relationship->getTo()): ?>
     public static function findBy<?= $relationship->getFrom()->getClassName(); ?>Id($id) {
-        return static::fetchAddresses(static::query('
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
             JOIN <?= $relationship->getFrom()->getTableName(); ?>_<?= $relationship->getTo()->getTableName(); ?> ON
@@ -178,7 +190,84 @@ class <?= $entity->getClassName(); ?> {
         ]));
     }
 <?php endif; ?>
+<?php endif; ?>
 <?php endforeach; ?>
+<?php if ($entity->hasAuthentication()): ?>
+
+    public static function validateLogin($emailAddress, $password) {
+        $entity = static::findByEmailAddress($emailAddress);
+
+        if (!$entity) {
+            return null;
+        }
+
+        if (password_verify($password, $entity->getPasswordHash())) {
+            if (password_needs_rehash($entity->getPasswordHash(), PASSWORD_DEFAULT)) {
+                $entity->hashPassword($password);
+                $entity->save();
+            }
+            return $entity;
+        }
+        return null;
+    }
+
+    public function login(\DateTime $expire) {
+        try {
+            $this->query('
+                DELETE FROM <?= $entity->getTableName(); ?>_sessions
+                WHERE expire < UTC_TIMESTAMP();
+            ');
+        } catch (\Exception $exception) {
+            // Ignore (dead lock, back off try again)
+        }
+
+        $token = base64_encode(openssl_random_pseudo_bytes(128));
+        $this->query('
+            INSERT INTO <?= $entity->getTableName(); ?>_sessions (
+                <?= $entity->getTableName(); ?>_id,
+                token,
+                expire,
+                created
+            ) VALUES (
+                :entity_id,
+                :token,
+                :expire,
+                UTC_TIMESTAMP()
+            );
+        ', [
+            ':entity_id' => $this->getId(),
+            ':token' => $token,
+            ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+        ]);
+        return $token;
+    }
+
+    public static function resume($token) {
+        $result = static::query('
+            SELECT <?= $entity->getTableName(); ?>_id
+            FROM <?= $entity->getTableName(); ?>_sessions
+            WHERE
+                token = :token
+            LIMIT 1;
+        ', [
+            ':token' => $token,
+        ]);
+        $entityId = $result->fetch(\PDO::FETCH_COLUMN);
+        if ($entityId) {
+            return static::findById($entityId);
+        }
+    }
+
+    public function logout($token, $count = 10) {
+        $this->query('
+            DELETE FROM <?= $entity->getTableName(); ?>_sessions
+            WHERE token = :token;
+        ', [
+            ':token' => $token,
+        ]);
+    }
+
+<?php endif; ?>
     public function getId() {
         return $this->id;
     }
