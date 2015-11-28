@@ -6,7 +6,7 @@ class XmlParser {
     protected $file;
     protected $codegen;
     
-    public function __construct(string $file) {
+    public function __construct($file) {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
         
         $this->file = $file;

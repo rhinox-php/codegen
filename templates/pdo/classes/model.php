@@ -194,12 +194,17 @@ class <?= $entity->getClassName(); ?> {
 <?php endforeach; ?>
 <?php if ($entity->hasAuthentication()): ?>
 
-    public static function validateLogin($emailAddress, $password) {
-        $entity = static::findByEmailAddress($emailAddress);
+    public function hashPassword($password) {
+        $this->setPasswordHash(password_hash($password, PASSWORD_DEFAULT));
+        return $this;
+    }
 
-        if (!$entity) {
+    public static function validateLogin($emailAddress, $password) {
+        $entities = iterator_to_array(static::findByEmailAddress($emailAddress));
+        if (count($entities) !== 1) {
             return null;
         }
+        $entity = $entities[0];
 
         if (password_verify($password, $entity->getPasswordHash())) {
             if (password_needs_rehash($entity->getPasswordHash(), PASSWORD_DEFAULT)) {
@@ -286,7 +291,7 @@ class <?= $entity->getClassName(); ?> {
         return $this-><?= $attribute->getPropertyName(); ?> ?: '';
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(string $value) {
+    public function set<?= $attribute->getMethodName(); ?>($value) {
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }

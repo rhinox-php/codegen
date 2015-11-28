@@ -17,27 +17,27 @@ trait Inflector {
         return $this;
     }
 
-    public function underscore(string $result): string {
+    public function underscore($result): string {
         $inflector = $this->getInflector();
         $result = preg_replace('/\s+/', '_', $result);
         $result = $inflector->camelize($result);
         return $inflector->underscore($result);
     }
 
-    public function hyphenate(string $result): string {
+    public function hyphenate($result): string {
         $inflector = $this->getInflector();
         $result = preg_replace('/\s+/', '_', $result);
         $result = $inflector->camelize($result);
         return $inflector->hyphenate($result);
     }
 
-    public function camelize(string $result, bool $lowercaseFirstLetter = false): string {
+    public function camelize($result, bool $lowercaseFirstLetter = false): string {
         $inflector = $this->getInflector();
         $result = preg_replace('/\s+/', '_', $result);
         return $inflector->camelize($result, $lowercaseFirstLetter);
     }
 
-    public function pluralize(string $result): string {
+    public function pluralize($result): string {
         $inflector = $this->getInflector();
         return $inflector->pluralize($result);
     }

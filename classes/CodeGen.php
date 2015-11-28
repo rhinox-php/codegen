@@ -21,7 +21,7 @@ class Codegen {
         $this->xmlParser = $xmlParser;
     }
 
-    public function generate(string $path) {
+    public function generate($path) {
         if (!is_dir($path)) {
             throw new \Exception('Expected path to be a valid directory: ' . $path);
         }
@@ -78,7 +78,7 @@ class Codegen {
         }
     }
 
-    protected function renderTemplate(string $template, string $outputFile, array $data = []) {
+    protected function renderTemplate($template, $outputFile, array $data = []) {
         $codegen = $this;
         $file = $this->getTemplateFile($template);
         extract(get_object_vars($this), EXTR_SKIP);
@@ -170,7 +170,7 @@ class Codegen {
         return $this;
     }
 
-    public function findEntity(string $name) {
+    public function findEntity($name) {
         foreach ($this->getEntities() as $entity) {
             if ($entity->getName() === $name) {
                 return $entity;
