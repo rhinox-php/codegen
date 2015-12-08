@@ -31,9 +31,7 @@ class Entity {
     }
 
     public function getPropertyName(): string {
-        $inflector = $this->getInflector();
-        $propertyName = $inflector->pluralize($this->getName());
-        return $inflector->camelize($propertyName, true);
+        return $this->camelize($this->getName(), true);
     }
 
     public function getFileName(): string {

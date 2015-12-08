@@ -7,9 +7,11 @@ CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?> (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
-    <?= $attribute->getColumnName(); ?> INT NOT NULL,
+    <?= $attribute->getColumnName(); ?> INT NULL,
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+    <?= $attribute->getColumnName(); ?> TINYINT(1) UNSIGNED NULL,
 <?php else: ?>
-    <?= $attribute->getColumnName(); ?> VARCHAR(255) NOT NULL,
+    <?= $attribute->getColumnName(); ?> VARCHAR(255) NULL,
 <?php endif; ?>
 <?php endforeach; ?>
     created DATETIME NOT NULL,
@@ -34,4 +36,3 @@ ENGINE = InnoDB
 DEFAULT CHARSET = utf8
 COLLATE = utf8_unicode_ci;
 <?php endif; ?>
-

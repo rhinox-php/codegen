@@ -94,8 +94,22 @@ class XmlParser {
                     $entity->addAttribute($attribute);
                     break;
                 }
+                case 'one-to-one-relationship': {
+                    $to = $this->codegen->findEntity((string) $child['to']);
+
+                    $attribute = new Attribute\IntAttribute();
+                    $attribute->setName($entity->getName() . ' ID');
+                    $to->addAttribute($attribute);
+
+                    $relationship = new Relationship\OneToOne();
+                    $relationship->setFrom($entity);
+                    $relationship->setTo($to);
+                    $entity->addRelationship($relationship);
+                    $to->addRelationship($relationship);
+                    break;
+                }
                 case 'one-to-many-relationship': {
-                    $to = $this->codegen->findEntity((string) $child['entity']);
+                    $to = $this->codegen->findEntity((string) $child['to']);
 
                     $attribute = new Attribute\IntAttribute();
                     $attribute->setName($entity->getName() . ' ID');

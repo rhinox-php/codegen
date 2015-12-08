@@ -40,6 +40,7 @@ class Codegen {
 //        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
 //        $this->renderTemplate('package', $path . '/package.json');
 //        $this->renderTemplate('include', $path . '/include.php');
+        $this->renderTemplate('generated.xml', $path . '/generated.xml');
         $this->renderTemplate('bin/router', $path . '/bin/router.php');
         $this->renderTemplate('bin/server', $path . '/bin/server.bat');
 //        $this->renderTemplate('composer', $path . '/composer.json');
@@ -70,10 +71,12 @@ class Codegen {
             ]);
 
             foreach ($entity->getRelationships() as $relationship) {
-                $this->renderTemplate('sql/full/create-relationship-table', $path . '/sql/full/' . $entity->getTableName() . '_' . $relationship->getTo()->getTableName() . '.sql', [
-                    'entity' => $entity,
-                    'relationship' => $relationship,
-                ]);
+                if ($relationship instanceof Relationship\ManyToMany) {
+                    $this->renderTemplate('sql/full/create-relationship-table', $path . '/sql/full/' . $entity->getTableName() . '_' . $relationship->getTo()->getTableName() . '.sql', [
+                        'entity' => $entity,
+                        'relationship' => $relationship,
+                    ]);
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ namespace Rhino\Codegen\Relationship;
 use Rhino\Codegen\Entity;
 use Rhino\Codegen\Relationship;
 
-class ToMany extends Relationship {
+class OneToOne extends Relationship {
 
     protected $from;
     protected $to;
