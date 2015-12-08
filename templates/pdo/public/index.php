@@ -14,6 +14,12 @@ $dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $ro
     $router->addRoute('GET', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
     $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'edit']);
     $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>Controller", 'delete']);
+
+    $router->addRoute('GET', "<?= $codegen->getUrlPrefix(); ?>/api/v1/<?= $entity->getPluralRouteName(); ?>", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>ApiController", 'index']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/create", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>ApiController", 'create']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/get/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>ApiController", 'edit']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>ApiController", 'edit']);
+    $router->addRoute('POST', "<?= $codegen->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $codegen->getNamespace(); ?>\Controller\<?= $entity->getClassName(); ?>ApiController", 'delete']);
     <?php endforeach; ?>
     
     require __DIR__ . '/../routes.php';

@@ -7,6 +7,7 @@
         "gulp-flatten": "^0.2.0",
         "gulp-rename": "^1.2.2",
         "gulp-sass": "^2.0.4",
-        "gulp-zip": "^3.0.2"
+        "gulp-zip": "^3.0.2",
+        "mocha": "^2.3.4"
     }
 }

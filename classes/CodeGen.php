@@ -53,6 +53,11 @@ class Codegen {
 //        $this->renderTemplate('public/index', $path . '/public/index.php', [
 //            'entities' => $this->entities,
 //        ]);
+
+        $this->renderTemplate('tests/index.js', $path . '/tests/index.js');
+
+        $this->renderTemplate('tests/api.js', $path . '/tests/api.js');
+
         foreach ($this->entities as $entity) {
             $this->renderTemplate('classes/model', $path . $this->getClassPathPrefix() . '/Model/' . $entity->getClassName() . '.php', [
                 'entity' => $entity,
@@ -67,6 +72,10 @@ class Codegen {
                 'entity' => $entity,
             ]);
             $this->renderTemplate('sql/full/create-table', $path . '/sql/full/' . $entity->getTableName() . '.sql', [
+                'entity' => $entity,
+            ]);
+
+            $this->renderTemplate('tests/api/model.js', $path . '/tests/api/' . $entity->getFileName() . '.js', [
                 'entity' => $entity,
             ]);
 

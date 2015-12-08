@@ -373,11 +373,21 @@ class <?= $entity->getClassName(); ?> {
     // Attribute accessors
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
+    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
 
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?> ?: '';
+    }
+
+    public function set<?= $attribute->getMethodName(); ?>($value) {
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
+        return $this;
+    }
+<?php endif; ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
+
+    public function get<?= $attribute->getMethodName(); ?>() {
+        return $this-><?= $attribute->getPropertyName(); ?> ?: 0;
     }
 
     public function set<?= $attribute->getMethodName(); ?>($value) {
