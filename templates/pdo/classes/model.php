@@ -233,10 +233,7 @@ class <?= $entity->getClassName(); ?> {
 <?php if ($entity == $relationship->getFrom()): ?>
     // Fetch one to many relationships
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
-        if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
-        }
-        return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
+        return <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
 
     public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $entities) {

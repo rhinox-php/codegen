@@ -182,7 +182,10 @@ class Codegen {
         return $this;
     }
 
-    public function findEntity($name) {
+    public function findEntity(string $name) {
+        if (!$name) {
+            throw new \Exception('Entity name missing.');
+        }
         foreach ($this->getEntities() as $entity) {
             if ($entity->getName() === $name) {
                 return $entity;
