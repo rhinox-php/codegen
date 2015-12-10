@@ -347,7 +347,7 @@ class <?= $entity->getClassName(); ?> {
         }
     }
 
-    public function logout($token, $count = 10) {
+    public function logout() {
         $this->query('
             DELETE FROM <?= $entity->getTableName(); ?>_sessions
             WHERE token = :token;
