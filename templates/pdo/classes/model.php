@@ -112,6 +112,16 @@ class <?= $entity->getClassName(); ?> {
 <?php endforeach; ?>
         ]);
     }
+    
+    public function delete() {
+        $this->query('
+            DELETE FROM <?= $entity->getTableName(); ?>
+
+            WHERE id = :id;
+        ', [
+            ':id' => $this->getId(),
+        ]);
+    }
 
     protected function saveRelated() {
 <?php foreach ($entity->getRelationships() as $relationship): ?>
@@ -284,6 +294,9 @@ class <?= $entity->getClassName(); ?> {
     }
 
     public static function validateLogin($emailAddress, $password) {
+        if (!$emailAddress || !$password) {
+            return null;
+        }
         $entities = iterator_to_array(static::findByEmailAddress($emailAddress));
         if (count($entities) !== 1) {
             return null;
