@@ -363,9 +363,9 @@ class <?= $entity->getClassName(); ?> {
     public function logout() {
         $this->query('
             DELETE FROM <?= $entity->getTableName(); ?>_sessions
-            WHERE token = :token;
+            WHERE <?= $entity->getTableName(); ?>_id = :id;
         ', [
-            ':token' => $token,
+            ':id' => $this->getId(),
         ]);
     }
 
