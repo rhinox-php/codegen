@@ -14,6 +14,13 @@ CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?> (
     <?= $attribute->getColumnName(); ?> VARCHAR(255) NULL,
 <?php endif; ?>
 <?php endforeach; ?>
+<?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToOne): ?>
+<?php if ($entity == $relationship->getFrom()): ?>
+    <?= $relationship->getTo()->getTableName(); ?>_id INT UNSIGNED NULL,
+<?php endif; ?>
+<?php endif; ?>
+<?php endforeach; ?>
     created DATETIME NOT NULL,
     updated DATETIME NULL
 )
