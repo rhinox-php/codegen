@@ -86,6 +86,9 @@ class <?= $entity->getClassName(); ?> {
 <?php endif; ?>
 <?php endforeach; ?>
         ]);
+        
+        $this->setId($this->lastInsertId());
+        $this->setCreated(new \DateTimeImmutable());
     }
 
     protected function update() {
@@ -111,6 +114,8 @@ class <?= $entity->getClassName(); ?> {
 <?php endif; ?>
 <?php endforeach; ?>
         ]);
+        
+        $this->setUpdated(new \DateTimeImmutable());
     }
     
     public function delete() {

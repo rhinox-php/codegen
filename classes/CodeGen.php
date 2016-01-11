@@ -35,7 +35,7 @@ class Codegen {
             $path . '/private/styles/mixins.scss',
             $path . '/private/styles/variables.scss',
         ]);
-        $this->renderTemplate('private/styles/application', $path . '/private/styles/application.scss');
+//        $this->renderTemplate('private/styles/application', $path . '/private/styles/application.scss');
 //        $this->renderTemplate('bower', $path . '/bower.json');
 //        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
 //        $this->renderTemplate('package', $path . '/package.json');
@@ -44,7 +44,7 @@ class Codegen {
         $this->renderTemplate('bin/router', $path . '/bin/router.php');
         $this->renderTemplate('bin/server', $path . '/bin/server.bat');
 //        $this->renderTemplate('composer', $path . '/composer.json');
-        $this->renderTemplate('environment/local', $path . '/environment/local.php');
+//        $this->renderTemplate('environment/local', $path . '/environment/local.php');
         $this->renderTemplate('sql/create-database', $path . '/sql/create-database.sql');
         $this->renderTemplate('views/home', $path . $this->getViewPathPrefix() . '/home.php');
         $this->renderTemplate('views/layouts/default', $path . $this->getViewPathPrefix() . '/layouts/default.php');
