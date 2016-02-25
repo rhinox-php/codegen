@@ -2,7 +2,7 @@
 
 namespace <?= $codegen->getNamespace(); ?>\Model;
 
-class <?= $entity->getClassName(); ?> {
+class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     use \Rhino\Core\Model\MySqlModel;
 
     // Properties
@@ -16,7 +16,11 @@ class <?= $entity->getClassName(); ?> {
     //Related entities
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
+<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
+    protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
+<?php else: ?>
     protected $<?= $relationship->getTo()->getPropertyName(); ?> = null;
+<?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
 
@@ -50,6 +54,20 @@ class <?= $entity->getClassName(); ?> {
         $table->addColumn('created')->setLabel('Created');
         $table->addColumn('updated')->setLabel('Updated');
         return $table;
+    }
+    
+    // Json
+    public function jsonSerialize() {
+        return [
+            'id' => $this->getId(),
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d') : null,
+<?php else: ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php endif; ?>
+<?php endforeach; ?>
+        ];
     }
 
     // Save/insert/update/delete
@@ -132,8 +150,8 @@ class <?= $entity->getClassName(); ?> {
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
-        if ($this-><?= $relationship->getTo()->getPropertyName(); ?> !== null) {
-            if (empty($this-><?= $relationship->getTo()->getPropertyName(); ?>)) {
+        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> !== null) {
+            if (empty($this-><?= $relationship->getTo()->getPluralPropertyName(); ?>)) {
                 $this->query('
                     DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
 
@@ -141,7 +159,7 @@ class <?= $entity->getClassName(); ?> {
                 ', [$this->getId()]);
             } else {
                 $deleteBindings = [];
-                foreach ($this-><?= $relationship->getTo()->getPropertyName(); ?> as $relatedEntity) {
+                foreach ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> as $relatedEntity) {
                     $relatedEntity->set<?= $relationship->getFrom()->getClassName(); ?>Id($this->getId());
                     $relatedEntity->save();
                     $deleteBindings[] = $relatedEntity->getId();
@@ -248,11 +266,18 @@ class <?= $entity->getClassName(); ?> {
 <?php if ($entity == $relationship->getFrom()): ?>
     // Fetch one to many relationships
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
-        return <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+        return \<?= $codegen->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+    }
+    
+    public function get<?= $relationship->getTo()->getPluralClassName(); ?>() {
+        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> === null) {
+            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getTo()->getPluralClassName(); ?>());
+        }
+        return $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>;
     }
 
     public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $entities) {
-        $this-><?= $relationship->getTo()->getPropertyName(); ?> = $entities;
+        $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $entities;
         return $this;
     }
 <?php endif; ?>
@@ -261,7 +286,7 @@ class <?= $entity->getClassName(); ?> {
     // Fetch one to one relationships
     public function fetch<?= $relationship->getTo()->getClassName(); ?>() {
         if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findFirstBy<?= $entity->getClassName(); ?>Id($this->getId());
+            $this-><?= $relationship->getTo()->getPropertyName(); ?> = \<?= $codegen->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findFirstBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
     }
@@ -270,7 +295,7 @@ class <?= $entity->getClassName(); ?> {
 <?php if ($entity == $relationship->getFrom()): ?>
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
         if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this-><?= $relationship->getTo()->getPropertyName(); ?> = <?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+            $this-><?= $relationship->getTo()->getPropertyName(); ?> = \<?= $codegen->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
     }

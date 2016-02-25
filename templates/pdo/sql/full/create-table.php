@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS <?= $entity->getTableName(); ?> (
     <?= $attribute->getColumnName(); ?> INT NULL,
 <?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
     <?= $attribute->getColumnName(); ?> TINYINT(1) UNSIGNED NULL,
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+    <?= $attribute->getColumnName(); ?> MEDIUMTEXT NULL,
 <?php else: ?>
     <?= $attribute->getColumnName(); ?> VARCHAR(255) NULL,
 <?php endif; ?>

@@ -39,6 +39,7 @@ class XmlParser {
             }
             case 'code': {
                 $this->codegen->setNamespace((string) $node['namespace']);
+                $this->codegen->setImplementedNamespace((string) $node['implemented-namespace']);
                 $this->codegen->setProjectName((string) $node['project-name']);
                 $this->codegen->setTemplatePath(dirname($this->getFile()) . '/' . $node['template-path']);
                 $this->codegen->setUrlPrefix((string) $node['url-prefix']);

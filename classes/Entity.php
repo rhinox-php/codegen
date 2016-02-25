@@ -34,6 +34,10 @@ class Entity {
         return $this->camelize($this->getName(), true);
     }
 
+    public function getPluralPropertyName(): string {
+        return $this->pluralize($this->getPropertyName());
+    }
+
     public function getFileName(): string {
         return $this->hyphenate($this->getName());
     }

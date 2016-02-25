@@ -5,6 +5,7 @@ class Codegen {
     use Inflector;
 
     protected $namespace;
+    protected $implementedNamespace;
     protected $projectName;
     protected $entities = [];
     protected $relationships = [];
@@ -157,7 +158,16 @@ class Codegen {
     public function getProjectName() {
         return $this->projectName;
     }
+    
+    public function getImplementedNamespace() {
+        return $this->implementedNamespace;
+    }
 
+    public function setImplementedNamespace($implementedNamespace) {
+        $this->implementedNamespace = $implementedNamespace;
+        return $this;
+    }
+    
     public function setProjectName($projectName) {
         $this->projectName = $projectName;
         return $this;
