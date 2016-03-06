@@ -17,138 +17,23 @@ class Codegen {
     protected $classPathPrefix;
     protected $databaseName;
     protected $port = 3000;
+    protected $template;
 
     public function __construct(XmlParser $xmlParser) {
         $this->xmlParser = $xmlParser;
     }
 
     public function generate($path) {
-        if (!is_dir($path)) {
-            throw new \Exception('Expected path to be a valid directory: ' . $path);
-        }
-
-        $path .= '/';
-
-        $this->createFiles([
-            $path . '/private/scripts/application.js',
-            $path . '/private/styles/layout.scss',
-            $path . '/private/styles/tags.scss',
-            $path . '/private/styles/mixins.scss',
-            $path . '/private/styles/variables.scss',
-        ]);
-//        $this->renderTemplate('private/styles/application', $path . '/private/styles/application.scss');
-//        $this->renderTemplate('bower', $path . '/bower.json');
-//        $this->renderTemplate('gulpfile', $path . '/gulpfile.js');
-//        $this->renderTemplate('package', $path . '/package.json');
-//        $this->renderTemplate('include', $path . '/include.php');
-        $this->renderTemplate('generated.xml', $path . '/generated.xml');
-        $this->renderTemplate('bin/router', $path . '/bin/router.php');
-        $this->renderTemplate('bin/server', $path . '/bin/server.bat');
-//        $this->renderTemplate('composer', $path . '/composer.json');
-//        $this->renderTemplate('environment/local', $path . '/environment/local.php');
-        $this->renderTemplate('sql/create-database', $path . '/sql/create-database.sql');
-        $this->renderTemplate('views/home', $path . $this->getViewPathPrefix() . '/home.php');
-        $this->renderTemplate('views/layouts/default', $path . $this->getViewPathPrefix() . '/layouts/default.php');
-//        $this->renderTemplate('classes/home-controller', $path . $this->getClassPathPrefix() . '/Controller/HomeController.php');
-//        $this->renderTemplate('classes/application', $path . $this->getClassPathPrefix() . '/Application.php');
-//        $this->renderTemplate('public/index', $path . '/public/index.php', [
-//            'entities' => $this->entities,
-//        ]);
-
-        $this->renderTemplate('tests/index.js', $path . '/tests/index.js');
-
-        $this->renderTemplate('tests/api.js', $path . '/tests/api.js');
-
-        foreach ($this->entities as $entity) {
-            $this->renderTemplate('classes/model', $path . $this->getClassPathPrefix() . '/Model/' . $entity->getClassName() . '.php', [
-                'entity' => $entity,
-            ]);
-            $this->renderTemplate('classes/controller', $path . $this->getClassPathPrefix() . '/Controller/' . $entity->getClassName() . 'Controller.php', [
-                'entity' => $entity,
-            ]);
-            $this->renderTemplate('views/model/index', $path . $this->getViewPathPrefix() . '/' . $entity->getFileName() . '/index.php', [
-                'entity' => $entity,
-            ]);
-            $this->renderTemplate('views/model/form', $path . $this->getViewPathPrefix() . '/' . $entity->getFileName() . '/form.php', [
-                'entity' => $entity,
-            ]);
-            $this->renderTemplate('sql/full/create-table', $path . '/sql/full/' . $entity->getTableName() . '.sql', [
-                'entity' => $entity,
-            ]);
-
-            $this->renderTemplate('tests/api/model.js', $path . '/tests/api/' . $entity->getFileName() . '.js', [
-                'entity' => $entity,
-            ]);
-
-            foreach ($entity->getRelationships() as $relationship) {
-                if ($relationship instanceof Relationship\ManyToMany) {
-                    $this->renderTemplate('sql/full/create-relationship-table', $path . '/sql/full/' . $entity->getTableName() . '_' . $relationship->getTo()->getTableName() . '.sql', [
-                        'entity' => $entity,
-                        'relationship' => $relationship,
-                    ]);
-                }
+        switch ($this->template) {
+            case 'pdo': {
+                (new Template\Pdo($this, $path))->generate();
+                break;
+            }
+            case 'laravel': {
+                (new Template\Laravel($this, $path))->generate();
+                break;
             }
         }
-    }
-
-    protected function renderTemplate($template, $outputFile, array $data = []) {
-        $codegen = $this;
-        $file = $this->getTemplateFile($template);
-        extract(get_object_vars($this), EXTR_SKIP);
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require $file;
-        $output = ob_get_clean();
-        $directory = dirname($outputFile);
-        if (!file_exists($directory)) {
-            $this->log('Creating directory ' . $directory);
-            if (!$this->dryRun) {
-                mkdir($directory, 0755, true);
-            }
-        }
-
-        if (is_file($outputFile) && md5($output) == md5_file($outputFile)) {
-//            $this->log('Skipped ' . $outputFile . ' from template ' . $template);
-            return;
-        }
-
-        $this->log((file_exists($outputFile) ? 'Overwriting' : 'Creating') . ' ' . $outputFile . ' from template ' . $template);
-        if (!$this->dryRun) {
-            file_put_contents($outputFile, $output);
-        }
-    }
-
-    protected function getTemplateFile($name) {
-        $file = $this->templatePath . '/' . $name . '.php';
-        if (is_file($file)) {
-            return $file;
-        }
-        $file = __DIR__ . '/../templates/pdo/' . $name . '.php';
-        assert(is_file($file), 'Could not find template file: ' . $name);
-        return $file;
-    }
-
-    protected function createFiles(array $files) {
-        foreach ($files as $file) {
-            $directory = dirname($file);
-            if (!file_exists($directory)) {
-                $this->log('Creating directory ' . $directory);
-                if (!$this->dryRun) {
-                    mkdir($directory, 0755, true);
-                }
-            }
-            if (!file_exists($file)) {
-                $this->log('Creating file ' . $file);
-                if (!$this->dryRun) {
-                    file_put_contents($file, '');
-                }
-            }
-        }
-    }
-
-    protected function log($message) {
-        // @todo inject a logger
-        echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
     }
 
     public function getNamespace() {
@@ -279,4 +164,12 @@ class Codegen {
         return $this;
     }
 
+    public function getTemplate(): string {
+        return $this->template;
+    }
+
+    public function setTemplate(string $template) {
+        $this->template = $template;
+        return $this;
+    }
 }

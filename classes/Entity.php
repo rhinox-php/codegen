@@ -30,6 +30,10 @@ class Entity {
         return $this->underscore($this->getName());
     }
 
+    public function getPluralTableName(): string {
+        return $this->pluralize($this->getTableName());
+    }
+
     public function getPropertyName(): string {
         return $this->camelize($this->getName(), true);
     }

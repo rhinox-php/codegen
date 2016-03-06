@@ -19,6 +19,9 @@ class XmlParser {
             $file = $this->getFile();
             $xml = simplexml_load_file($file);
             foreach ($xml as $child) {
+                $this->preparseNode($child);
+            }
+            foreach ($xml as $child) {
                 $this->parseNode($child);
             }
         } catch (\Exception $exception) {
@@ -29,6 +32,17 @@ class XmlParser {
         }
 
         return $this->codegen;
+    }
+    
+    protected function preparseNode($node) {
+        switch ($node->getName()) {
+            case 'entity': {
+                $entity = new Entity();
+                $entity->setName((string) $node['name']);
+                $this->codegen->addEntity($entity);
+                break;
+            }
+        }
     }
     
     protected function parseNode($node) {
@@ -47,14 +61,14 @@ class XmlParser {
                 $this->codegen->setClassPathPrefix((string) $node['class-path-prefix']);
                 $this->codegen->setDatabaseName((string) $node['database-name']);
                 $this->codegen->setPort((int) $node['port']);
+                $this->codegen->setTemplate((string) $node['template']);
                 break;
             }
         }
     }
     
     protected function parseEntity($node) {
-        $entity = new Entity();
-        $entity->setName((string) $node['name']);
+        $entity = $this->codegen->findEntity((string) $node['name']);
         foreach ($node->children() as $child) {
             switch ($child->getName()) {
                 case 'authentication': {
@@ -73,6 +87,12 @@ class XmlParser {
                 }
                 case 'int-attribute': {
                     $attribute = new Attribute\IntAttribute();
+                    $attribute->setName((string) $child['name']);
+                    $entity->addAttribute($attribute);
+                    break;
+                }
+                case 'decimal-attribute': {
+                    $attribute = new Attribute\DecimalAttribute();
                     $attribute->setName((string) $child['name']);
                     $entity->addAttribute($attribute);
                     break;
@@ -99,12 +119,13 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['to']);
 
                     $attribute = new Attribute\IntAttribute();
-                    $attribute->setName($entity->getName() . ' ID');
-                    $to->addAttribute($attribute);
+                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' ID');
+                    $entity->addAttribute($attribute);
 
                     $relationship = new Relationship\OneToOne();
                     $relationship->setFrom($entity);
                     $relationship->setTo($to);
+                    $relationship->setName((string) $child['name'] ?: (string) $child['to']);
                     $entity->addRelationship($relationship);
                     $to->addRelationship($relationship);
                     break;
@@ -132,9 +153,34 @@ class XmlParser {
 //                    $to->addRelationship($relationship);
 //                    break;
 //                }
+                case 'has-one': {
+                    $to = $this->codegen->findEntity((string) $child['entity']);
+
+                    $attribute = new Attribute\IntAttribute();
+                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' ID');
+                    $entity->addAttribute($attribute);
+
+                    $relationship = new Relationship\HasOne();
+                    $relationship->setFrom($entity);
+                    $relationship->setTo($to);
+                    $relationship->setName((string) $child['name'] ?: $to->getName());
+                    $entity->addRelationship($relationship);
+                    $to->addRelationship($relationship);
+                    break;
+                }
+                case 'has-many': {
+                    $to = $this->codegen->findEntity((string) $child['entity']);
+
+                    $relationship = new Relationship\HasMany();
+                    $relationship->setFrom($entity);
+                    $relationship->setTo($to);
+                    $relationship->setName((string) $child['name'] ?: $to->getName());
+                    $entity->addRelationship($relationship);
+                    $to->addRelationship($relationship);
+                    break;
+                }
             }
         }
-        $this->codegen->addEntity($entity);
     }
     
     public function getFile() {
