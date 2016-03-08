@@ -6,11 +6,11 @@ class XmlParser {
     protected $file;
     protected $codegen;
     
-    public function __construct($file) {
+    public function __construct(Codegen $codegen, $file) {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
         
         $this->file = $file;
-        $this->codegen = new Codegen($this);
+        $this->codegen = $codegen;
     }
     
     public function parse(): Codegen {
@@ -62,6 +62,13 @@ class XmlParser {
                 $this->codegen->setDatabaseName((string) $node['database-name']);
                 $this->codegen->setPort((int) $node['port']);
                 $this->codegen->setTemplate((string) $node['template']);
+                break;
+            }
+            case 'db': {
+                $dsn = (string) $node['dsn'];
+                $user = (string) $node['user'];
+                $password = (string) $node['password'];
+                $this->codegen->setPdo(new \PDO($dsn, $user, $password));
                 break;
             }
         }
@@ -126,6 +133,20 @@ class XmlParser {
                     $relationship->setFrom($entity);
                     $relationship->setTo($to);
                     $relationship->setName((string) $child['name'] ?: (string) $child['to']);
+                    $entity->addRelationship($relationship);
+                    $to->addRelationship($relationship);
+                    break;
+                }
+                case 'belongs-to': {
+                    $to = $this->codegen->findEntity((string) $child['to']);
+
+                    $attribute = new Attribute\IntAttribute();
+                    $attribute->setName($to->getName() . ' ID');
+                    $entity->addAttribute($attribute);
+
+                    $relationship = new Relationship\BelongsTo();
+                    $relationship->setFrom($entity);
+                    $relationship->setTo($to);
                     $entity->addRelationship($relationship);
                     $to->addRelationship($relationship);
                     break;

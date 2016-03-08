@@ -17,13 +17,42 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+function getCodegen(InputInterface $input, OutputInterface $output) {
+    $schema = $input->getOption('schema');
+    switch (pathinfo($schema, PATHINFO_EXTENSION)) {
+        case 'php': {
+            $codegen = require $schema;
+            break;
+        }
+        case 'xml': {
+            $xmlParser = new \Rhino\Codegen\XmlParser($schema);
+            $codegen = $xmlParser->parse();
+            break;
+        }
+    }
+    $codegen->setDryRun(!$input->getOption('execute'));
+    return $codegen;
+}
+
 $application = new Application();
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('gen')
             ->setDescription('Generate code')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addArgument('schema', InputArgument::REQUIRED, 'Codegen schema file to load.')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        getCodegen($input, $output)->generate();
+    }
+});
+$application->add(new class() extends Command {
+    protected function configure() {
+        $this->setName('migrate')
+            ->setDescription('Generate migrations')
+            ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
             ->addArgument('outputPath', InputArgument::REQUIRED, 'Path to output generated files to.');
     }
 
@@ -32,7 +61,20 @@ $application->add(new class() extends Command {
         $xmlParser = new \Rhino\Codegen\XmlParser($schema);
         $codegen = $xmlParser->parse();
         $codegen->setDryRun(!$input->getOption('execute'));
-        $codegen->generate($input->getArgument('outputPath'));
+        $codegen->migrate($input->getArgument('outputPath'));
+    }
+});
+$application->add(new class() extends Command {
+    protected function configure() {
+        $this->setName('db:reset')
+            ->setDescription('Reset table')
+            ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        getCodegen($input, $output)->reset($input->getArgument('entity'));
     }
 });
 $application->run();
