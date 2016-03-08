@@ -81,6 +81,9 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     }
 
     protected function insert() {
+        if (!$this->getCreated()) {
+            $this->setCreated(new \DateTimeImmutable());
+        }
         $this->query('
             INSERT INTO <?= $entity->getTableName(); ?> (
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -91,7 +94,7 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
                 :<?= $attribute->getColumnName(); ?>,
 <?php endforeach; ?>
-                UTC_TIMESTAMP()
+                :created
             );
         ', [
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -103,10 +106,14 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
 <?php endif; ?>
 <?php endforeach; ?>
+            ':created' => $this->formatDateTime($this->getCreated()),
         ]);
         
         $this->setId($this->lastInsertId());
-        $this->setCreated(new \DateTimeImmutable());
+    }
+    
+    protected static function formatDateTime(\DateTimeImmutable $date) {
+        return $date->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
     }
 
     protected function update() {
@@ -221,6 +228,16 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
             $result = $entity;
         };
         return $result;
+    }
+
+    public static function countBy<?= $attribute->getMethodName(); ?>($value) {
+        return (int) static::query('
+            SELECT COUNT(id)
+            FROM ' . static::$table . '
+            WHERE <?= $attribute->getColumnName(); ?> = :value;
+        ', [
+            ':value' => $value,
+        ])->fetchColumn();
     }
 <?php endif; ?>
 <?php endforeach; ?>

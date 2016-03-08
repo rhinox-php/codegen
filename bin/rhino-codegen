@@ -21,6 +21,9 @@ function getCodegen(InputInterface $input, OutputInterface $output) {
     $schema = $input->getOption('schema');
     switch (pathinfo($schema, PATHINFO_EXTENSION)) {
         case 'php': {
+            if (!is_file($schema)) {
+                throw new \Exception('Could not find codegen schema file: ' . $schema);
+            }
             $codegen = require $schema;
             break;
         }
