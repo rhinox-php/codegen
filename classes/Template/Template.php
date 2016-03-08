@@ -3,20 +3,9 @@ namespace Rhino\Codegen\Template;
 
 abstract class Template {
 
-    protected $codegen;
-    protected $path;
     protected $name;
 
     public abstract function generate();
-
-    public function __construct(\Rhino\Codegen\CodeGen $codegen, string $path) {
-        if (!is_dir($path)) {
-            throw new \Exception('Expected path to be a valid directory: ' . $path);
-        }
-        
-        $this->codegen = $codegen;
-        $this->path = $path . '/';
-    }
 
     protected function renderTemplate($template, $outputFile, array $data = [], $overwrite = true) {
         if (!$overwrite && file_exists($outputFile)) {
@@ -86,5 +75,14 @@ abstract class Template {
     protected function debug($message) {
         // @todo inject a logger
         echo ($this->codegen->isDryRun() ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+    }
+    
+    public function getCodegen() {
+        return $this->codegen;
+    }
+
+    public function setCodegen($codegen) {
+        $this->codegen = $codegen;
+        return $this;
     }
 }
