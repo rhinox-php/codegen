@@ -18,6 +18,8 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
     protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
+    protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
 <?php else: ?>
     protected $<?= $relationship->getTo()->getPropertyName(); ?> = null;
 <?php endif; ?>
@@ -41,11 +43,11 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     public static function getDataTable() {
         $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), '<?= $entity->getTableName(); ?>');
         $table->insertColumn('actions', function($column, $row) {
-        // @todo fix delete button, make post, confirm
-        return '
-            <a href="/<?= $entity->getRouteName(); ?>/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
-            <a href="/<?= $entity->getRouteName(); ?>/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
-        ';
+            // @todo fix delete button, make post, confirm
+            return '
+                <a href="/<?= $entity->getRouteName(); ?>/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
+                <a href="/<?= $entity->getRouteName(); ?>/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
+            ';
         })->setLabel('Actions');
         $table->addColumn('id')->setLabel('ID');
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -280,6 +282,25 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     // Fetch relationships
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
+<?php if ($entity == $relationship->getFrom()): ?>
+    // Fetch one to many relationships
+    public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
+        return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+    }
+    
+    public function get<?= $relationship->getTo()->getPluralClassName(); ?>() {
+        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> === null) {
+            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getTo()->getPluralClassName(); ?>());
+        }
+        return $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>;
+    }
+
+    public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $entities) {
+        $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $entities;
+        return $this;
+    }
+<?php endif; ?>
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
     // Fetch one to many relationships
     public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {

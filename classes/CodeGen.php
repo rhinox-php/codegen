@@ -19,6 +19,7 @@ class Codegen {
     protected $templates = [];
     protected $pdo = null;
     protected $path = null;
+    protected $debug = false;
 
     public function generate() {
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
@@ -332,4 +333,14 @@ class Codegen {
         $this->path = $path;
         return $this;
     }
+    
+    public function isDebug(): bool {
+        return $this->debug;
+    }
+
+    public function setDebug(bool $debug): self {
+        $this->debug = $debug;
+        return $this;
+    }
+
 }

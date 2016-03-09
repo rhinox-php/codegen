@@ -73,8 +73,9 @@ abstract class Template {
     }
 
     protected function debug($message) {
-        // @todo inject a logger
-        echo ($this->codegen->isDryRun() ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+        if ($this->getCodegen()->isDebug()) {
+            echo ($this->codegen->isDryRun() ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+        }
     }
     
     public function getCodegen() {
