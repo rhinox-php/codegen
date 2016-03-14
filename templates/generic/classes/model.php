@@ -65,6 +65,8 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d') : null,
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>(),
 <?php else: ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
 <?php endif; ?>
