@@ -33,13 +33,13 @@ class <?= $entity->getClassName(); ?>Controller extends \Rhino\Core\Controller {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
     || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->getInput('<?= $attribute->getPropertyName(); ?>'));
+            $entity->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->getInput('<?= $attribute->getPropertyName(); ?>')));
+            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->date('<?= $attribute->getPropertyName(); ?>')));
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->getInput('<?= $attribute->getPropertyName(); ?>') ? true : false);
+            $entity->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
 <?php endif; ?>
 <?php endforeach; ?>
 
