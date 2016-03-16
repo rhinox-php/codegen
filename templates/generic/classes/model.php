@@ -220,18 +220,14 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     }
 
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
-        $result = null;
-        foreach (static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+        return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
-            WHERE <?= $attribute->getColumnName(); ?> = :value;
+            WHERE <?= $attribute->getColumnName(); ?> = :value
+            LIMIT 1;
         ', [
             ':value' => $value,
-        ])) as $entity) {
-            assert(!$result, 'Expected there to only be one <?= $entity->getClassName(); ?>');
-            $result = $entity;
-        };
-        return $result;
+        ]));
     }
 
     public static function countBy<?= $attribute->getMethodName(); ?>($value) {
@@ -350,19 +346,6 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
             $this-><?= $relationship->getTo()->getPropertyName(); ?> = \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
         }
         return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
-    }
-<?php endif; ?>
-<?php if ($entity == $relationship->getTo()): ?>
-    public static function findBy<?= $relationship->getFrom()->getClassName(); ?>Id($id) {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
-            SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
-            JOIN <?= $relationship->getFrom()->getTableName(); ?>_<?= $relationship->getTo()->getTableName(); ?> ON
-                <?= $relationship->getFrom()->getTableName(); ?>_<?= $relationship->getTo()->getTableName(); ?>.<?= $relationship->getFrom()->getTableName(); ?>_id = :id
-                AND <?= $relationship->getFrom()->getTableName(); ?>_<?= $relationship->getTo()->getTableName(); ?>.<?= $relationship->getTo()->getTableName(); ?>_id = ' . static::$table . '.id
-        ', [
-            ':id' => $id,
-        ]));
     }
 <?php endif; ?>
 <?php endif; ?>
