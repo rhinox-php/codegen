@@ -73,6 +73,7 @@ class XmlParser {
     }
     
     protected function parseEntity($node) {
+        // $this->codegen->debug($node->asXml());
         $entity = $this->codegen->findEntity((string) $node['name']);
         foreach ($node->children() as $child) {
             switch ($child->getName()) {
@@ -136,7 +137,7 @@ class XmlParser {
                     break;
                 }
                 case 'belongs-to': {
-                    $to = $this->codegen->findEntity((string) $child['to']);
+                    $to = $this->codegen->findEntity((string) $child['entity']);
 
                     $attribute = new Attribute\IntAttribute();
                     $attribute->setName($to->getName() . ' ID');

@@ -17,6 +17,8 @@ class <?= $entity->getClassName(); ?>Table extends Migration
             $table->boolean('<?= $attribute->getColumnName(); ?>');
 <?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\DecimalAttribute): ?>
             $table->decimal('<?= $attribute->getColumnName(); ?>', 10, 2);
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+            $table->text('<?= $attribute->getColumnName(); ?>');
 <?php else: ?>
             $table->string('<?= $attribute->getColumnName(); ?>');
 <?php endif; ?>

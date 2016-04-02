@@ -177,9 +177,16 @@ class Codegen {
     }
     */
 
-    protected function log($message) {
+    public function log($message) {
         // @todo inject a logger
         echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+    }
+
+    public function debug($message) {
+        // @todo inject a logger
+        if ($this->isDebug()) {
+            echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+        }
     }
 
     public function getNamespace() {

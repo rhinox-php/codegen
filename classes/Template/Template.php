@@ -4,6 +4,7 @@ namespace Rhino\Codegen\Template;
 abstract class Template {
 
     protected $name;
+    protected $templateOverrides = [];
 
     public abstract function generate();
 
@@ -40,7 +41,11 @@ abstract class Template {
     }
 
     protected function getTemplateFile($name) {
-        $file = $this->codegen->getTemplatePath() . '/' . $name . '.php';
+        if (isset($this->templateOverrides[$name])) {
+            $file = $this->templateOverrides[$name];
+        } else {
+            $file = $this->codegen->getTemplatePath() . '/' . $name . '.php';
+        }
         if (is_file($file)) {
             return $file;
         }
@@ -84,6 +89,14 @@ abstract class Template {
 
     public function setCodegen($codegen) {
         $this->codegen = $codegen;
+        return $this;
+    }
+    
+    public function setTemplateOverride($name, $file) {
+        if (!is_file($file)) {
+            throw new \Exception('Could not find template override file: ' . $name . ' tried: ' . $file);
+        }
+        $this->templateOverrides[$name] = $file;
         return $this;
     }
 }
