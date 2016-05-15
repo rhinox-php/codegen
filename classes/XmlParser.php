@@ -191,6 +191,10 @@ class XmlParser {
                 case 'has-many': {
                     $to = $this->codegen->findEntity((string) $child['entity']);
 
+//                    $attribute = new Attribute\IntAttribute();
+//                    $attribute->setName($entity->getName() . ' ID');
+//                    $to->addAttribute($attribute);
+
                     $relationship = new Relationship\HasMany();
                     $relationship->setFrom($entity);
                     $relationship->setTo($to);

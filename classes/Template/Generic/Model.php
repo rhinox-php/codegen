@@ -11,6 +11,9 @@ class Model extends \Rhino\Codegen\Template\Generic {
             $this->renderTemplate('sql/full/create-table', $this->getPath('/sql/full/' . $entity->getTableName() . '.sql'), [
                 'entity' => $entity,
             ]);
+            $this->renderTemplate('sql/full/alter-table', $this->getPath('/sql/alter/' . $entity->getTableName() . '.sql'), [
+                'entity' => $entity,
+            ]);
         }
     }
     
