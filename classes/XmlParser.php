@@ -5,12 +5,15 @@ class XmlParser {
     
     protected $file;
     protected $codegen;
+    protected $parsers = [];
     
     public function __construct(Codegen $codegen, $file) {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
         
         $this->file = $file;
         $this->codegen = $codegen;
+        
+        $this->addParser('entity', new XmlParser\EntityParser());
     }
     
     public function parse(): Codegen {
@@ -45,7 +48,12 @@ class XmlParser {
         }
     }
     
-    protected function parseNode($node) {
+    protected function parseNode(\SimpleXMLElement $node) {
+        if (!isset($this->parsers[$node->getName()])) {
+            throw new \Exception('Could not find node parser for ' . $node->getName());
+        }
+        $this->parsers[$node->getName()]->setCodegen($this->codegen)->parse($node);
+        return;
         switch ($node->getName()) {
             case 'entity': {
                 $this->parseEntity($node);
@@ -75,6 +83,7 @@ class XmlParser {
     protected function parseEntity($node) {
         // $this->codegen->debug($node->asXml());
         $entity = $this->codegen->findEntity((string) $node['name']);
+        
         foreach ($node->children() as $child) {
             switch ($child->getName()) {
                 case 'authentication': {
@@ -82,42 +91,6 @@ class XmlParser {
 
                     $attribute = new Attribute\StringAttribute();
                     $attribute->setName('Password Hash');
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'string-attribute': {
-                    $attribute = new Attribute\StringAttribute();
-                    $attribute->setName((string) $child['name']);
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'int-attribute': {
-                    $attribute = new Attribute\IntAttribute();
-                    $attribute->setName((string) $child['name']);
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'decimal-attribute': {
-                    $attribute = new Attribute\DecimalAttribute();
-                    $attribute->setName((string) $child['name']);
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'date-attribute': {
-                    $attribute = new Attribute\DateAttribute();
-                    $attribute->setName((string) $child['name']);
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'text-attribute': {
-                    $attribute = new Attribute\TextAttribute();
-                    $attribute->setName((string) $child['name']);
-                    $entity->addAttribute($attribute);
-                    break;
-                }
-                case 'bool-attribute': {
-                    $attribute = new Attribute\BoolAttribute();
-                    $attribute->setName((string) $child['name']);
                     $entity->addAttribute($attribute);
                     break;
                 }
@@ -210,6 +183,11 @@ class XmlParser {
     
     public function getFile() {
         return $this->file;
+    }
+    
+    public function addParser($nodeName, $parser) {
+        $this->parsers[$nodeName] = $parser;
+        return $this;
     }
     
 }
