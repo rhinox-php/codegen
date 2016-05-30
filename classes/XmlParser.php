@@ -146,6 +146,7 @@ class XmlParser {
                     $relationship = new Relationship\BelongsTo();
                     $relationship->setFrom($entity);
                     $relationship->setTo($to);
+                    $relationship->setName((string) $child['name'] ?: (string) $child['entity']);
                     $entity->addRelationship($relationship);
                     $to->addRelationship($relationship);
                     break;
