@@ -98,7 +98,7 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['to']);
 
                     $attribute = new Attribute\IntAttribute();
-                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' ID');
+                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' Id');
                     $entity->addAttribute($attribute);
 
                     $relationship = new Relationship\OneToOne();
@@ -113,13 +113,13 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['entity']);
 
                     $attribute = new Attribute\IntAttribute();
-                    $attribute->setName($to->getName() . ' ID');
+                    $attribute->setName($to->getName() . ' Id');
                     $entity->addAttribute($attribute);
 
                     $relationship = new Relationship\BelongsTo();
                     $relationship->setFrom($entity);
                     $relationship->setTo($to);
-                    $relationship->setName((string) $child['name'] ?: (string) $child['entity']);
+                    $relationship->setName((string) $child['name'] ?: $to->getName());
                     $entity->addRelationship($relationship);
                     $to->addRelationship($relationship);
                     break;
@@ -128,7 +128,7 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['to']);
 
                     $attribute = new Attribute\IntAttribute();
-                    $attribute->setName($entity->getName() . ' ID');
+                    $attribute->setName($entity->getName() . ' Id');
                     $to->addAttribute($attribute);
 
                     $relationship = new Relationship\OneToMany();
@@ -151,7 +151,7 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['entity']);
 
                     $attribute = new Attribute\IntAttribute();
-                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' ID');
+                    $attribute->setName(((string) $child['name'] ?: $to->getName()) . ' Id');
                     $entity->addAttribute($attribute);
 
                     $relationship = new Relationship\HasOne();
@@ -166,7 +166,7 @@ class XmlParser {
                     $to = $this->codegen->findEntity((string) $child['entity']);
 
 //                    $attribute = new Attribute\IntAttribute();
-//                    $attribute->setName($entity->getName() . ' ID');
+//                    $attribute->setName($entity->getName() . ' Id');
 //                    $to->addAttribute($attribute);
 
                     $relationship = new Relationship\HasMany();

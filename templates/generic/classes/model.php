@@ -17,9 +17,9 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
+    protected $<?= $relationship->getPluralPropertyName(); ?> = null;
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne || $relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
-    protected $<?= $relationship->getTo()->getPropertyName(); ?> = null;
+    protected $<?= $relationship->getPropertyName(); ?> = null;
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
@@ -161,8 +161,18 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> !== null) {
-            if (empty($this-><?= $relationship->getTo()->getPluralPropertyName(); ?>)) {
+        $this->save<?= $relationship->getPluralClassName(); ?>();
+<?php endif; ?>
+<?php endif; ?>
+<?php endforeach; ?>
+    }
+    
+<?php foreach ($entity->getRelationships() as $relationship): ?>
+<?php if ($entity == $relationship->getFrom()): ?>
+<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
+    protected function save<?= $relationship->getPluralClassName(); ?>() {
+        if ($this-><?= $relationship->getPluralPropertyName(); ?> !== null) {
+            if (empty($this-><?= $relationship->getPluralPropertyName(); ?>)) {
                 $this->query('
                     DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
 
@@ -170,7 +180,7 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
                 ', [$this->getId()]);
             } else {
                 $deleteBindings = [];
-                foreach ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> as $relatedEntity) {
+                foreach ($this-><?= $relationship->getPluralPropertyName(); ?> as $relatedEntity) {
                     $relatedEntity->set<?= $relationship->getFrom()->getClassName(); ?>Id($this->getId());
                     $relatedEntity->save();
                     $deleteBindings[] = $relatedEntity->getId();
@@ -186,10 +196,11 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
                 ", $deleteBindings);
             }
         }
+    }
+    
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
-    }
 
     // @todo delete
 
@@ -290,36 +301,39 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    // Fetch has many relationships
-    public function fetch<?= $relationship->getTo()->getPluralClassName(); ?>() {
+    // Fetch has many <?= $relationship->getTo()->getName(); ?> relationships as <?= $relationship->getClassName(); ?>
+    
+    public function fetch<?= $relationship->getPluralClassName(); ?>() {
         return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
     
-    public function get<?= $relationship->getTo()->getPluralClassName(); ?>() {
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> === null) {
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getTo()->getPluralClassName(); ?>());
+    public function get<?= $relationship->getPluralClassName(); ?>() {
+        if ($this-><?= $relationship->getPluralPropertyName(); ?> === null) {
+            $this-><?= $relationship->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getPluralClassName(); ?>());
         }
-        return $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>;
+        return $this-><?= $relationship->getPluralPropertyName(); ?>;
     }
 
-    public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $entities) {
-        $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $entities;
+    public function set<?= $relationship->getPluralClassName(); ?>(array $entities) {
+        $this-><?= $relationship->getPluralPropertyName(); ?> = $entities;
         return $this;
     }
+    
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne || $relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
-    // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship
-    public function fetch<?= $relationship->getTo()->getClassName(); ?>() {
-        if (!$this-><?= $relationship->getTo()->getPropertyName(); ?>) {
-            $this-><?= $relationship->getTo()->getPropertyName(); ?> = \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
+    // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
+    
+    public function fetch<?= $relationship->getClassName(); ?>() {
+        if (!$this-><?= $relationship->getPropertyName(); ?>) {
+            $this-><?= $relationship->getPropertyName(); ?> = \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
         }
-        return $this-><?= $relationship->getTo()->getPropertyName(); ?>;
+        return $this-><?= $relationship->getPropertyName(); ?>;
     }
     
-    public function has<?= $relationship->getTo()->getClassName(); ?>() {
-        if (!$this->get<?= $relationship->getTo()->getClassName(); ?>Id()) {
+    public function has<?= $relationship->getClassName(); ?>() {
+        if (!$this->get<?= $relationship->getClassName(); ?>Id()) {
             return false;
         }
-        return $this->fetch<?= $relationship->getTo()->getClassName(); ?>() ? true : false;
+        return $this->fetch<?= $relationship->getClassName(); ?>() ? true : false;
     }
     
 <?php endif; ?>

@@ -7,6 +7,16 @@ abstract class Template {
     protected $templateOverrides = [];
 
     public abstract function generate();
+    
+    protected function bufferTemplate($template, array $data = []) {
+        $codegen = $this->codegen;
+        $file = $this->getTemplateFile($template);
+        extract(get_object_vars($this), EXTR_SKIP);
+        extract($data, EXTR_SKIP);
+        ob_start();
+        require $file;
+        return ob_get_clean();
+    }
 
     protected function renderTemplate($template, $outputFile, array $data = [], $overwrite = true) {
         if (!$overwrite && file_exists($outputFile)) {
@@ -14,13 +24,7 @@ abstract class Template {
             return;
         }
         
-        $codegen = $this->codegen;
-        $file = $this->getTemplateFile($template);
-        extract(get_object_vars($this), EXTR_SKIP);
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require $file;
-        $output = ob_get_clean();
+        $output = $this->bufferTemplate($template, $data);
         $directory = dirname($outputFile);
         if (!file_exists($directory)) {
             $this->log('Creating directory ' . $directory);
@@ -30,7 +34,7 @@ abstract class Template {
         }
 
         if ($overwrite && is_file($outputFile) && md5($output) == md5_file($outputFile)) {
-            $this->debug('No changes ' . $outputFile . ' from template ' . $file);
+            $this->debug('No changes ' . $outputFile . ' from template ' . $this->getTemplateFile($template));
             return;
         }
 
@@ -41,6 +45,9 @@ abstract class Template {
     }
 
     protected function getTemplateFile($name) {
+        if (is_file($name)) {
+            return $name;
+        }
         if (isset($this->templateOverrides[$name])) {
             $file = $this->templateOverrides[$name];
         } else {

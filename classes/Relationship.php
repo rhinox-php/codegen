@@ -12,10 +12,18 @@ class Relationship {
         return $this->camelize($this->getName(), true);
     }
     
+    public function getPluralPropertyName() {
+        return $this->pluralize($this->getPropertyName());
+    }
+    
     public function getClassName() {
         return $this->camelize($this->getName());
     }
     
+    public function getPluralClassName() {
+        return $this->pluralize($this->getClassName());
+    }
+
     public function getFrom(): Entity {
         return $this->from;
     }
