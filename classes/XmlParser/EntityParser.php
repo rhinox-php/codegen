@@ -15,6 +15,7 @@ class EntityParser extends AggregateParser {
             'has-one' => new Entity\HasOneParser(),
             'has-many' => new Entity\HasManyParser(),
             'belongs-to' => new Entity\BelongsToParser(),
+            'authentication' => new Entity\AuthenticationParser(),
         ];
     }
     

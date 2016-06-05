@@ -33,5 +33,15 @@ class Attribute {
         $label = $inflector->underscore($this->getName());
         return $inflector->humanize($label, true);
     }
+    
+    public function is(array $types): bool {
+        foreach ($types as $type) {
+            $type = 'Rhino\\Codegen\\Attribute\\' . $type . 'Attribute';
+            if ($this instanceof $type) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

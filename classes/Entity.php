@@ -65,6 +65,18 @@ class Entity {
     public function getAttributes(): array {
         return $this->attributes;
     }
+    
+    public function iterateAttributesByType(array $types): \Generator {
+        foreach ($this->attributes as $attribute) {
+            foreach ($types as $type) {
+                $type = 'Rhino\\Codegen\\Attribute\\' . $type . 'Attribute';
+                if ($attribute instanceof $type) {
+                    yield $attribute;
+                    continue 2;
+                }
+            }
+        }
+    }
 
     public function setAttributes(array $attributes) {
         $this->attributes = $attributes;
