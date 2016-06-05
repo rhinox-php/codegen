@@ -13,7 +13,7 @@ class Entity {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName(string $name) {
         $this->name = $name;
         return $this;
     }
@@ -78,6 +78,21 @@ class Entity {
 
     public function getRelationships(): array {
         return $this->relationships;
+    }
+
+    public function iterateRelationshipsByType(array $types): \Generator {
+        foreach ($this->relationships as $relationship) {
+            if ($relationship->getFrom() != $this) {
+                continue;
+            }
+            foreach ($types as $type) {
+                $type = 'Rhino\\Codegen\\Relationship\\' . $type;
+                if ($relationship instanceof $type) {
+                    yield $relationship;
+                    continue 2;
+                }
+            }
+        }
     }
 
     public function setRelationships(array $relationships) {

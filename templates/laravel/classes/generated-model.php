@@ -4,19 +4,14 @@ namespace <?= $codegen->getNamespace(); ?>\Models\Generated;
 
 class <?= $entity->getClassName(); ?> extends \Illuminate\Database\Eloquent\Model implements \JsonSerializable {
 
-    // Related entities
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
+    // Has many related entities
+<?php foreach ($entity->iterateRelationshipsByType('HasMany') as $relationship): ?>
     protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\OneToOne): ?>
+<?php endforeach; ?>
+
+    // Has one related entities
+<?php foreach ($entity->iterateRelationshipsByType('HasOne') as $relationship): ?>
     protected $<?= $relationship->getPropertyName(); ?> = null;
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-    protected $<?= $relationship->getPropertyName(); ?> = null;
-<?php endif; ?>
-<?php endif; ?>
 <?php endforeach; ?>
 
     // Datatable
@@ -93,43 +88,17 @@ class <?= $entity->getClassName(); ?> extends \Illuminate\Database\Eloquent\Mode
 
     public function saveRelated()
     {
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> !== null) {
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->saveMany($this-><?= $relationship->getTo()->getPluralPropertyName(); ?>);
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->whereNotIn('id', array_map(function ($entity) {
-                return $entity->getId();
-            }, $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>))->delete();
-        }
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> !== null) {
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->saveMany($this-><?= $relationship->getTo()->getPluralPropertyName(); ?>);
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->whereNotIn('id', array_map(function ($entity) {
-                return $entity->getId();
-            }, $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>))->delete();
-        }
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\OneToOne): ?>
+<?php foreach ($entity->iterateRelationshipsByType('HasOne') as $relationship): ?>
         if ($this-><?= $relationship->getPropertyName(); ?> !== null) {
             $this-><?= $relationship->getPropertyName(); ?>->save();
             $this->set<?= $relationship->getClassName(); ?>Id($this-><?= $relationship->getPropertyName(); ?>->getId());
             parent::save();
         }
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-        if ($this-><?= $relationship->getPropertyName(); ?> !== null) {
-            $this-><?= $relationship->getPropertyName(); ?>->save();
-            $this->set<?= $relationship->getClassName(); ?>Id($this-><?= $relationship->getPropertyName(); ?>->getId());
-            parent::save();
-        }
-<?php endif; ?>
-<?php endif; ?>
 <?php endforeach; ?>
     }
 
-    // Related accessors
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\OneToMany): ?>
+    // Has many related accessors
+<?php foreach ($entity->iterateRelationshipsByType('HasMany') as $relationship): ?>
     public function <?= $relationship->getTo()->getPluralPropertyName(); ?>() {
         return $this->hasMany(\<?= $codegen->getNamespace(); ?>\Models\<?= $relationship->getTo()->getClassName(); ?>::class);
     }
@@ -150,28 +119,10 @@ class <?= $entity->getClassName(); ?> extends \Illuminate\Database\Eloquent\Mode
     
     // @todo remove<?= $relationship->getTo()->getPluralClassName(); ?>
     
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    public function <?= $relationship->getTo()->getPluralPropertyName(); ?>() {
-        return $this->hasMany(\<?= $codegen->getNamespace(); ?>\Models\<?= $relationship->getTo()->getClassName(); ?>::class);
-    }
-    
-    public function get<?= $relationship->getTo()->getPluralClassName(); ?>() {
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> === null) {
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->get();
-        }
-        return $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>;
-    }
-    
-    public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $<?= $relationship->getTo()->getPluralPropertyName(); ?>) {
-        $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $<?= $relationship->getTo()->getPluralPropertyName(); ?>;
-        return $this;
-    }
-    
-    // @todo add<?= $relationship->getTo()->getPluralClassName(); ?>
-    
-    // @todo remove<?= $relationship->getTo()->getPluralClassName(); ?>
-    
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\OneToOne): ?>
+<?php endforeach; ?>
+
+    // Has one related accessors
+<?php foreach ($entity->iterateRelationshipsByType('HasOne') as $relationship): ?>
     public function <?= $relationship->getPropertyName(); ?>() {
         return $this->belongsTo(\<?= $codegen->getNamespace(); ?>\Models\<?= $relationship->getTo()->getClassName(); ?>::class);
     }
@@ -188,25 +139,6 @@ class <?= $entity->getClassName(); ?> extends \Illuminate\Database\Eloquent\Mode
         return $this;
     }
     
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-    public function <?= $relationship->getPropertyName(); ?>() {
-        return $this->belongsTo(\<?= $codegen->getNamespace(); ?>\Models\<?= $relationship->getTo()->getClassName(); ?>::class);
-    }
-    
-    public function get<?= $relationship->getClassName(); ?>() {
-        if ($this-><?= $relationship->getPropertyName(); ?> === null) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this-><?= $relationship->getPropertyName(); ?>()->first();
-        }
-        return $this-><?= $relationship->getPropertyName(); ?>;
-    }
-    
-    public function set<?= $relationship->getClassName(); ?>(\<?= $codegen->getNamespace(); ?>\Models\<?= $relationship->getTo()->getClassName(); ?> $<?= $relationship->getPropertyName(); ?> = null) {
-        $this-><?= $relationship->getPropertyName(); ?> = $<?= $relationship->getPropertyName(); ?>;
-        return $this;
-    }
-    
-<?php endif; ?>
-<?php endif; ?>
 <?php endforeach; ?>
 
     // Attribute accessors

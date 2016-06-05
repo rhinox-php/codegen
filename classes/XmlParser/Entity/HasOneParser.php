@@ -1,19 +1,22 @@
 <?php
 namespace Rhino\Codegen\XmlParser\Entity;
+use Rhino\Codegen\Relationship;
 
-class HasOneParser extends \Rhino\Codegen\XmlParser\NodeParser {
+class HasOneParser extends AttributeParser {
     public function parse(\SimpleXMLElement $node) {
         $to = $this->codegen->findEntity((string) $node['entity']);
 
-        $attribute = new Attribute\IntAttribute();
-        $attribute->setName(((string) $node['name'] ?: $to->getName()) . ' ID');
-        $entity->addAttribute($attribute);
+        // $attribute = new Attribute\IntAttribute();
+        // $attribute->setName(((string) $node['name'] ?: $to->getName()) . ' ID');
+        // $this->entity->addAttribute($attribute);
 
         $relationship = new Relationship\HasOne();
-        $relationship->setFrom($entity);
+        $relationship->setFrom($this->entity);
         $relationship->setTo($to);
         $relationship->setName((string) $node['name'] ?: $to->getName());
-        $entity->addRelationship($relationship);
+        $this->entity->addRelationship($relationship);
         $to->addRelationship($relationship);
     }
 }
+
+

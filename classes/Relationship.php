@@ -24,6 +24,14 @@ class Relationship {
         return $this->pluralize($this->getClassName());
     }
 
+    public function getMethodName(): string {
+        return $this->camelize($this->getName());
+    }
+
+    public function getColumnName(): string {
+        return $this->underscore($this->getName());
+    }
+    
     public function getFrom(): Entity {
         return $this->from;
     }
