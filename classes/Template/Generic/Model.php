@@ -5,6 +5,7 @@ class Model extends \Rhino\Codegen\Template\Generic {
     
     public function generate() {
         foreach ($this->codegen->getEntities() as $entity) {
+            $this->renderTemplate('classes/abstract-model', $this->getModelPath('AbstractModel.php'));
             $this->renderTemplate('classes/model', $this->getModelPath($entity->getClassName() . '.php'), [
                 'entity' => $entity,
             ]);

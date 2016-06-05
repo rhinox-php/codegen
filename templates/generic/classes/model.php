@@ -2,16 +2,13 @@
 
 namespace <?= $this->getModelNamespace(); ?>;
 
-class <?= $entity->getClassName(); ?> implements \JsonSerializable {
+class <?= $entity->getClassName(); ?> extends AbstractModel {
     use \Rhino\Core\Model\MySqlModel;
-
+    
     // Properties
-    protected $id;
 <?php foreach ($entity->getAttributes() as $attribute): ?>
     protected $<?= $attribute->getPropertyName(); ?>;
 <?php endforeach; ?>
-    protected $updated;
-    protected $created;
 
     //Related entities
 <?php foreach ($entity->getRelationships() as $relationship): ?>
@@ -61,29 +58,22 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
         return [
             'id' => $this->getId(),
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d') : null,
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>(),
-<?php else: ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php elseif ($attribute->is(['Bool'])): ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>(),
+<?php elseif ($attribute->is(['Date'])): ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_FORMAT) : null,
+<?php elseif ($attribute->is(['DateTime'])): ?>
+            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_TIME_FORMAT) : null,
 <?php endif; ?>
 <?php endforeach; ?>
-            'created' => $this->getCreated() ? $this->getCreated()->format(DATE_ISO8601) : null,
-            'updated' => $this->getUpdated() ? $this->getUpdated()->format(DATE_ISO8601) : null,
+            'created' => $this->getCreated() ? $this->getCreated()->format(static::DATE_TIME_FORMAT) : null,
+            'updated' => $this->getUpdated() ? $this->getUpdated()->format(static::DATE_TIME_FORMAT) : null,
         ];
     }
 
     // Save/insert/update/delete
-    public function save() {
-        if ($this->getId()) {
-            $this->update();
-        } else {
-            $this->insert();
-        }
-        $this->saveRelated();
-    }
-
     protected function insert() {
         if (!$this->getCreated()) {
             $this->setCreated(new \DateTimeImmutable());
@@ -102,22 +92,20 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
             );
         ', [
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d') : null,
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
-<?php else: ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php elseif ($attribute->is(['Bool'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
+<?php elseif ($attribute->is(['Date'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
+<?php elseif ($attribute->is(['DateTime'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
 <?php endif; ?>
 <?php endforeach; ?>
-            ':created' => $this->formatDateTime($this->getCreated()),
+            ':created' => $this->formatMySqlDateTime($this->getCreated()),
         ]);
         
         $this->setId($this->lastInsertId());
-    }
-    
-    protected static function formatDateTime(\DateTimeImmutable $date) {
-        return $date->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
     }
 
     protected function update() {
@@ -202,13 +190,10 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
 <?php endif; ?>
 <?php endforeach; ?>
 
-    // @todo delete
-
     // Find methods
     
     /**
-     * @return <?= $entity->getClassName(); ?>
-
+     * @return <?= $entity->getClassName(); ?> The instance matching the ID, or null.
      */
     public static function findById($id) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
@@ -425,42 +410,31 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
     }
 
 <?php endif; ?>
-    // ID accessors
-    public function getId() {
-        return $this->id;
-    }
     
-    public function setId($id) {
-        $this->id = $id;
-        return $this;
-    }
-
     // Attribute accessors
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
 
     public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?> ?: '';
+        return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
     public function set<?= $attribute->getMethodName(); ?>($value) {
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
-<?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
-
-    public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?> ?: 0;
+<?php elseif ($attribute->is(['Bool'])): ?>
+    
+    public function is<?= $attribute->getMethodName(); ?>() {
+        return $this-><?= $attribute->getPropertyName(); ?> ? true : false;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value) {
+    public function set<?= $attribute->getMethodName(); ?>(bool $value) {
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
-<?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+<?php elseif ($attribute->is(['Date', 'DateTime'])): ?>
+    
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
@@ -470,34 +444,6 @@ class <?= $entity->getClassName(); ?> implements \JsonSerializable {
         return $this;
     }
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-    public function is<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?> ? true : false;
-    }
-
-    public function set<?= $attribute->getMethodName(); ?>(bool $value) {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
-        return $this;
-    }
-<?php endif; ?>
 <?php endforeach; ?>
-    // Created/updated date accessors
-    public function getCreated() {
-        return $this->created;
-    }
-    
-    public function setCreated(\DateTimeImmutable $created) {
-        $this->created = $created;
-        return $this;
-    }
-
-    public function getUpdated() {
-        return $this->updated;
-    }
-    
-    public function setUpdated(\DateTimeImmutable $updated) {
-        $this->updated = $updated;
-        return $this;
-    }
     
 }
