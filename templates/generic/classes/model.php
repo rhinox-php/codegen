@@ -3,7 +3,6 @@
 namespace <?= $this->getModelNamespace(); ?>;
 
 class <?= $entity->getClassName(); ?> extends AbstractModel {
-    use \Rhino\Core\Model\MySqlModel;
     
     // Properties
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -308,8 +307,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
     
     public function fetch<?= $relationship->getClassName(); ?>() {
+        return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
+    }
+    
+    public function get<?= $relationship->getClassName(); ?>() {
         if (!$this-><?= $relationship->getPropertyName(); ?>) {
-            $this-><?= $relationship->getPropertyName(); ?> = \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
+            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getClassName(); ?>();
         }
         return $this-><?= $relationship->getPropertyName(); ?>;
     }

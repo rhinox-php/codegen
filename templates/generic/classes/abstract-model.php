@@ -28,13 +28,18 @@ abstract class AbstractModel implements \JsonSerializable {
     public abstract function jsonSerialize();
 
     // Save/insert/update/delete
-    public function save() {
-        if ($this->getId()) {
-            $this->update();
-        } else {
-            $this->insert();
-        }
-        $this->saveRelated();
+    public function save(callable $transactionCallback = null) {
+        $this->transaction(function() use($transactionCallback) {
+            if ($this->getId()) {
+                $this->update();
+            } else {
+                $this->insert();
+            }
+            $this->saveRelated();
+            if ($transactionCallback) {
+                $transactionCallback();
+            }
+        });
     }
 
     protected abstract function insert();
