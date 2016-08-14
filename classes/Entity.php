@@ -5,6 +5,7 @@ class Entity {
     use Inflector;
 
     protected $name;
+    protected $pluralName;
     protected $authentication = false;
     protected $attributes = [];
     protected $relationships = [];
@@ -17,13 +18,22 @@ class Entity {
         $this->name = $name;
         return $this;
     }
+    
+    public function getPluralName() {
+        return $this->pluralName ?: $this->pluralize($this->getName());
+    }
+
+    public function setPluralName($pluralName) {
+        $this->pluralName = $pluralName;
+        return $this;
+    }
 
     public function getClassName(): string {
         return $this->camelize($this->getName());
     }
 
     public function getPluralClassName(): string {
-        return $this->pluralize($this->getClassName());
+        return $this->pluralize($this->camelize($this->getPluralName()));
     }
 
     public function getTableName(): string {
@@ -31,7 +41,7 @@ class Entity {
     }
 
     public function getPluralTableName(): string {
-        return $this->pluralize($this->getTableName());
+        return $this->pluralize($this->underscore($this->getPluralName()));
     }
 
     public function getPropertyName(): string {
@@ -39,7 +49,7 @@ class Entity {
     }
 
     public function getPluralPropertyName(): string {
-        return $this->pluralize($this->getPropertyName());
+        return $this->pluralize($this->camelize($this->getPluralName(), true));
     }
 
     public function getFileName(): string {
@@ -51,7 +61,7 @@ class Entity {
     }
 
     public function getPluralRouteName(): string {
-        return $this->pluralize($this->getRouteName());
+        return $this->pluralize($this->hyphenate($this->getPluralName()));
     }
 
     public function getLabel(): string {
@@ -59,7 +69,7 @@ class Entity {
     }
 
     public function getPluralLabel(): string {
-        return $this->pluralize($this->getLabel());
+        return $this->pluralize($this->humanize($this->getPluralName()));
     }
 
     public function getAttributes(): array {

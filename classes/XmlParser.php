@@ -42,6 +42,7 @@ class XmlParser {
             case 'entity': {
                 $entity = new Entity();
                 $entity->setName((string) $node['name']);
+                $entity->setPluralName((string) $node['plural-name']);
                 $this->codegen->addEntity($entity);
                 break;
             }

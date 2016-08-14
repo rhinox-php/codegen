@@ -8,6 +8,10 @@ CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> I
 CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> TINYINT(1) UNSIGNED NULL AFTER <?= $previous ?: 'id'; ?>;
 <?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
 CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> MEDIUMTEXT NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> DATE NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\DateTimeAttribute): ?>
+CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> DATETIME NULL AFTER <?= $previous ?: 'id'; ?>;
 <?php else: ?>
 CHANGE <?= $attribute->getColumnName(); ?> <?= $attribute->getColumnName(); ?> VARCHAR(255) NULL AFTER <?= $previous ?: 'id'; ?>;
 <?php endif; ?>

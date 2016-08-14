@@ -121,12 +121,14 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ', [
             ':id' => $this->getId(),
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format('Y-m-d') : null,
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
-<?php else: ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+<?php elseif ($attribute->is(['Bool'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
+<?php elseif ($attribute->is(['Date'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
+<?php elseif ($attribute->is(['DateTime'])): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
 <?php endif; ?>
 <?php endforeach; ?>
         ]);
@@ -220,6 +222,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ]));
     }
 
+    /**
+     * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
+     * `null` if there was no results.
+     *
+     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     */
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
@@ -243,19 +251,40 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php endif; ?>
 <?php endforeach; ?>
 
-    // Iterate methods
+    /**
+     * Yeilds an instance for every row stored in the database.
+     * 
+     * WARNING: It is not advisable to use this method on tables with many rows 
+     * as it will likly be quite slow.
+     *
+     * @return Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     */
     public static function iterateAll() {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . ';
         '));
     }
+    
+    /**
+     * Returns an array of every instance stored in the database.
+     * 
+     * WARNING: This method can quickly cause a out of memory error if there are 
+     * many rows in the database.
+     *
+     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     */
     public static function getAll() {
         return iterator_to_array(static::iterateAll());
     }
 
-    // Fetch methods
-    protected static function fetch<?= $entity->getClassName(); ?>($result) {
+    /**
+     * Fetch a single instance of <?= $entity->getClassName(); ?> from a PDO result,
+     * or `null` if there was no results.
+     *
+     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     */
+    protected static function fetch<?= $entity->getClassName(); ?>(\PDOStatement $result) {
         $entity = $result->fetchObject(static::class);
         if (!$entity) {
             return null;
@@ -274,8 +303,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $entity;
     }
 
-    // Fetch/iterate multiple
-    protected static function fetch<?= $entity->getPluralClassName(); ?>($result) {
+    /**
+     * Yield multiple instances of <?= $entity->getClassName(); ?> from a PDO result.
+     *
+     * @return \Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     */
+    protected static function fetch<?= $entity->getPluralClassName(); ?>(\PDOStatement $result) {
         while ($entity = static::fetch<?= $entity->getClassName(); ?>($result)) {
             yield $entity;
         }
@@ -287,10 +320,21 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
     // Fetch has many <?= $relationship->getTo()->getName(); ?> relationships as <?= $relationship->getClassName(); ?>
     
+    /**
+     * Yields all related <?= $relationship->getTo()->getClassName(); ?>.
+     *
+     * @return \Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     */
     public function fetch<?= $relationship->getPluralClassName(); ?>() {
         return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
     
+    /**
+     * Returns an array of all related <?= $relationship->getTo()->getClassName(); ?>, 
+     * and caches the fetch call into a property.
+     *
+     * @return <?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     */
     public function get<?= $relationship->getPluralClassName(); ?>() {
         if ($this-><?= $relationship->getPluralPropertyName(); ?> === null) {
             $this-><?= $relationship->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getPluralClassName(); ?>());
