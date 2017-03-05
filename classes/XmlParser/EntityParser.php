@@ -19,6 +19,15 @@ class EntityParser extends AggregateParser {
         ];
     }
     
+    public function preparse(\SimpleXMLElement $node) {
+        $this->log('Parsing entity', (string) $node['name']);
+
+        $entity = new \Rhino\Codegen\Entity();
+        $entity->setName((string) $node['name']);
+        $entity->setPluralName((string) $node['plural-name']);
+        $this->codegen->addEntity($entity);
+    }
+    
     public function parseNode(\SimpleXMLElement $node) {
         $this->entity = $this->codegen->findEntity((string) $node['name']);
     }

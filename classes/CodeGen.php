@@ -3,6 +3,7 @@ namespace Rhino\Codegen;
 
 class Codegen {
     use Inflector;
+    use Logger;
 
     protected $namespace;
     protected $implementedNamespace;
@@ -19,13 +20,16 @@ class Codegen {
     protected $templates = [];
     protected $pdo = null;
     protected $path = null;
-    protected $debug = false;
+    protected $debug = true;
 
     public function generate() {
+        $this->log('Generating...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {
+            $this->log(get_class($template));
             $template->setCodegen($this)->generate();
         }
+        $this->log('Generating complete!');
     }
     
     public function tableExists(string $tableName) {
@@ -176,11 +180,6 @@ class Codegen {
         }
     }
     */
-
-    public function log($message) {
-        // @todo inject a logger
-        echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
-    }
 
     public function debug($message) {
         // @todo inject a logger

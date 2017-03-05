@@ -10,9 +10,9 @@ class Laravel extends Template {
     
     public function generate() {
         foreach ($this->codegen->getEntities() as $entity) {
-            // $this->renderTemplate('classes/generated-model', $this->codegen->getPath('/' . $this->generatedModelPath . '/' . $entity->getClassName() . '.php'), [
-            //     'entity' => $entity,
-            // ]);
+            $this->renderTemplate('classes/generated-model', $this->codegen->getPath('/' . $this->generatedModelPath . '/' . $entity->getClassName() . '.php'), [
+                'entity' => $entity,
+            ]);
             $this->renderTemplate('classes/model', $this->codegen->getPath('/' . $this->modelPath . '/' . $entity->getClassName() . '.php'), [
                 'entity' => $entity,
             ]);
@@ -20,6 +20,11 @@ class Laravel extends Template {
                 'entity' => $entity,
             ]);
         }
+    }
+
+    public function setGeneratedModelPath($generatedModelPath) {
+        $this->generatedModelPath = $generatedModelPath;
+        return $this;
     }
 
 }
