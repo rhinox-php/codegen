@@ -6,6 +6,7 @@ class Attribute {
     use Inflector;
 
     protected $name;
+    protected $nullable = true;
 
     public function getName(): string {
         return $this->name;
@@ -43,5 +44,13 @@ class Attribute {
         }
         return false;
     }
+    
+    public function isNullable(): bool {
+        return $this->nullable;
+    }
 
+    public function setNullable(bool $nullable) {
+        $this->nullable = $nullable;
+        return $this;
+    }
 }

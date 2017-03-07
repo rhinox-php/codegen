@@ -206,9 +206,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ]));
     }
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute ||
-        $attribute instanceof \Rhino\Codegen\Attribute\IntAttribute ||
-        $attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+<?php if ($attribute->is(['String', 'Int'])): ?>
 
     // Find by attribute <?= $attribute->getName(); ?>
 
@@ -249,13 +247,85 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ])->fetchColumn();
     }
 <?php endif; ?>
+<?php if ($attribute->is(['Bool'])): ?>
+    
+    // Find by attribute <?= $attribute->getName(); ?>
+
+    public static function findBy<?= $attribute->getMethodName(); ?>($value) {
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . '
+            WHERE 
+                <?= $attribute->getColumnName(); ?> = :value 
+                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
+        ', [
+            ':value' => $value ? 1 : 0,
+        ]));
+    }
+
+    /**
+     * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
+     * `null` if there was no results.
+     *
+     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     */
+    public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
+        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . '
+            WHERE
+                <?= $attribute->getColumnName(); ?> = :value 
+                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL)
+            LIMIT 1;
+        ', [
+            ':value' => $value,
+        ]));
+    }
+
+    public static function countBy<?= $attribute->getMethodName(); ?>($value) {
+        return (int) static::query('
+            SELECT COUNT(id)
+            FROM ' . static::$table . '
+            WHERE
+                <?= $attribute->getColumnName(); ?> = :value 
+                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
+        ', [
+            ':value' => $value,
+        ])->fetchColumn();
+    }
+<?php endif; ?>
+<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+
+    public static function findBy<?= $attribute->getMethodName(); ?>Before($value) {
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . '
+            WHERE 
+                <?= $attribute->getColumnName(); ?> < :value 
+                OR <?= $attribute->getColumnName(); ?> IS NULL
+        ', [
+            ':value' => static::formatMySqlDateTime($value),
+        ]));
+    }
+
+    public static function findBy<?= $attribute->getMethodName(); ?>After($value) {
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM ' . static::$table . '
+            WHERE 
+                <?= $attribute->getColumnName(); ?> > :value 
+        ', [
+            ':value' => static::formatMySqlDateTime($value),
+        ]));
+    }
+<?php endif; ?>
 <?php endforeach; ?>
 
     /**
-     * Yeilds an instance for every row stored in the database.
+     * Yields an instance for every row stored in the database.
      * 
      * WARNING: It is not advisable to use this method on tables with many rows 
-     * as it will likly be quite slow.
+     * as it will likely be quite slow.
      *
      * @return Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
      */
@@ -292,8 +362,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
         // Parse date attributes
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-        $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($entity-><?= $attribute->getPropertyName(); ?>));
+<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+        if ($entity-><?= $attribute->getPropertyName(); ?>) {
+            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($entity-><?= $attribute->getPropertyName(); ?>));
+        }
 <?php endif; ?>
 <?php endforeach; ?>
 
@@ -431,18 +503,31 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $token;
     }
 
-    public static function resume($token) {
+    public static function resume($token, \DateTime $expire) {
         $result = static::query('
             SELECT <?= $entity->getTableName(); ?>_id
             FROM <?= $entity->getTableName(); ?>_sessions
             WHERE
                 token = :token
+                AND expire > UTC_TIMESTAMP()
             LIMIT 1;
         ', [
             ':token' => $token,
         ]);
         $entityId = $result->fetch(\PDO::FETCH_COLUMN);
         if ($entityId) {
+            try {
+                static::query('
+                    UPDATE <?= $entity->getTableName(); ?>_sessions
+                    SET expire = :expire
+                    WHERE token = :token;
+                ', [
+                    ':token' => $token,
+                    ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $exception) {
+                // Ignore (dead lock, back off try again)
+            }
             return static::findById($entityId);
         }
     }
@@ -473,6 +558,11 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php elseif ($attribute->is(['Bool'])): ?>
     
     public function is<?= $attribute->getMethodName(); ?>() {
+<?php if ($attribute->isNullable()): ?>
+        if ($this-><?= $attribute->getPropertyName(); ?> === null) {
+            return null;
+        }
+<?php endif; ?>
         return $this-><?= $attribute->getPropertyName(); ?> ? true : false;
     }
 
