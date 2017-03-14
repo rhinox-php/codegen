@@ -51,6 +51,18 @@ $application->add(new class() extends Command {
 });
 $application->add(new class() extends Command {
     protected function configure() {
+        $this->setName('desc')
+            ->setDescription('Describe entities')
+            ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        getCodegen($input, $output)->describe();
+    }
+});
+$application->add(new class() extends Command {
+    protected function configure() {
         $this->setName('migrate')
             ->setDescription('Generate migrations')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')

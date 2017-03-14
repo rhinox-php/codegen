@@ -9,6 +9,8 @@ class BelongsToParser extends AttributeParser {
 
         $attribute = new Attribute\IntAttribute();
         $attribute->setName($to->getName() . ' ID');
+        $attribute->setHasAccessors(false);
+        $attribute->setIsForeignKey(true);
         $this->entity->addAttribute($attribute);
 
         $relationship = new Relationship\BelongsTo();

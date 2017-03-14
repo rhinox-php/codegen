@@ -31,6 +31,22 @@ class Codegen {
         }
         $this->log('Generating complete!');
     }
+
+    public function describe() {
+        $print = function(...$args) {
+            echo implode(" \t ", $args) . PHP_EOL;
+        };
+        foreach ($this->entities as $entity) {
+            echo PHP_EOL;
+            echo '-- '.$entity->getName().' -----------------------' . PHP_EOL;
+            $print($entity->getClassName(), $entity->getPropertyName());
+            echo 'Attributes:' . PHP_EOL;
+            foreach ($entity->getAttributes() as $attribute) {
+                $print('', $attribute->getName(), $attribute->getPropertyName());
+            }
+            echo PHP_EOL;
+        }
+    }
     
     public function tableExists(string $tableName) {
         $statement = $this->getPdo()->prepare('SHOW TABLES LIKE ?');

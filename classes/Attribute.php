@@ -8,6 +8,21 @@ class Attribute {
     protected $name;
     protected $nullable = true;
 
+    /**
+     * @var bool If true accessors will be generated.
+     */
+    protected $hasAccessors = true;
+
+    /**
+     * @var bool If true the attribute will be included in JSON serialization.
+     */
+    protected $jsonSerialize = true;
+
+    /**
+     * @var bool If true the attribute is a foreign key.
+     */
+    protected $isForeignKey = false;
+
     public function getName(): string {
         return $this->name;
     }
@@ -27,6 +42,13 @@ class Attribute {
 
     public function getColumnName(): string {
         return $this->underscore($this->getName());
+    }
+
+    public function getGetterName() {
+        if ($this->is(['Bool'])) {
+            return 'is' . $this->getMethodName();
+        }
+        return 'get' . $this->getMethodName();
     }
 
     public function getLabel(): string {
@@ -51,6 +73,60 @@ class Attribute {
 
     public function setNullable(bool $nullable) {
         $this->nullable = $nullable;
+        return $this;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function hasAccessors(): bool
+    {
+        return $this->hasAccessors;
+    }
+
+    /**
+     * @param bool $hasAccessors
+     * @return Attribute
+     */
+    public function setHasAccessors(bool $hasAccessors): Attribute
+    {
+        $this->hasAccessors = $hasAccessors;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getJsonSerialize(): bool
+    {
+        return $this->jsonSerialize;
+    }
+
+    /**
+     * @param bool $jsonSerialize
+     * @return Attribute
+     */
+    public function setJsonSerialize(bool $jsonSerialize): Attribute
+    {
+        $this->jsonSerialize = $jsonSerialize;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isForeignKey(): bool
+    {
+        return $this->isForeignKey;
+    }
+
+    /**
+     * @param bool $isForeignKey
+     * @return Attribute
+     */
+    public function setIsForeignKey(bool $isForeignKey): Attribute
+    {
+        $this->isForeignKey = $isForeignKey;
         return $this;
     }
 }

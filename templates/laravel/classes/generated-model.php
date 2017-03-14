@@ -40,7 +40,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         return [
             'id' => $this->getId(),
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
+            '<?= $attribute->getPropertyName(); ?>' => $this-><?= $attribute->getGetterName(); ?>(),
 <?php endforeach; ?>
             'created' => $this->getCreated(),
             'updated' => $this->getUpdated(),
@@ -171,7 +171,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     /**
      * @return string|null Returns the <?= $attribute->getName(); ?> attribute, or null if not set.
      */
-    public function get<?= $attribute->getMethodName(); ?>() {
+    public function <?= $attribute->getGetterName(); ?>() {
         return $this-><?= $attribute->getColumnName(); ?>;
     }
 
@@ -189,7 +189,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     /**
      * @return integer|null Returns the <?= $attribute->getName(); ?> attribute, or null if not set.
      */
-    public function get<?= $attribute->getMethodName(); ?>() {
+    public function <?= $attribute->getGetterName(); ?>() {
         return $this-><?= $attribute->getColumnName(); ?>;
     }
 
@@ -204,7 +204,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\DecimalAttribute): ?>
-    public function get<?= $attribute->getMethodName(); ?>() {
+    public function <?= $attribute->getGetterName(); ?>() {
         return $this-><?= $attribute->getColumnName(); ?>;
     }
 
@@ -215,7 +215,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-    public function get<?= $attribute->getMethodName(); ?>() {
+    public function <?= $attribute->getGetterName(); ?>() {
         return $this-><?= $attribute->getColumnName(); ?>;
     }
 
@@ -226,8 +226,11 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-    public function is<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getColumnName(); ?>;
+    public function <?= $attribute->getGetterName(); ?>() {
+        if ($this-><?= $attribute->getColumnName(); ?> === null) {
+            return null;
+        }
+        return (bool) $this-><?= $attribute->getColumnName(); ?>;
     }
 
     public function set<?= $attribute->getMethodName(); ?>($value) {
