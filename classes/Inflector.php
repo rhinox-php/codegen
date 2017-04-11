@@ -21,7 +21,9 @@ trait Inflector {
         $inflector = $this->getInflector();
         $result = preg_replace('/\s+/', '_', $result);
         $result = $inflector->camelize($result);
-        return $inflector->underscore($result);
+        $result = $inflector->underscore($result);
+        $result = preg_replace('/([0-9]+)/', '_$1', $result);
+        return $result;
     }
 
     public function hyphenate($result): string {

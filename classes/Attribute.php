@@ -6,6 +6,9 @@ class Attribute {
     use Inflector;
 
     protected $name;
+    protected $propertyName;
+    protected $methodName;
+    protected $columnName;
     protected $nullable = true;
 
     /**
@@ -33,15 +36,30 @@ class Attribute {
     }
 
     public function getPropertyName(): string {
-        return $this->camelize($this->getName(), true);
+        return $this->propertyName ?: $this->camelize($this->getName(), true);
+    }
+
+    public function setPropertyName($propertyName) {
+        $this->propertyName = $propertyName;
+        return $this;
     }
 
     public function getMethodName(): string {
-        return $this->camelize($this->getName());
+        return $this->methodName ?: $this->camelize($this->getName());
+    }
+
+    public function setMethodName($methodName) {
+        $this->methodName = $methodName;
+        return $this;
     }
 
     public function getColumnName(): string {
-        return $this->underscore($this->getName());
+        return $this->columnName ?: $this->underscore($this->getName());
+    }
+
+    public function setColumnName($columnName) {
+        $this->columnName = $columnName;
+        return $this;
     }
 
     public function getGetterName() {

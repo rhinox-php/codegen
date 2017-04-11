@@ -21,6 +21,9 @@ class XmlParser {
         try {
             $file = $this->getFile();
             $xml = simplexml_load_file($file);
+            if (!$xml) {
+                throw new \Exception('Could not read XML.');
+            }
             foreach ($xml as $child) {
                 $this->preparseNode($child);
             }
@@ -42,15 +45,6 @@ class XmlParser {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->preparse($node);
-        // switch ($node->getName()) {
-        //     case 'entity': {
-        //         $entity = new Entity();
-        //         $entity->setName((string) $node['name']);
-        //         $entity->setPluralName((string) $node['plural-name']);
-        //         $this->codegen->addEntity($entity);
-        //         break;
-        //     }
-        // }
     }
     
     protected function parseNode(\SimpleXMLElement $node) {
@@ -58,31 +52,6 @@ class XmlParser {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->parse($node);
-        // return;
-        // switch ($node->getName()) {
-        //     case 'entity': {
-        //         $this->parseEntity($node);
-        //         break;
-        //     }
-        //     case 'code': {
-        //         $this->codegen->setNamespace((string) $node['namespace']);
-        //         $this->codegen->setImplementedNamespace((string) $node['implemented-namespace']);
-        //         $this->codegen->setProjectName((string) $node['project-name']);
-        //         $this->codegen->setTemplatePath(dirname($this->getFile()) . '/' . $node['template-path']);
-        //         $this->codegen->setUrlPrefix((string) $node['url-prefix']);
-        //         $this->codegen->setViewPathPrefix((string) $node['view-path-prefix']);
-        //         $this->codegen->setClassPathPrefix((string) $node['class-path-prefix']);
-        //         $this->codegen->setDatabaseName((string) $node['database-name']);
-        //         break;
-        //     }
-        //     case 'db': {
-        //         $dsn = (string) $node['dsn'];
-        //         $user = (string) $node['user'];
-        //         $password = (string) $node['password'];
-        //         $this->codegen->setPdo(new \PDO($dsn, $user, $password));
-        //         break;
-        //     }
-        // }
     }
     
     protected function parseEntity($node) {
