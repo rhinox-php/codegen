@@ -67,10 +67,16 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
 
     // Find by attribute <?= $attribute->getName(); ?>
 
+    /**
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>[] Returns an array of instances where the <?= $attribute->getName(); ?> attribute matches the supplied value.
+     */
     public static function findBy<?= $attribute->getMethodName(); ?>($value) {
         return iterator_to_array(static::where('<?= $attribute->getColumnName(); ?>', $value)->get());
     }
 
+    /**
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>
+     */
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::where('<?= $attribute->getColumnName(); ?>', $value)->first();
     }

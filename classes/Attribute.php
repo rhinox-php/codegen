@@ -10,6 +10,7 @@ class Attribute {
     protected $methodName;
     protected $columnName;
     protected $nullable = true;
+    protected $indexed = false;
 
     /**
      * @var bool If true accessors will be generated.
@@ -146,5 +147,13 @@ class Attribute {
     {
         $this->isForeignKey = $isForeignKey;
         return $this;
+    }
+
+    public function isIndexed() {
+
+    }
+
+    public function setIsIndexed() {
+        
     }
 }
