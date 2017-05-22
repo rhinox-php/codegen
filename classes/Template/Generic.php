@@ -2,7 +2,7 @@
 namespace Rhino\Codegen\Template;
 
 class Generic extends Template {
-    
+
     protected $name = 'generic';
     protected $viewPath = 'views';
     protected $controllerPath = 'classes/Controller';
@@ -72,11 +72,15 @@ class Generic extends Template {
 //            }
 //        }
     }
-    
-    public function getPath(string $path = ''): string {
-        return $this->codegen->getPath($path);
-    }
-    
+
+    // public function getTemplate(string $default): string {
+    //     return __DIR__ . '/../../templates/generic/' . $default . '.php';
+    // }
+
+    // public function getPath(string $path = ''): string {
+    //     return $this->codegen->getPath($path);
+    // }
+
     public function getViewPath(string $path = ''): string {
         return ($this->viewPath ?: $this->codegen->getPath('/views/')) . '/' . $path;
     }
@@ -85,7 +89,7 @@ class Generic extends Template {
         $this->viewPath = $viewPath;
         return $this;
     }
-    
+
     public function getControllerPath(string $path = ''): string {
         return ($this->controllerPath ?: $this->codegen->getPath('/classes/Controller/')) . '/' . $path;
     }

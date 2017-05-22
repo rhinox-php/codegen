@@ -1,9 +1,9 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getModelNamespace(); ?>;
+namespace <?= $this->getGeneratedNamespace(); ?>;
 
 class <?= $entity->getClassName(); ?> extends AbstractModel {
-    
+
     // Properties
 <?php foreach ($entity->getAttributes() as $attribute): ?>
     protected $<?= $attribute->getPropertyName(); ?>;
@@ -51,7 +51,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         $table->addColumn('updated')->setLabel('Updated');
         return $table;
     }
-    
+
     // Json
     public function jsonSerialize() {
         return [
@@ -103,7 +103,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php endforeach; ?>
             ':created' => $this->formatMySqlDateTime($this->getCreated()),
         ]);
-        
+
         $this->setId($this->lastInsertId());
     }
 
@@ -132,10 +132,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php endif; ?>
 <?php endforeach; ?>
         ]);
-        
+
         $this->setUpdated(new \DateTimeImmutable());
     }
-    
+
     public function delete() {
         $this->query('
             DELETE FROM <?= $entity->getTableName(); ?>
@@ -155,7 +155,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php endif; ?>
 <?php endforeach; ?>
     }
-    
+
 <?php foreach ($entity->getRelationships() as $relationship): ?>
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
@@ -179,20 +179,20 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
                 $this->query("
                     DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
 
-                    WHERE 
+                    WHERE
                         id NOT IN ($in)
                         AND <?= $relationship->getFrom()->getTableName(); ?>_id = ?;
                 ", $deleteBindings);
             }
         }
     }
-    
+
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
 
     // Find methods
-    
+
     /**
      * @return <?= $entity->getClassName(); ?> The instance matching the ID, or null.
      */
@@ -248,15 +248,15 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     }
 <?php endif; ?>
 <?php if ($attribute->is(['Bool'])): ?>
-    
+
     // Find by attribute <?= $attribute->getName(); ?>
 
     public static function findBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
-            WHERE 
-                <?= $attribute->getColumnName(); ?> = :value 
+            WHERE
+                <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
         ', [
             ':value' => $value ? 1 : 0,
@@ -274,7 +274,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
             WHERE
-                <?= $attribute->getColumnName(); ?> = :value 
+                <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL)
             LIMIT 1;
         ', [
@@ -287,7 +287,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             SELECT COUNT(id)
             FROM ' . static::$table . '
             WHERE
-                <?= $attribute->getColumnName(); ?> = :value 
+                <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
         ', [
             ':value' => $value,
@@ -300,8 +300,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
-            WHERE 
-                <?= $attribute->getColumnName(); ?> < :value 
+            WHERE
+                <?= $attribute->getColumnName(); ?> < :value
                 OR <?= $attribute->getColumnName(); ?> IS NULL
         ', [
             ':value' => static::formatMySqlDateTime($value),
@@ -312,8 +312,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM ' . static::$table . '
-            WHERE 
-                <?= $attribute->getColumnName(); ?> > :value 
+            WHERE
+                <?= $attribute->getColumnName(); ?> > :value
         ', [
             ':value' => static::formatMySqlDateTime($value),
         ]));
@@ -323,8 +323,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     /**
      * Yields an instance for every row stored in the database.
-     * 
-     * WARNING: It is not advisable to use this method on tables with many rows 
+     *
+     * WARNING: It is not advisable to use this method on tables with many rows
      * as it will likely be quite slow.
      *
      * @return Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
@@ -335,11 +335,11 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             FROM ' . static::$table . ';
         '));
     }
-    
+
     /**
      * Returns an array of every instance stored in the database.
-     * 
-     * WARNING: This method can quickly cause a out of memory error if there are 
+     *
+     * WARNING: This method can quickly cause a out of memory error if there are
      * many rows in the database.
      *
      * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
@@ -391,7 +391,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
     // Fetch has many <?= $relationship->getTo()->getName(); ?> relationships as <?= $relationship->getClassName(); ?>
-    
+
     /**
      * Yields all related <?= $relationship->getTo()->getClassName(); ?>.
      *
@@ -400,9 +400,9 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public function fetch<?= $relationship->getPluralClassName(); ?>() {
         return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
-    
+
     /**
-     * Returns an array of all related <?= $relationship->getTo()->getClassName(); ?>, 
+     * Returns an array of all related <?= $relationship->getTo()->getClassName(); ?>,
      * and caches the fetch call into a property.
      *
      * @return <?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
@@ -418,28 +418,28 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         $this-><?= $relationship->getPluralPropertyName(); ?> = $entities;
         return $this;
     }
-    
+
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne || $relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
     // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
-    
+
     public function fetch<?= $relationship->getClassName(); ?>() {
         return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
     }
-    
+
     public function get<?= $relationship->getClassName(); ?>() {
         if (!$this-><?= $relationship->getPropertyName(); ?>) {
             $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getClassName(); ?>();
         }
         return $this-><?= $relationship->getPropertyName(); ?>;
     }
-    
+
     public function has<?= $relationship->getClassName(); ?>() {
         if (!$this->get<?= $relationship->getClassName(); ?>Id()) {
             return false;
         }
         return $this->fetch<?= $relationship->getClassName(); ?>() ? true : false;
     }
-    
+
 <?php endif; ?>
 <?php else: ?>
 <?php endif; ?>
@@ -542,7 +542,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     }
 
 <?php endif; ?>
-    
+
     // Attribute accessors
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
@@ -556,7 +556,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $this;
     }
 <?php elseif ($attribute->is(['Bool'])): ?>
-    
+
     public function is<?= $attribute->getMethodName(); ?>() {
 <?php if ($attribute->isNullable()): ?>
         if ($this-><?= $attribute->getPropertyName(); ?> === null) {
@@ -571,7 +571,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $this;
     }
 <?php elseif ($attribute->is(['Date', 'DateTime'])): ?>
-    
+
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
@@ -582,5 +582,5 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     }
 <?php endif; ?>
 <?php endforeach; ?>
-    
+
 }

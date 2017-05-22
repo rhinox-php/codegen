@@ -27,7 +27,7 @@ class Codegen {
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {
             $this->log(get_class($template));
-            $template->setCodegen($this)->generate();
+            $template->generate();
         }
         $this->log('Generating complete!');
     }
@@ -47,7 +47,7 @@ class Codegen {
             echo PHP_EOL;
         }
     }
-    
+
     public function tableExists(string $tableName) {
         $statement = $this->getPdo()->prepare('SHOW TABLES LIKE ?');
         $statement->execute([
@@ -55,7 +55,7 @@ class Codegen {
         ]);
         return $statement->rowCount() == 1;
     }
-    
+
     public function columnExists(string $tableName, string $columnName) {
         $statement = $this->getPdo()->prepare("SHOW COLUMNS FROM $tableName LIKE ?");
         $statement->execute([
@@ -63,11 +63,11 @@ class Codegen {
         ]);
         return $statement->rowCount() == 1;
     }
-    
+
     protected function getMigrationName($name) {
         return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
     }
-    
+
     public function migrate($path) {
         $path .= '/sql/up/';
         $this->log('Create migrations in ' . $path);
@@ -94,12 +94,12 @@ class Codegen {
                 }
                 $previous = $attribute->getColumnName();
             }
-            
+
             // @todo indexes
             // @todo triggers
         }
     }
-    
+
     public function reset($entity) {
         $pdo = $this->getPdo();
         $entity = $this->findEntity($entity);
@@ -107,6 +107,16 @@ class Codegen {
 //        $this->renderTemplate('sql/full/create-table', $path . $name, [
 //            'entity' => $entity,
 //        ]);
+    }
+
+    public function createDirectory(string $directory, $permissions = 0755): Codegen {
+        if (!file_exists($directory)) {
+            $this->log('Creating directory ' . $directory);
+            if (!$this->isDryRun()) {
+                mkdir($directory, $permissions, true);
+            }
+        }
+        return $this;
     }
 
     /*
@@ -204,6 +214,11 @@ class Codegen {
         }
     }
 
+    public function log($message) {
+        // @todo inject a logger
+        echo ($this->isDryRun() ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+    }
+
     public function getNamespace() {
         return $this->namespace;
     }
@@ -211,7 +226,7 @@ class Codegen {
     public function getProjectName() {
         return $this->projectName;
     }
-    
+
     public function getImplementedNamespace() {
         return $this->implementedNamespace;
     }
@@ -220,7 +235,7 @@ class Codegen {
         $this->implementedNamespace = $implementedNamespace;
         return $this;
     }
-    
+
     public function setProjectName($projectName) {
         $this->projectName = $projectName;
         return $this;
@@ -322,7 +337,7 @@ class Codegen {
     public function setDatabaseName($databaseName) {
         $this->databaseName = $databaseName;
     }
-    
+
     public function getPdo(): \PDO {
         return $this->pdo;
     }
@@ -343,6 +358,7 @@ class Codegen {
 
     public function addTemplate(Template\Template $template) {
         $this->templates[] = $template;
+        $template->setCodegen($this);
         return $this;
     }
 
@@ -355,7 +371,7 @@ class Codegen {
         $this->path = $path;
         return $this;
     }
-    
+
     public function isDebug(): bool {
         return $this->debug;
     }

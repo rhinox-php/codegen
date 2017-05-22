@@ -2,13 +2,13 @@
 namespace Rhino\Codegen\Template\Generic;
 
 class Server extends \Rhino\Codegen\Template\Generic {
-    
+
     protected $port = 3000;
-    
+
     public function generate() {
-        $this->renderTemplate('bin/server', $this->getPath('/bin/server.bat'));
+        $this->renderTemplate('bin/server', 'bin/server.bat');
     }
-    
+
     public function getPort(): int {
         return $this->port;
     }
@@ -17,5 +17,5 @@ class Server extends \Rhino\Codegen\Template\Generic {
         $this->port = $port;
         return $this;
     }
-    
+
 }

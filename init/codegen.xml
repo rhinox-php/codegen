@@ -1,0 +1,11 @@
+<codegen>
+    <entity name="Person">
+        <string-attribute name="Name" />
+        <belongs-to entity="Company" />
+    </entity>
+
+    <entity name="Company">
+        <string-attribute name="Name" />
+        <belongs-to entity="Person" name="Employee" />
+    </entity>
+</codegen>

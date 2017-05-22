@@ -37,6 +37,7 @@ function getCodegen(InputInterface $input, OutputInterface $output) {
 }
 
 $application = new Application();
+
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('gen')
@@ -49,6 +50,7 @@ $application->add(new class() extends Command {
         getCodegen($input, $output)->generate();
     }
 });
+
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('desc')
@@ -61,6 +63,7 @@ $application->add(new class() extends Command {
         getCodegen($input, $output)->describe();
     }
 });
+
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('migrate')
@@ -78,6 +81,7 @@ $application->add(new class() extends Command {
         $codegen->migrate($input->getArgument('outputPath'));
     }
 });
+
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('db:reset')
@@ -91,6 +95,7 @@ $application->add(new class() extends Command {
         getCodegen($input, $output)->reset($input->getArgument('entity'));
     }
 });
+
 $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('make:migration')
@@ -110,4 +115,44 @@ $application->add(new class() extends Command {
         }
     }
 });
+
+$application->add(new class() extends Command {
+    protected function configure() {
+        $this->setName('init')
+            ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'Path to initialise codegen files.', '.')
+            ->setDescription('Init codegen files');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        $path = $input->getOption('path');
+        if (!is_dir($path)) {
+            throw new \Exception('Invalid path ' . $path);
+        }
+        $path = realpath($path);
+        $output->writeln('Initialising codegen at ' . $path);
+
+        $source = "dir/dir/dir";
+
+        if (!is_dir($path)) {
+            mkdir($path);
+        }
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(__DIR__ . '/../init'), \RecursiveIteratorIterator::SELF_FIRST);
+        foreach ($iterator as $item) {
+            $outputPath = $path . '/' . $iterator->getSubPathName();
+            if ($item->isDir()) {
+                if (!is_dir($outputPath)) {
+                    $output->writeln('Creating directory ' . $outputPath);
+                    mkdir($outputPath);
+                }
+            } else {
+                if (!is_file($outputPath)) {
+                    $output->writeln('Creating ' . $outputPath);
+                    copy($item, $outputPath);
+                }
+            }
+        }
+    }
+});
+
 $application->run();
