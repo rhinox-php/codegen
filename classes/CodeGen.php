@@ -22,14 +22,17 @@ class Codegen {
     protected $path = null;
     protected $debug = true;
 
+    public function __construct() {
+    }
+
     public function generate() {
-        $this->log('Generating...');
+        $this->log('Generating templates...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {
             $this->log(get_class($template));
             $template->generate();
         }
-        $this->log('Generating complete!');
+        $this->log('Generating templates complete!');
     }
 
     public function describe() {
@@ -207,16 +210,20 @@ class Codegen {
     }
     */
 
-    public function debug($message) {
+    public function debug(string ...$messages) {
         // @todo inject a logger
-        if ($this->isDebug()) {
-            echo ($this->dryRun ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+        if (!$this->isDebug() || empty($messages)) {
+            return;
         }
+        echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
     }
 
-    public function log($message) {
+    public function log(string ...$messages) {
         // @todo inject a logger
-        echo ($this->isDryRun() ? '[DRY RUN] ' : '') . $message . PHP_EOL;
+        if (!$this->isDebug() || empty($messages)) {
+            return;
+        }
+        echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
     }
 
     public function getNamespace() {
@@ -370,6 +377,29 @@ class Codegen {
         assert(is_dir($path), 'Expected path to be a valid directory: ' . $path);
         $this->path = $path;
         return $this;
+    }
+
+    public function getFile(string $file): string {
+        $file = $this->getPath($file);
+        if (file_exists($file)) {
+            $file = realpath($file);
+        } elseif (is_dir(dirname($file))) {
+            $file = realpath(dirname($file)) . DIRECTORY_SEPARATOR . basename($file);
+        }
+        return $file;
+    }
+
+    public function writeFile(string $file, string $content) {
+        if (is_file($file)) {
+            if (md5($content) === md5_file($file)) {
+                $this->debug('No changes to', $file);
+                return;
+            }
+        }
+        $this->debug('Writing', strlen($content), 'bytes to', $file);
+        if (!$this->isDryRun()) {
+            file_put_contents($file, $content);
+        }
     }
 
     public function isDebug(): bool {

@@ -1,8 +1,8 @@
 <?php
 namespace Rhino\Codegen\Template;
 
-class Generic extends Template {
-    
+class ApiTest extends Template {
+
     public function generate() {
         $this->renderTemplate('tests/index.js', $this->getPath('/tests/index.js'));
         $this->renderTemplate('tests/api.js', $this->getPath('/tests/api.js'));

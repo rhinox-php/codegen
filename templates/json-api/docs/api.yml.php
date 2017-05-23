@@ -11,5 +11,6 @@ basePath: ???
 produces:
   - application/vnd.api+json
 paths:
-
+  $ref: ./paths.yml
 definitions:
+  $ref: ./definitions.yml

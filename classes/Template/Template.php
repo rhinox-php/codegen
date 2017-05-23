@@ -29,6 +29,8 @@ abstract class Template {
                 $this->getCodegen()->debug('Skipped ' . $outputFile);
                 return;
             }
+        } elseif (is_dir(dirname($outputFile))) {
+            $outputFile = realpath(dirname($outputFile)) . DIRECTORY_SEPARATOR . basename($outputFile);
         }
 
         $templateFile = $this->getTemplateFile($template);
