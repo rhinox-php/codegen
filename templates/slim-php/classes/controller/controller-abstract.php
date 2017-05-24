@@ -1,13 +1,13 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getNamespace(); ?>\Controllers;
+namespace <?= $this->getNamespace(); ?>\Controller;
 
-use \Interop\Container\ContainerInterface;
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use \<?= $this->getNamespace(); ?>\Services\InputData;
-use \<?= $this->getNamespace(); ?>\Services\Jwt;
-use \Symfony\Component\Validator\Constraints;
+use Rhino\Core\InputData;
+use Rhino\Core\Jwt;
+use Symfony\Component\Validator\Constraints;
 
 abstract class Controller {
     protected $body;
