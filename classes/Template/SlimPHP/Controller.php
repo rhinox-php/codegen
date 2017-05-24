@@ -8,9 +8,9 @@ class Controller extends SlimPHP {
     public function generate() {
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
-            'url' => 'git@bitbucket.org:rhino-php/rhino-core',
+            'url' => 'git@bitbucket.org:rhino-php/rhino-input-data',
         ]);
-        $this->codegen->composer->addDependency('rhinox/core', 'dev-master');
+        $this->codegen->composer->addDependency('rhinox/input-data', 'dev-master');
         $this->codegen->composer->addDependency('slim/slim', '~3.8.1');
 
         // Render abstract controllers
