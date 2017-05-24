@@ -6,6 +6,13 @@ use Rhino\Codegen\Template\SlimPHP;
 class Controller extends SlimPHP {
 
     public function generate() {
+        $this->codegen->composer->addRepository([
+            'type' => 'vcs',
+            'url' => 'git@bitbucket.org:PetahNZ/rhino-core',
+        ]);
+        $this->codegen->composer->addDependency('rhinox/core', 'dev-master');
+        $this->codegen->composer->addDependency('slim/slim', '~3.8.1');
+
         // Render abstract controllers
         $this->renderTemplate('classes/controller/controller-abstract', 'src/classes/Controller/Controller.php');
         $this->renderTemplate('classes/controller/controller-abstract-entity', 'src/classes/Controller/EntityController.php');
