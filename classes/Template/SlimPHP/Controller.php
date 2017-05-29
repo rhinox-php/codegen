@@ -1,9 +1,9 @@
 <?php
-namespace Rhino\Codegen\Template\SlimPHP;
+namespace Rhino\Codegen\Template\SlimPhp;
 
-use Rhino\Codegen\Template\SlimPHP;
+use Rhino\Codegen\Template\SlimPhp;
 
-class Controller extends SlimPHP {
+class Controller extends SlimPhp {
 
     public function generate() {
         $this->codegen->composer->addRepository([

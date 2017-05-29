@@ -1,9 +1,9 @@
 <?php
-namespace Rhino\Codegen\Template\SlimPHP;
+namespace Rhino\Codegen\Template\SlimPhp;
 
-use Rhino\Codegen\Template\SlimPHP;
+use Rhino\Codegen\Template\SlimPhp;
 
-class Service extends SlimPHP {
+class Service extends SlimPhp {
 
     protected $template = 'classes/services';
 
