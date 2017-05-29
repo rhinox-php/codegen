@@ -34,6 +34,7 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
                 $json['repositories'][] = $repository;
             }
             $json['repositories'] = array_unique($json['repositories'], SORT_REGULAR);
+            $json['repositories'] = array_values($json['repositories']);
         }
         $this->writeJsonFile('composer.json', $json);
     }

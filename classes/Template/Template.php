@@ -43,10 +43,7 @@ abstract class Template {
             return;
         }
 
-        $this->getCodegen()->log((file_exists($outputFile) ? 'Overwriting' : 'Creating') . ' ' . $outputFile . ' from template ' . $templateFile);
-        if (!$this->getCodegen()->isDryRun()) {
-            file_put_contents($outputFile, $output);
-        }
+        $this->getCodegen()->writeFile($outputFile, $output);
     }
 
     protected function getTemplateFile($name) {
