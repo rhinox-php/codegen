@@ -11,6 +11,13 @@ class Controller extends SlimPHP {
             'url' => 'git@bitbucket.org:rhino-php/rhino-input-data',
         ]);
         $this->codegen->composer->addDependency('rhinox/input-data', 'dev-master');
+
+        $this->codegen->composer->addDependency('rhinox/rhino-json-api-list', 'dev-master');
+        $this->codegen->composer->addRepository([
+            'type' => 'vcs',
+            'url' => 'git@bitbucket.org:rhino-php/rhino-json-api-list',
+        ]);
+
         $this->codegen->composer->addDependency('slim/slim', '~3.8.1');
 
         // Render abstract controllers
