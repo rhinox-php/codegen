@@ -5,17 +5,18 @@ namespace <?= $this->getNamespace(); ?>\Controller;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Rhino\Core\InputData;
-use Rhino\Core\Jwt;
+use Rhino\InputData\InputData;
+use Rhino\Jwt\Jwt;
 use Symfony\Component\Validator\Constraints;
 
 abstract class Controller {
+    use JwtTrait;
+
     protected $body;
     protected $input;
     protected $logger;
     protected $request;
     protected $response;
-    protected $jwt;
 
     public function __construct(ContainerInterface $container, ResponseInterface $request, ResponseInterface $response, $params)
     {
@@ -25,19 +26,6 @@ abstract class Controller {
         $this->jwt = $request->jwt;
         $this->request = $request;
         $this->response = $response;
-    }
-
-    /**
-     * Outputs a JWT token.
-     */
-    protected function jwtToken(array $data)
-    {
-        return [
-            'data' => [
-                'id' => Jwt::encode($data, \config('app.key')),
-                'type' => 'AuthToken',
-            ],
-        ];
     }
 
     /**
@@ -138,32 +126,32 @@ abstract class Controller {
         return $this->error($message, 404);
     }
 
-    public function getLogger()
+    protected function getLogger()
     {
         return $this->logger;
     }
 
-    public function getBody()
+    protected function getBody()
     {
         return $this->body;
     }
 
-    public function getInput()
+    protected function getInput()
     {
         return $this->input;
     }
 
-    public function getJwt()
+    protected function getJwt()
     {
         return $this->jwt;
     }
 
-    public function getRequest()
+    protected function getRequest()
     {
         return $this->request;
     }
 
-    public function getResponse()
+    protected function getResponse()
     {
         return $this->response;
     }
