@@ -224,7 +224,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
      * `null` if there was no results.
      *
-     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>|null
      */
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
@@ -267,7 +267,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
      * `null` if there was no results.
      *
-     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>|null
      */
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
@@ -327,7 +327,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * WARNING: It is not advisable to use this method on tables with many rows
      * as it will likely be quite slow.
      *
-     * @return Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     * @return Generator|\<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>[]
      */
     public static function iterateAll() {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
@@ -342,7 +342,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * WARNING: This method can quickly cause a out of memory error if there are
      * many rows in the database.
      *
-     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>[]
      */
     public static function getAll() {
         return iterator_to_array(static::iterateAll());
@@ -352,7 +352,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * Fetch a single instance of <?= $entity->getClassName(); ?> from a PDO result,
      * or `null` if there was no results.
      *
-     * @return \<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>|null
      */
     protected static function fetch<?= $entity->getClassName(); ?>(\PDOStatement $result) {
         $entity = $result->fetchObject(static::class);
@@ -378,7 +378,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     /**
      * Yield multiple instances of <?= $entity->getClassName(); ?> from a PDO result.
      *
-     * @return \Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $entity->getClassName(); ?>[]
+     * @return \Generator|\<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>[]
      */
     protected static function fetch<?= $entity->getPluralClassName(); ?>(\PDOStatement $result) {
         while ($entity = static::fetch<?= $entity->getClassName(); ?>($result)) {
@@ -395,17 +395,17 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     /**
      * Yields all related <?= $relationship->getTo()->getClassName(); ?>.
      *
-     * @return \Generator|\<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     * @return \Generator|\<?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
      */
     public function fetch<?= $relationship->getPluralClassName(); ?>() {
-        return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+        return \<?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
 
     /**
      * Returns an array of all related <?= $relationship->getTo()->getClassName(); ?>,
      * and caches the fetch call into a property.
      *
-     * @return <?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     * @return <?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
      */
     public function get<?= $relationship->getPluralClassName(); ?>() {
         if ($this-><?= $relationship->getPluralPropertyName(); ?> === null) {
@@ -423,7 +423,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
 
     public function fetch<?= $relationship->getClassName(); ?>() {
-        return \<?= $this->getModelImplementationNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
+        return \<?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
     }
 
     public function get<?= $relationship->getClassName(); ?>() {

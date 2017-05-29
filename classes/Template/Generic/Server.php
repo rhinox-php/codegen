@@ -7,6 +7,10 @@ class Server extends \Rhino\Codegen\Template\Generic {
 
     public function generate() {
         $this->renderTemplate('bin/server', 'bin/server.bat');
+        $this->renderTemplate('bin/router', 'bin/router.php');
+        $this->renderTemplate('public/index', 'public/index.php', [
+            'entities' => $this->codegen->getEntities(),
+        ]);
     }
 
     public function getPort(): int {

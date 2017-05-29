@@ -1,11 +1,18 @@
 <?php
-namespace Rhino\Codegen\Template;
+namespace Rhino\Codegen\Template\Generic;
 
-abstract class Generic extends Template {
-
-    protected $name = 'generic';
+class Controller extends \Rhino\Codegen\Template\Generic {
     protected $generatedNamespace = null;
     protected $implementedNamespace = null;
+
+    public function generate() {
+        $this->renderTemplate('classes/controller-abstract', 'AbstractController.php');
+        foreach ($this->codegen->getEntities() as $entity) {
+            $this->renderTemplate('classes/controller-generated', $entity->getClassName() . 'Controller.php', [
+                'entity' => $entity,
+            ]);
+        }
+    }
 
     public function getGeneratedNamespace() {
         return $this->generatedNamespace;

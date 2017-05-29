@@ -1,9 +1,8 @@
 <?= '<?php'; ?>
 
-namespace <?= $codegen->getNamespace(); ?>\Controller;
-use <?= $codegen->getNamespace(); ?>\Model\<?= $entity->getClassName(); ?>;
+namespace <?= $this->getImplementedNamespace(); ?>\Controller;
 
-class <?= $entity->getClassName(); ?>Controller extends \Rhino\Core\Controller {
+class <?= $entity->getClassName(); ?>Controller extends AbstractController {
 
     public function index() {
         $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
