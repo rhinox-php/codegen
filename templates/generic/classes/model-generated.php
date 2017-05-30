@@ -74,72 +74,64 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     // Save/insert/update/delete
     protected function insert() {
-        if (!$this->getCreated()) {
-            $this->setCreated(new \DateTimeImmutable());
-        }
         $this->query('
-            INSERT INTO <?= $entity->getTableName(); ?> (
+            INSERT INTO `<?= $entity->getTableName(); ?>` (
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-                <?= $attribute->getColumnName(); ?>,
+                `<?= $attribute->getColumnName(); ?>`,
 <?php endforeach; ?>
                 created
             ) VALUES (
 <?php foreach ($entity->getAttributes() as $attribute): ?>
                 :<?= $attribute->getColumnName(); ?>,
 <?php endforeach; ?>
-                :created
+                UTC_TIMESTAMP()
             );
-        ', [
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->is(['Bool'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
-<?php elseif ($attribute->is(['Date'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
-<?php elseif ($attribute->is(['DateTime'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
-<?php endif; ?>
-<?php endforeach; ?>
-            ':created' => $this->formatMySqlDateTime($this->getCreated()),
-        ]);
-
+        ', $this->getQueryParams());
+        
         $this->setId($this->lastInsertId());
     }
 
     protected function update() {
+        $params = $this->getQueryParams();
+        $params[':id'] = $this->getId();
         $this->query('
-            UPDATE <?= $entity->getTableName(); ?>
+            UPDATE `<?= $entity->getTableName(); ?>`
 
             SET
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-                <?= $attribute->getColumnName(); ?> = :<?= $attribute->getColumnName(); ?>,
+                `<?= $attribute->getColumnName(); ?>` = :<?= $attribute->getColumnName(); ?>,
 <?php endforeach; ?>
                 updated = UTC_TIMESTAMP()
             WHERE id = :id
             LIMIT 1;
-        ', [
-            ':id' => $this->getId(),
+        ', $params);
+        
+        $this->setUpdated(new \DateTimeImmutable());
+    }
+    
+    protected function getQueryParams() {
+       return [
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
 <?php elseif ($attribute->is(['Bool'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() ? 1 : 0,
+<?php if ($attribute->isNullable()): ?>
+            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() === null ? null : (int) $this->is<?= $attribute->getMethodName(); ?>(),
+<?php else: ?>
+            ':<?= $attribute->getColumnName(); ?>' => (int) $this->is<?= $attribute->getMethodName(); ?>(),
+<?php endif; ?>
 <?php elseif ($attribute->is(['Date'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
 <?php elseif ($attribute->is(['DateTime'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
 <?php endif; ?>
 <?php endforeach; ?>
-        ]);
-
-        $this->setUpdated(new \DateTimeImmutable());
+        ];
     }
 
     public function delete() {
         $this->query('
-            DELETE FROM <?= $entity->getTableName(); ?>
-
+            DELETE FROM `<?= $entity->getTableName(); ?>`
             WHERE id = :id;
         ', [
             ':id' => $this->getId(),
