@@ -11,6 +11,7 @@ class BelongsToParser extends AttributeParser {
         $attribute->setName(((string) $node['name'] ?: (string) $node['entity']) . ' ID');
         $attribute->setHasAccessors(false);
         $attribute->setIsForeignKey(true);
+        $attribute->setIsIndexed(true);
         $this->entity->addAttribute($attribute);
 
         $relationship = new Relationship\BelongsTo();

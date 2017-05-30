@@ -294,7 +294,7 @@ class Codegen {
                 return;
             }
         }
-        $this->log('Writing', strlen($content), 'bytes to', $file);
+        $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file);
         if (!$this->isDryRun()) {
             file_put_contents($file, $content);
         }
