@@ -25,12 +25,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     // Columns
     protected static $columns = '
-        <?= $entity->getTableName(); ?>.id,
+        `<?= $entity->getTableName(); ?>`.`id`,
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-        <?= $entity->getTableName(); ?>.<?= $attribute->getColumnName(); ?> AS <?= $attribute->getPropertyName(); ?>,
+        `<?= $entity->getTableName(); ?>`.`<?= $attribute->getColumnName(); ?>` AS `<?= $attribute->getPropertyName(); ?>`,
 <?php endforeach; ?>
-        <?= $entity->getTableName(); ?>.created,
-        <?= $entity->getTableName(); ?>.updated
+        `<?= $entity->getTableName(); ?>`.`created`,
+        `<?= $entity->getTableName(); ?>`.`updated`
     ';
 
     // Datatable
@@ -103,7 +103,6 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         $params[':id'] = $this->getId();
         $this->query('
             UPDATE `<?= $entity->getTableName(); ?>`
-
             SET
 <?php foreach ($entity->getAttributes() as $attribute): ?>
                 `<?= $attribute->getColumnName(); ?>` = :<?= $attribute->getColumnName(); ?>,
@@ -200,7 +199,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findById($id) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE id = :id;
         ', [
             ':id' => $id,
@@ -214,8 +213,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
-            WHERE <?= $attribute->getColumnName(); ?> = :value;
+            FROM `' . static::$table . '`
+            WHERE `<?= $attribute->getColumnName(); ?>` = :value;
         ', [
             ':value' => $value,
         ]));
@@ -230,8 +229,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
-            WHERE <?= $attribute->getColumnName(); ?> = :value
+            FROM `' . static::$table . '`
+            WHERE `<?= $attribute->getColumnName(); ?>` = :value
             LIMIT 1;
         ', [
             ':value' => $value,
@@ -240,9 +239,9 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     public static function countBy<?= $attribute->getMethodName(); ?>($value) {
         return (int) static::query('
-            SELECT COUNT(id)
-            FROM ' . static::$table . '
-            WHERE <?= $attribute->getColumnName(); ?> = :value;
+            SELECT COUNT(`id`)
+            FROM `' . static::$table . '`
+            WHERE `<?= $attribute->getColumnName(); ?>` = :value;
         ', [
             ':value' => $value,
         ])->fetchColumn();
@@ -255,7 +254,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE
                 <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
@@ -273,7 +272,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
         return static::fetch<?= $entity->getClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE
                 <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL)
@@ -286,7 +285,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function countBy<?= $attribute->getMethodName(); ?>($value) {
         return (int) static::query('
             SELECT COUNT(id)
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE
                 <?= $attribute->getColumnName(); ?> = :value
                 OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
@@ -300,7 +299,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findBy<?= $attribute->getMethodName(); ?>Before($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE
                 <?= $attribute->getColumnName(); ?> < :value
                 OR <?= $attribute->getColumnName(); ?> IS NULL
@@ -312,7 +311,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function findBy<?= $attribute->getMethodName(); ?>After($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . '
+            FROM `' . static::$table . '`
             WHERE
                 <?= $attribute->getColumnName(); ?> > :value
         ', [
@@ -333,7 +332,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public static function iterateAll() {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
-            FROM ' . static::$table . ';
+            FROM `' . static::$table . '`;
         '));
     }
 
