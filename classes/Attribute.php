@@ -75,7 +75,7 @@ class Attribute {
         $label = $inflector->underscore($this->getName());
         return $inflector->humanize($label, true);
     }
-    
+
     public function is(array $types): bool {
         foreach ($types as $type) {
             $type = 'Rhino\\Codegen\\Attribute\\' . $type . 'Attribute';
@@ -85,7 +85,7 @@ class Attribute {
         }
         return false;
     }
-    
+
     public function isNullable(): bool {
         return $this->nullable;
     }
@@ -94,7 +94,7 @@ class Attribute {
         $this->nullable = $nullable;
         return $this;
     }
-    
+
     /**
      * @return bool
      */
@@ -150,10 +150,11 @@ class Attribute {
     }
 
     public function isIndexed() {
-
+        return $this->indexed;
     }
 
-    public function setIsIndexed() {
-        
+    public function setIsIndexed($indexed) {
+        $this->indexed = $indexed;
+        return $this;
     }
 }

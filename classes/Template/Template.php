@@ -43,16 +43,18 @@ abstract class Template {
             return;
         }
 
-        $this->getCodegen()->log((file_exists($outputFile) ? 'Overwriting' : 'Creating') . ' ' . $outputFile . ' from template ' . $templateFile);
-        if (!$this->getCodegen()->isDryRun()) {
-            file_put_contents($outputFile, $output);
-        }
+        $this->getCodegen()->writeFile($outputFile, $output);
     }
 
     protected function getTemplateFile($name) {
-        $file = __DIR__ . '/../../templates/' . $this->name . '/' . $name . '.php';
-        assert(is_file($file), 'Could not find template file: ' . $name . ' tried: ' . $file);
-        return realpath($file);
+        $standardFile = __DIR__ . '/../../templates/' . $this->name . '/' . $name . '.php';
+        if (!is_file($standardFile)) {
+            if (!is_file($name)) {
+                throw new \Exception('Could not find template file: ' . $name . ' tried ' . $standardFile . ' and ' . $name);
+            }
+            return realpath($name);
+        }
+        return realpath($standardFile);
     }
 
     protected function createFiles(array $files) {

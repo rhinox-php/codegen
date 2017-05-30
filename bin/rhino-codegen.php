@@ -33,6 +33,7 @@ function getCodegen(InputInterface $input, OutputInterface $output) {
         }
     }
     $codegen->setDryRun(!$input->getOption('execute'));
+    $codegen->setDebug($input->getOption('debug') ? true : false);
     return $codegen;
 }
 
@@ -43,7 +44,8 @@ $application->add(new class() extends Command {
         $this->setName('gen')
             ->setDescription('Generate code')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php');
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
