@@ -12,7 +12,7 @@ class Controller extends SlimPhp {
         ]);
         $this->codegen->composer->addDependency('rhinox/input-data', 'dev-master');
 
-        $this->codegen->composer->addDependency('rhinox/rhino-json-api-list', 'dev-master');
+        $this->codegen->composer->addDependency('rhinox/json-api-list', 'dev-master');
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-json-api-list',
