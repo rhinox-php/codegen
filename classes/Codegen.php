@@ -5,8 +5,7 @@ class Codegen {
     use Inflector;
     use Logger;
 
-    protected $namespace;
-    protected $implementedNamespace;
+    protected $namespace = null;
     protected $projectName;
     protected $entities = [];
     protected $relationships = [];
@@ -137,26 +136,12 @@ class Codegen {
         echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
     }
 
-    public function getProjectName() {
+    public function getProjectName(): string {
         return $this->projectName;
     }
 
-    public function getImplementedNamespace() {
-        return $this->implementedNamespace;
-    }
-
-    public function setImplementedNamespace($implementedNamespace) {
-        $this->implementedNamespace = $implementedNamespace;
-        return $this;
-    }
-
-    public function setProjectName($projectName) {
+    public function setProjectName(string $projectName): self {
         $this->projectName = $projectName;
-        return $this;
-    }
-
-    public function setNamespace($namespace) {
-        $this->namespace = $namespace;
         return $this;
     }
 
@@ -264,7 +249,9 @@ class Codegen {
     public function addTemplate(Template\Template $template) {
         $this->templates[] = $template;
         $template->setCodegen($this);
-        return $this;
+        $template->setPath($this->getPath());
+        $template->setNamespace($this->getNamespace());
+        return $template;
     }
 
     public function getPath(string $path = ''): string {
@@ -306,6 +293,15 @@ class Codegen {
 
     public function setDebug(bool $debug): self {
         $this->debug = $debug;
+        return $this;
+    }
+
+    public function getNamespace(): string {
+        return $this->namespace;
+    }
+
+    public function setNamespace(string $namespace): self {
+        $this->namespace = $namespace;
         return $this;
     }
 

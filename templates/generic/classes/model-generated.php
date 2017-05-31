@@ -419,8 +419,26 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $this;
     }
 
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne || $relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
     // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
+
+    public function fetch<?= $relationship->getClassName(); ?>() {
+        return \<?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findFirstBy<?= $entity->getClassName(); ?>Id($this->getId());
+    }
+
+    public function get<?= $relationship->getClassName(); ?>() {
+        if (!$this-><?= $relationship->getPropertyName(); ?>) {
+            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getClassName(); ?>();
+        }
+        return $this-><?= $relationship->getPropertyName(); ?>;
+    }
+
+    public function has<?= $relationship->getClassName(); ?>() {
+        return $this->fetch<?= $relationship->getClassName(); ?>() ? true : false;
+    }
+
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
+    // Fetch belongs to <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
 
     public function fetch<?= $relationship->getClassName(); ?>() {
         return \<?= $this->getImplementedNamespace(); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());

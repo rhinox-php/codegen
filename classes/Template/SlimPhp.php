@@ -1,38 +1,26 @@
 <?php
 namespace Rhino\Codegen\Template;
 
-abstract class SlimPHP extends Template {
-
-    protected $implementedNamespace = null;
+abstract class SlimPhp extends Template {
     protected $name = 'slim-php';
-    protected $namespace = null;
-    protected $template = null;
+    protected $generatedNamespace = null;
+    protected $implementedNamespace = null;
 
-    public function getNamespace() {
-        return $this->namespace;
+    public function getGeneratedNamespace(): string {
+        return $this->generatedNamespace;
     }
 
-    public function setNamespace($namespace) {
-        $this->namespace = $namespace;
+    public function setGeneratedNamespace(string $generatedNamespace): self {
+        $this->generatedNamespace = $generatedNamespace;
         return $this;
     }
 
-    public function getImplementedNamespace(): ?string {
-        return $this->implementedNamespace ?: $this->getNamespace();
+    public function getImplementedNamespace(): string {
+        return $this->implementedNamespace;
     }
 
-    public function setImplementedNamespace($implementedNamespace) {
+    public function setImplementedNamespace(string $implementedNamespace): self {
         $this->implementedNamespace = $implementedNamespace;
         return $this;
     }
-
-    public function getTemplate(): string {
-        return $this->template;
-    }
-
-    public function setTemplate(string $template) {
-        $this->template = $template;
-        return $this;
-    }
-
 }

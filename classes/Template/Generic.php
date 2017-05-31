@@ -7,20 +7,20 @@ abstract class Generic extends Template {
     protected $generatedNamespace = null;
     protected $implementedNamespace = null;
 
-    public function getGeneratedNamespace() {
+    public function getGeneratedNamespace(): string {
         return $this->generatedNamespace;
     }
 
-    public function setGeneratedNamespace($generatedNamespace) {
+    public function setGeneratedNamespace(string $generatedNamespace): self {
         $this->generatedNamespace = $generatedNamespace;
         return $this;
     }
 
-    public function getImplementedNamespace() {
+    public function getImplementedNamespace(): string {
         return $this->implementedNamespace;
     }
 
-    public function setImplementedNamespace($implementedNamespace) {
+    public function setImplementedNamespace(string $implementedNamespace): self {
         $this->implementedNamespace = $implementedNamespace;
         return $this;
     }

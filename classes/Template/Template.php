@@ -8,6 +8,7 @@ abstract class Template {
     protected $name;
     protected $templateOverrides = [];
     protected $path = null;
+    protected $namespace = null;
 
     public abstract function generate();
 
@@ -88,15 +89,24 @@ abstract class Template {
     }
 
     public function getFilePath($file) {
-        return $this->getCodegen()->getPath() . '/' . $this->getPath() . '/' . $file;
+        return $this->getPath() . '/' . $file;
     }
 
-    public function getPath() {
+    public function getPath(): string {
         return $this->path;
     }
 
-    public function setPath($path) {
+    public function setPath(string $path): self {
         $this->path = $path;
+        return $this;
+    }
+
+    public function getNamespace(): string {
+        return $this->namespace;
+    }
+
+    public function setNamespace(string $namespace): self {
+        $this->namespace = $namespace;
         return $this;
     }
 }
