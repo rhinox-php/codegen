@@ -16,8 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-function getCodegen(InputInterface $input, OutputInterface $output) {
-    $schema = $input->getOption('schema');
+function getCodegen(string $schema, bool $dryRun, bool $debug): Rhino\Codegen\Codegen {
     switch (pathinfo($schema, PATHINFO_EXTENSION)) {
         case 'php': {
             if (!is_file($schema)) {
@@ -32,8 +31,8 @@ function getCodegen(InputInterface $input, OutputInterface $output) {
             break;
         }
     }
-    $codegen->setDryRun(!$input->getOption('execute'));
-    $codegen->setDebug($input->getOption('debug') ? true : false);
+    $codegen->setDryRun($dryRun);
+    $codegen->setDebug($debug);
     return $codegen;
 }
 
@@ -49,7 +48,7 @@ $application->add(new class() extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input, $output)->generate();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->generate();
     }
 });
 
@@ -58,11 +57,12 @@ $application->add(new class() extends Command {
         $this->setName('desc')
             ->setDescription('Describe entities')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php');
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input, $output)->describe();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->describe();
     }
 });
 
@@ -90,12 +90,12 @@ $application->add(new class() extends Command {
             ->setDescription('Reset table')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
             ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
-            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.')
-            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output')
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input, $output)->dbReset();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->describe();
     }
 });
 
@@ -155,6 +155,25 @@ $application->add(new class() extends Command {
                 }
             }
         }
+    }
+});
+
+$application->add(new class() extends Command {
+    protected function configure() {
+        $this->setName('watch')
+            ->setDescription('Watch code for changes and trigger generation automatically')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output) {
+        $codegen = getCodegen($input->getOption('schema'), true, $input->getOption('debug'));
+        $watcher = new \Rhino\Codegen\Watch\Watcher(function() {
+            passthru('php ' . __FILE__ . ' gen -x');
+        });
+        $watcher->addDirectory(__DIR__ . '/../');
+        $watcher->addDirectory('.');
+        $watcher->start();
     }
 });
 

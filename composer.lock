@@ -4,7 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b570ea866669e87e0f554333a5f0a59d",
     "content-hash": "e372db95b7d5c5dadcb1efaaba711c8e",
     "packages": [
         {
@@ -57,7 +56,7 @@
                 "singularize",
                 "underscore"
             ],
-            "time": "2015-11-03 11:03:27"
+            "time": "2015-11-03T11:03:27+00:00"
         },
         {
             "name": "symfony/console",
@@ -113,7 +112,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2015-10-20 14:38:46"
+            "time": "2015-10-20T14:38:46+00:00"
         }
     ],
     "packages-dev": [],
