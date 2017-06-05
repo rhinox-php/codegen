@@ -1,6 +1,6 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getImplementedNamespace(); ?>;
+namespace <?= $this->getNamespace('controller-implemented'); ?>;
 
 class <?= $entity->getClassName(); ?>Controller extends AbstractController {
 

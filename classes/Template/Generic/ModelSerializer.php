@@ -1,10 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class ControllerInitial extends Controller {
+class ModelSerializer extends \Rhino\Codegen\Template\Generic {
     public function generate() {
         foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('classes/controller-initial', 'src/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
+            $this->renderTemplate('classes/model-serializer', 'src/classes/Model/Serializer/' . $entity->getClassName() . 'Serializer.php', [
                 'entity' => $entity,
             ]);
         }

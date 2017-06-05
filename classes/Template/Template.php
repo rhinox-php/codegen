@@ -8,7 +8,15 @@ abstract class Template {
     protected $name;
     protected $templateOverrides = [];
     protected $path = null;
-    protected $namespace = null;
+    protected $namespaces = [
+        'model-implemented' => 'Model',
+        'model-generated' => 'Model\Generated',
+        'model-serializer' => 'Model\Serializer',
+        'controller-implemented' => 'Controller',
+        'controller-generated' => 'Controller\Generated',
+        'controller-api-implemented' => 'Controller\Api',
+        'controller-api-generated' => 'Controller\Api\Generated',
+    ];
 
     public abstract function generate();
 
@@ -101,12 +109,16 @@ abstract class Template {
         return $this;
     }
 
-    public function getNamespace(): string {
-        return $this->namespace;
+    public function getNamespace(string $type): string {
+        return $this->getCodegen()->getNamespace() . '\\' . $this->namespaces[$type];
     }
 
     public function setNamespace(string $namespace): self {
         $this->namespace = $namespace;
         return $this;
+    }
+
+    public function iterateRoutes() {
+        return [];
     }
 }

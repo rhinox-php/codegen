@@ -1,18 +1,37 @@
-var api = require('../api.js');
+const api = require('../api');
+const faker = require('faker');
 
-var entity = {
-    id: null,
+let <?= $entity->getPropertyName(); ?> = {
+    data: {
+        id: null,
+        type: '<?= $entity->getClassName(); ?>',
+        attributes: {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-    <?= $attribute->getPropertyName(); ?>: null,
+<?php if ($attribute->is(['String'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.random.word(),
+<?php elseif ($attribute->is(['Text'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.random.words(),
+<?php elseif ($attribute->is(['Int'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.random.number(),
+<?php elseif ($attribute->is(['Decimal'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.random.number(),
+<?php elseif ($attribute->is(['Date'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.date.recent(),
+<?php elseif ($attribute->is(['DateTime'])): ?>
+            <?= $attribute->getPropertyName(); ?>: faker.date.recent(),
+<?php endif; ?>
 <?php endforeach;?>
+        },
+    },
 };
 
 describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
     it('should create a <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
-            return api.post('<?= $entity->getRouteName(); ?>/create', entity);
-        }).then(function(body) {
-            return api.validateJsonApi(body);
+            return api.post('<?= $entity->getRouteName(); ?>/create', <?= $entity->getPropertyName(); ?>);
+        }).then(function(response) {
+            <?= $entity->getPropertyName(); ?> = response;
+            return api.validateJsonApi(response);
         }).then(function() {
             done();
         }).catch(api.handleError(done));
@@ -20,9 +39,10 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
 
     it('should read a <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
-            return api.get('<?= $entity->getRouteName(); ?>/' + entity.id);
-        }).then(function(body) {
-            return api.validateJsonApi(body);
+            return api.get('<?= $entity->getRouteName(); ?>/get/' + <?= $entity->getPropertyName(); ?>.data.id);
+        }).then(function(response) {
+            <?= $entity->getPropertyName(); ?> = response;
+            return api.validateJsonApi(response);
         }).then(function() {
             done();
         }).catch(api.handleError(done));
@@ -31,11 +51,12 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
     it('should update a <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
             // @todo mod entity
-            return api.post('<?= $entity->getRouteName(); ?>/edit/' + entity.id, entity);
-        }).then(function(entity) {
+            return api.post('<?= $entity->getRouteName(); ?>/update/' + <?= $entity->getPropertyName(); ?>.data.id, <?= $entity->getPropertyName(); ?>);
+        }).then(function(response) {
             // @todo assert mods
     //        assert.equal(contact.data.attributes.firstName, name);
-            return api.validateJsonApi(entity);
+            <?= $entity->getPropertyName(); ?> = response;
+            return api.validateJsonApi(response);
         }).then(function() {
             done();
         }).catch(api.handleError(done));
@@ -43,9 +64,10 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
 
     it('should delete a <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
-            return api.post('<?= $entity->getRouteName(); ?>/delete/' + entity.id, entity);
-        }).then(function(entity) {
-            return api.validateJsonApi(entity);
+            return api.post('<?= $entity->getRouteName(); ?>/delete/' + <?= $entity->getPropertyName(); ?>.data.id, <?= $entity->getPropertyName(); ?>);
+        }).then(function(response) {
+            <?= $entity->getPropertyName(); ?> = response;
+            return api.validateJsonApi(response);
         }).then(function() {
             done();
         }).catch(api.handleError(done));

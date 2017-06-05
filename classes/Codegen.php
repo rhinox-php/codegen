@@ -101,13 +101,15 @@ class Codegen {
         }
     }
 
-    public function reset($entity) {
+    public function dbReset() {
         $pdo = $this->getPdo();
-        $entity = $this->findEntity($entity);
-        dump($entity);
-//        $this->renderTemplate('sql/full/create-table', $path . $name, [
-//            'entity' => $entity,
-//        ]);
+        foreach ($this->iterateTemplates() as $template) {
+            if ($template instanceof Template\Interfaces\DbReset) {
+                foreach ($template->iterateSql() as $sql) {
+                    $this->getPdo()->query($sql);
+                }
+            }
+        }
     }
 
     public function createDirectory(string $directory, $permissions = 0755): Codegen {
@@ -244,6 +246,17 @@ class Codegen {
     public function setTemplates(array $templates) {
         $this->templates = $templates;
         return $this;
+    }
+
+    public function iterateTemplates($templates = null) {
+        $templates = $templates ?: $this->getTemplates();
+        foreach ($templates as $template) {
+            if ($template instanceof Template\Aggregate) {
+                yield from $this->iterateTemplates($template->iterateTemplates());
+            } else {
+                yield $template;
+            }
+        }
     }
 
     public function addTemplate(Template\Template $template) {

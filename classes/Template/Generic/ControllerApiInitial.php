@@ -1,10 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class ControllerInitial extends Controller {
+class ControllerApiInitial extends Controller {
     public function generate() {
         foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('classes/controller-initial', 'src/classes/Controller/' . $entity->getClassName() . 'Controller.php', [
+            $this->renderTemplate('classes/controller-api-initial', 'src/classes/Controller/Api/' . $entity->getClassName() . 'ApiController.php', [
                 'entity' => $entity,
             ]);
         }

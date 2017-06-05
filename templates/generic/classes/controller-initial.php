@@ -1,6 +1,6 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getImplementedNamespace(); ?>;
+namespace <?= $this->getNamespace('controller-implemented'); ?>;
 
-class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getGeneratedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller {
+class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace('controller-generated'); ?>\<?= $entity->getClassName(); ?>Controller {
 }

@@ -7,7 +7,6 @@ class Model extends \Rhino\Codegen\Template\Template {
     protected $name = 'dynamo-db';
     protected $path = null;
     protected $namespace = null;
-    protected $implementedNamespace = null;
     protected $tableNamePrefix = null;
 
     public function generate() {
@@ -44,15 +43,6 @@ class Model extends \Rhino\Codegen\Template\Template {
 
     public function setNamespace($namespace) {
         $this->namespace = $namespace;
-        return $this;
-    }
-    
-    public function getImplementedNamespace() {
-        return $this->implementedNamespace;
-    }
-
-    public function setImplementedNamespace($implementedNamespace) {
-        $this->implementedNamespace = $implementedNamespace;
         return $this;
     }
 

@@ -1,9 +1,8 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getGeneratedNamespace(); ?>;
+namespace <?= $this->getNamespace('model-generated'); ?>;
 
-abstract class AbstractModel implements \JsonSerializable {
-    use \Rhino\Core\Model\MySqlModel;
+abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\ModelInterface {
 
     const DATE_FORMAT = DATE_ISO8601;
     const DATE_TIME_FORMAT = DATE_ISO8601;
@@ -22,6 +21,10 @@ abstract class AbstractModel implements \JsonSerializable {
     // Datatable
     public static function getDataTable() {
         throw new \Exception('Expected child class to implement ' . __FUNCTION__);
+    }
+
+    public static function getTableName() {
+        return static::$table;
     }
 
     // Json
@@ -49,6 +52,49 @@ abstract class AbstractModel implements \JsonSerializable {
     public abstract function delete();
 
     protected abstract function saveRelated();
+
+    protected static $transactionCount = 0;
+
+    public static function getPdo() {
+        return PdoModel::getPdo();
+    }
+
+    protected static function query($sql, array $data = []) : \PDOStatement {
+        $statement = static::getPdo()->prepare($sql);
+        $statement->execute($data);
+        return $statement;
+    }
+
+    protected static function transaction(callable $transactionCallback) {
+        $pdo = static::getPdo();
+        try {
+            if (static::$transactionCount === 0) {
+                $pdo->beginTransaction();
+            }
+            static::$transactionCount++;
+            $transactionCallback();
+            static::$transactionCount--;
+            if (static::$transactionCount === 0) {
+                $pdo->commit();
+            }
+        } catch (\Exception $exception) {
+            static::$transactionCount = 0;
+            $pdo->rollBack();
+            throw new \Exception('Exception throw while in transaction, see previous exception.', null, $exception);
+        }
+    }
+
+    protected static function lastInsertId() {
+        return static::getPdo()->lastInsertId();
+    }
+
+    public static function formatMySqlDate(\DateTimeInterface $date) {
+        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d');
+    }
+
+    public static function formatMySqlDateTime(\DateTimeInterface $date) {
+        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    }
 
     public static function findById($id) {
         throw new \Exception('Expected child class to implement ' . __FUNCTION__);

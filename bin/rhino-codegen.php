@@ -90,11 +90,12 @@ $application->add(new class() extends Command {
             ->setDescription('Reset table')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
             ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
-            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.')
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input, $output)->reset($input->getArgument('entity'));
+        getCodegen($input, $output)->dbReset();
     }
 });
 

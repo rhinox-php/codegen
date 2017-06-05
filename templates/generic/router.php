@@ -1,25 +1,13 @@
 <?= '<?php'; ?>
 
 $dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $router) {
-    $router->addRoute('GET', '/', ['<?= $this->getImplementedNamespace(); ?>\HomeController', 'home']);
+    $router->addRoute('GET', '/', ['<?= $this->getNamespace('controller-implemented'); ?>\HomeController', 'home']);
 
-    <?php foreach ($entities as $entity): ?>
-
-    $router->addRoute('GET', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getPluralRouteName(); ?>", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'index']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getPluralRouteName(); ?>", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'index']);
-    $router->addRoute('GET', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/create", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'create']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/create", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'create']);
-    $router->addRoute('GET', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'edit']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'edit']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>Controller", 'delete']);
-
-    $router->addRoute('GET', "<?= $this->getUrlPrefix(); ?>/api/v1/<?= $entity->getPluralRouteName(); ?>", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>ApiController", 'index']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/create", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>ApiController", 'create']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/get/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>ApiController", 'edit']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/edit/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>ApiController", 'edit']);
-    $router->addRoute('POST', "<?= $this->getUrlPrefix(); ?>/api/v1/<?= $entity->getRouteName(); ?>/delete/{id}", ["<?= $this->getImplementedNamespace(); ?>\<?= $entity->getClassName(); ?>ApiController", 'delete']);
-    <?php endforeach; ?>
-
+<?php foreach ($this->codegen->getTemplates() as $template): ?>
+<?php foreach ($template->iterateRoutes() as [$method, $url, $controller, $function]): ?>
+    $router->addRoute('<?= strtoupper($method); ?>', '<?= $url; ?>', [<?= $controller; ?>::class, '<?= $function; ?>']);
+<?php endforeach; ?>
+<?php endforeach; ?>
 });
 
 $request = \Rhino\Http\Request::createDefault();
@@ -42,6 +30,12 @@ switch ($routeInfo[0]) {
         $controller = new $controllerName();
         $controller->setRequest($request);
         $controller->setResponse($response);
+        $controller->setInput(new \Rhino\InputData\InputData(array_merge(
+            $request->query->all(),
+            $request->request->all(),
+            json_decode($request->getContent(), true) ?: []
+        )));
+        call_user_func_array([$controller, $methodName], $parameters);
         $response->process();
         break;
     }

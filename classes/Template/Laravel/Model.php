@@ -5,7 +5,6 @@ class Model extends \Rhino\Codegen\Template\Template {
     protected $name = 'laravel';
     protected $path = null;
     protected $namespace = null;
-    protected $implementedNamespace = null;
     protected $modelTemplate = 'classes/generated-model';
 
     public function generate() {
@@ -32,15 +31,6 @@ class Model extends \Rhino\Codegen\Template\Template {
 
     public function setNamespace($namespace) {
         $this->namespace = $namespace;
-        return $this;
-    }
-    
-    public function getImplementedNamespace() {
-        return $this->implementedNamespace;
-    }
-
-    public function setImplementedNamespace($implementedNamespace) {
-        $this->implementedNamespace = $implementedNamespace;
         return $this;
     }
 

@@ -1,6 +1,6 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getNamespace('controller-generated'); ?>;
+namespace <?= $this->getNamespace('controller-api-generated'); ?>;
 
 use Rhino\Http\Request;
 use Rhino\Http\Response;

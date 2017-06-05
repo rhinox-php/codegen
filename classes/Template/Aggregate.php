@@ -5,8 +5,14 @@ abstract class Aggregate extends Template {
     public abstract function aggregate();
 
     public function generate() {
+        foreach ($this->iterateTemplates() as $template) {
+            $template->generate();
+        }
+    }
+
+    public function iterateTemplates() {
         foreach ($this->aggregate() as $template) {
-            $template->setCodegen($this->getCodegen())->generate();
+            yield $template->setCodegen($this->getCodegen());
         }
     }
 }
