@@ -4,10 +4,15 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 
 class <?= $entity->getClassName(); ?> extends AbstractModel {
 
+    protected $id;
+
     // Properties
 <?php foreach ($entity->getAttributes() as $attribute): ?>
     protected $<?= $attribute->getPropertyName(); ?>;
 <?php endforeach; ?>
+
+    protected $created;
+    protected $updated;
 
     //Related entities
 <?php foreach ($entity->getRelationships() as $relationship): ?>
@@ -144,6 +149,31 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ', [
             ':id' => $this->getId(),
         ]);
+    }
+
+    public static function hydrateFromPdoStatement($statement) {
+        while (($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            $entity = new static();
+            $entity->id = $row['id'];
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php elseif ($attribute->is(['Bool'])): ?>
+<?php if ($attribute->isNullable()): ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php else: ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php endif; ?>
+<?php elseif ($attribute->is(['Date'])): ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php elseif ($attribute->is(['DateTime'])): ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php endif; ?>
+<?php endforeach; ?>
+            $entity->setCreated(new \DateTimeImmutable($row['created']));
+            $entity->setUpdated(new \DateTimeImmutable($row['updated']));
+            yield $entity;
+        }
     }
 
     protected function saveRelated() {

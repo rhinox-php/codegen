@@ -7,6 +7,13 @@ use <?= $this->getNamespace('model-serializer'); ?>\<?= $entity->getClassName();
 class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
 
     public function index() {
+        $list = new \Rhino\JsonApiList\JsonApiList(<?= $entity->getClassName(); ?>::class, $this->input);
+        $list->setSortColumns([
+        ]);
+        $list->setSearchColumns([
+        ]);
+        $list->process();
+        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($list->getResults(), $list->getMeta()));
     }
 
     public function get($id) {
