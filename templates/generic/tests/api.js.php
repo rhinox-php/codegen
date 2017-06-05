@@ -14,8 +14,19 @@ module.exports = new class {
         return Promise.resolve();
     }
 
-    validateJsonApi() {
+    validateJsonApi(response) {
+        assert(response, 'Response was empty.');
+        assert(response.data, 'Response data was empty.');
+        if (Array.isArray(response.data)) {
+            response.data.forEach(entity => this.validateJsonApiEntity(entity));
+        } else {
+            this.validateJsonApiEntity(response.data);
+        }
+    }
 
+    validateJsonApiEntity(entity) {
+        assert(entity.id, 'Response data.id was empty.');
+        assert(entity.type, 'Response data.type was empty.');
     }
 
     dump() {

@@ -27,7 +27,34 @@ class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
 
     public function create() {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
+        $this->updateAttributes($<?= $entity->getPropertyName(); ?>);
+        $<?= $entity->getPropertyName(); ?>->save();
 
+        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+    }
+
+    public function update($id) {
+        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
+        if (!$<?= $entity->getPropertyName(); ?>) {
+            $this->response->notFound();
+            return;
+        }
+        $this->updateAttributes($<?= $entity->getPropertyName(); ?>);
+        $<?= $entity->getPropertyName(); ?>->save();
+        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+    }
+
+    public function delete($id) {
+        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
+        if (!$<?= $entity->getPropertyName(); ?>) {
+            $this->response->notFound();
+            return;
+        }
+        $<?= $entity->getPropertyName(); ?>->delete();
+        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+    }
+
+    private function updateAttributes(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('data.attributes.<?= $attribute->getPropertyName(); ?>'));
@@ -43,28 +70,6 @@ class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('data.attributes.<?= $attribute->getPropertyName(); ?>'));
 <?php endif; ?>
 <?php endforeach; ?>
-
-        $<?= $entity->getPropertyName(); ?>->save();
-
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
-    }
-
-    public function update($id) {
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
-        if (!$<?= $entity->getPropertyName(); ?>) {
-            $this->response->notFound();
-            return;
-        }
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
-    }
-
-    public function delete($id) {
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
-        if (!$<?= $entity->getPropertyName(); ?>) {
-            $this->response->notFound();
-            return;
-        }
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
     }
 
 }
