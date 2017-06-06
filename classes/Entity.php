@@ -88,13 +88,11 @@ class Entity {
         }
     }
 
-    public function setAttributes(array $attributes) {
-        $this->attributes = $attributes;
-        return $this;
-    }
-
     public function addAttribute(Attribute $attribute) {
-        $this->attributes[] = $attribute;
+        $this->attributes[$attribute->getName()] = $attribute;
+        uksort($this->attributes, function($a, $b) {
+            return strnatcasecmp($a, $b);
+        });
         return $this;
     }
 
@@ -117,13 +115,11 @@ class Entity {
         }
     }
 
-    public function setRelationships(array $relationships) {
-        $this->relationships = $relationships;
-        return $this;
-    }
-
     public function addRelationship(Relationship $relationship) {
-        $this->relationships[] = $relationship;
+        $this->relationships[$relationship->getName()] = $relationship;
+        uksort($this->relationships, function($a, $b) {
+            return strnatcasecmp($a, $b);
+        });
         return $this;
     }
 
