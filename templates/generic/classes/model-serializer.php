@@ -19,10 +19,10 @@ class <?= $entity->getClassName(); ?>Serializer extends \Rhino\JsonApiList\JsonA
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
 <?php $found = true; ?>
-        yield '<?= $relationship->getPluralPropertyName(); ?>' => $entity->get<?= $relationship->getPluralClassName(); ?>();
+        yield '<?= $relationship->getPluralPropertyName(); ?>' => new <?= $relationship->getTo()->getClassName(); ?>Serializer($entity->get<?= $relationship->getPluralClassName(); ?>());
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
 <?php $found = true; ?>
-        yield '<?= $relationship->getPropertyName(); ?>' => $entity->get<?= $relationship->getClassName(); ?>();
+        yield '<?= $relationship->getPropertyName(); ?>' => new <?= $relationship->getTo()->getClassName(); ?>Serializer($entity->get<?= $relationship->getClassName(); ?>());
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>

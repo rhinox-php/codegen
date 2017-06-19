@@ -12,6 +12,10 @@ class ApiTest extends \Rhino\Codegen\Template\Generic {
         $this->codegen->npm->addDevDependency('mocha', '^3.4.2');
         $this->codegen->npm->addDevDependency('dotenv', '^4.0.0');
         $this->codegen->npm->addDevDependency('request', '^2.81.0');
+        $this->codegen->npm->addDevDependency('faker', '^4.1.0');
+
+        // @todo use custom port
+        $this->codegen->env->add('TEST_BASE_URL', 'http://localhost:3000/api/v1/');
 
         foreach ($this->codegen->getEntities() as $entity) {
             $this->renderTemplate('tests/api/model.js', 'tests/api/' . $entity->getFileName() . '.js', [

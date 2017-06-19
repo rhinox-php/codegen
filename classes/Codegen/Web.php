@@ -13,11 +13,13 @@ class Web extends \Rhino\Codegen\Codegen {
         $this->npm = new Web\Npm($this);
         $this->bower = new Web\Bower($this);
         $this->gulp = new Web\Gulp($this);
+        $this->env = new Web\Env($this);
     }
 
     public function generate() {
         parent::generate();
         $this->composer->generate();
         $this->npm->generate();
+        $this->env->generate();
     }
 }

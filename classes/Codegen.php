@@ -1,11 +1,12 @@
 <?php
 namespace Rhino\Codegen;
+use Symfony\Component\Console\Helper\Table;
 
 class Codegen {
     use Inflector;
     use Logger;
 
-    protected $namespace = null;
+    protected $namespace;
     protected $projectName;
     protected $entities = [];
     protected $relationships = [];
@@ -14,10 +15,15 @@ class Codegen {
     protected $templatePath;
     protected $viewPathPrefix;
     protected $classPathPrefix;
-    protected $databaseName;
     protected $templates = [];
-    protected $pdo = null;
-    protected $path = null;
+    protected $pdo;
+    protected $databaseDsn;
+    protected $databaseName;
+    protected $databaseUser;
+    protected $databasePassword;
+    protected $databaseCharset = 'utf8mb4';
+    protected $databaseCollation = 'utf8mb4_unicode_520_ci';
+    protected $path;
     protected $debug = false;
 
     public function __construct() {
@@ -33,19 +39,25 @@ class Codegen {
         $this->log('Generating templates complete!');
     }
 
-    public function describe() {
-        $print = function(...$args) {
-            echo implode(" \t ", $args) . PHP_EOL;
-        };
+    public function describe(\Symfony\Component\Console\Output\OutputInterface $output) {
         foreach ($this->entities as $entity) {
-            echo PHP_EOL;
-            echo '-- '.$entity->getName().' -----------------------' . PHP_EOL;
-            $print($entity->getClassName(), $entity->getPropertyName());
-            echo 'Attributes:' . PHP_EOL;
+            $output->writeln('Entity:');
+            (new Table($output))
+                ->setHeaders(['Class Name', 'Property Name'])
+                ->setRows([
+                    [$entity->getClassName(), $entity->getPropertyName()],
+                ])
+                ->render();
+            $output->writeln('Attributes:');
+            $rows = [];
             foreach ($entity->getAttributes() as $attribute) {
-                $print('', $attribute->getName(), $attribute->getPropertyName());
+                $rows[] = [$attribute->getName(), $attribute->getPropertyName(), $attribute->getType()];
             }
-            echo PHP_EOL;
+            (new Table($output))
+                ->setHeaders(['Class Name', 'Property Name', 'Type'])
+                ->setRows($rows)
+                ->render();
+            $output->writeln('');
         }
     }
 
@@ -102,11 +114,24 @@ class Codegen {
     }
 
     public function dbReset() {
-        $pdo = $this->getPdo();
+        $pdo = $this->getPdo(false);
+        $this->log('Dropping and recreating database', $this->getDatabaseName(), $this->getDatabaseCharset(), $this->getDatabaseCollation());
+        if (!$this->dryRun) {
+            $pdo->query("
+                DROP DATABASE IF EXISTS `{$this->getDatabaseName()}`;
+                CREATE DATABASE `{$this->getDatabaseName()}`
+                DEFAULT CHARACTER SET '{$this->getDatabaseCharset()}'
+                DEFAULT COLLATE '{$this->getDatabaseCollation()}';
+                USE `{$this->getDatabaseName()}`;
+            ");
+        }
         foreach ($this->iterateTemplates() as $template) {
             if ($template instanceof Template\Interfaces\DbReset) {
+                $this->log('Resetting', get_class($template));
                 foreach ($template->iterateSql() as $sql) {
-                    $this->getPdo()->query($sql);
+                    if (!$this->dryRun) {
+                        $this->getPdo()->query($sql);
+                    }
                 }
             }
         }
@@ -222,20 +247,86 @@ class Codegen {
         return $this;
     }
 
+    public function setDatabase($databaseDsn, $databaseName, $databaseUser, $databasePassword) {
+        $this->databaseDsn = $databaseDsn;
+        $this->databaseName = $databaseName;
+        $this->databaseUser = $databaseUser;
+        $this->databasePassword = $databasePassword;
+        return $this;
+    }
+
+    public function getDatabaseDsn() {
+        return $this->databaseDsn;
+    }
+
     public function getDatabaseName() {
         return $this->databaseName;
     }
 
-    public function setDatabaseName($databaseName) {
-        $this->databaseName = $databaseName;
+    public function getDatabaseUser() {
+        return $this->databaseUser;
     }
 
-    public function getPdo(): \PDO {
+    public function getDatabasePassword() {
+        return $this->databasePassword;
+    }
+
+    public function getDatabaseCharset() {
+        return $this->databaseCharset;
+    }
+
+    public function getDatabaseCollation() {
+        return $this->databaseCollation;
+    }
+
+    public function setDatabaseDsn($databaseDsn) {
+        $this->databaseDsn = $databaseDsn;
+        return $this;
+    }
+
+    public function setDatabaseName($databaseName) {
+        $this->databaseName = $databaseName;
+        return $this;
+    }
+
+    public function setDatabaseUser($databaseUser) {
+        $this->databaseUser = $databaseUser;
+        return $this;
+    }
+
+    public function setDatabasePassword($databasePassword) {
+        $this->databasePassword = $databasePassword;
+        return $this;
+    }
+
+    public function setDatabaseCharset($databaseCharset) {
+        $this->databaseCharset = $databaseCharset;
+        return $this;
+    }
+
+    public function setDatabaseCollation($databaseCollation) {
+        $this->databaseCollation = $databaseCollation;
+        return $this;
+    }
+
+    public function getPdo($useDatabase = true): \PDO {
+        if (!$this->pdo) {
+            $this->pdo = new \PDO($this->databaseDsn, $this->databaseUser, $this->databasePassword, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_EMULATE_PREPARES => true,
+                \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$this->getDatabaseCharset()} COLLATE {$this->getDatabaseCollation()}",
+            ]);
+            if ($useDatabase) {
+                $this->pdo->query("USE DATABASE `{$this->getDatabaseName()}`");
+            }
+        }
         return $this->pdo;
     }
 
-    public function setPdo(\PDO $pdo) {
-        $this->pdo = $pdo;
+    public function setPdo($dsn, $user, $password) {
+        $this->databaseDsn = $dsn;
+        $this->databaseUser = $user;
+        $this->databasePassword = $password;
         return $this;
     }
 

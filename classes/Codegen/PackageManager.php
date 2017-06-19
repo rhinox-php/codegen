@@ -6,14 +6,20 @@ class PackageManager {
     protected $dependencies = [];
     protected $devDependencies = [];
 
+    public function __construct(\Rhino\Codegen\Codegen $codegen) {
+        $this->codegen = $codegen;
+    }
+
     protected function loadJsonFile(string $file) {
         $file = $this->codegen->getFile($file);
         if (!is_file($file)) {
-            throw new \Exception('Could not find file ' . $file);
+            $this->codegen->log('Could not find file ' . $file);
+            return [];
         }
         $contents = file_get_contents($file);
         if (!$contents) {
-            throw new \Exception('Package file was empty ' . $file);
+            $this->codegen->log('Package file was empty ' . $file);
+            return [];
         }
         $json = json_decode($contents, true);
         if (!$json) {
@@ -25,10 +31,6 @@ class PackageManager {
     public function writeJsonFile(string $file, $json) {
         $file = $this->codegen->getFile($file);
         $this->codegen->writeFile($file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    }
-
-    public function __construct(\Rhino\Codegen\Codegen $codegen) {
-        $this->codegen = $codegen;
     }
 
     public function addDependency($name, $version) {

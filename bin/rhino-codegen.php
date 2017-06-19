@@ -48,7 +48,8 @@ $application->add(new class() extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->generate();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
+            ->generate();
     }
 });
 
@@ -62,7 +63,8 @@ $application->add(new class() extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->describe();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
+            ->describe($output);
     }
 });
 
@@ -95,7 +97,8 @@ $application->add(new class() extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))->describe();
+        getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
+            ->dbReset();
     }
 });
 
@@ -123,6 +126,7 @@ $application->add(new class() extends Command {
     protected function configure() {
         $this->setName('init')
             ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'Path to initialise codegen files.', '.')
+            ->addOption('overwrite', 'o', InputOption::VALUE_NONE, 'Overwrite existing files.')
             ->setDescription('Init codegen files');
     }
 
@@ -133,8 +137,6 @@ $application->add(new class() extends Command {
         }
         $path = realpath($path);
         $output->writeln('Initialising codegen at ' . $path);
-
-        $source = "dir/dir/dir";
 
         if (!is_dir($path)) {
             mkdir($path);
@@ -149,7 +151,7 @@ $application->add(new class() extends Command {
                     mkdir($outputPath);
                 }
             } else {
-                if (!is_file($outputPath)) {
+                if (!is_file($outputPath) || $input->getOption('overwrite')) {
                     $output->writeln('Creating ' . $outputPath);
                     copy($item, $outputPath);
                 }
