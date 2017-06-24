@@ -6,6 +6,9 @@ class Codegen {
     use Inflector;
     use Logger;
 
+    public $pdo;
+    public $db;
+
     protected $namespace;
     protected $projectName;
     protected $entities = [];
@@ -16,7 +19,6 @@ class Codegen {
     protected $viewPathPrefix;
     protected $classPathPrefix;
     protected $templates = [];
-    protected $pdo;
     protected $databaseDsn;
     protected $databaseName;
     protected $databaseUser;
@@ -61,55 +63,49 @@ class Codegen {
         }
     }
 
-    public function tableExists(string $tableName) {
-        $statement = $this->getPdo()->prepare('SHOW TABLES LIKE ?');
-        $statement->execute([
-            $tableName,
-        ]);
-        return $statement->rowCount() == 1;
-    }
-
-    public function columnExists(string $tableName, string $columnName) {
-        $statement = $this->getPdo()->prepare("SHOW COLUMNS FROM $tableName LIKE ?");
-        $statement->execute([
-            $columnName,
-        ]);
-        return $statement->rowCount() == 1;
-    }
-
     protected function getMigrationName($name) {
         return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
     }
 
-    public function migrate($path) {
-        $path .= '/sql/up/';
-        $this->log('Create migrations in ' . $path);
-        $pdo = $this->getPdo();
-        foreach ($this->entities as $entity) {
-            if (!$this->tableExists($entity->getTableName())) {
-                $name = $this->getMigrationName($entity->getTableName());
-                $this->log('Create table migration ' . $path . $name);
-                $this->renderTemplate('sql/full/create-table', $path . $name, [
-                    'entity' => $entity,
-                ]);
-                continue;
-            }
-            $previous = 'id';
-            foreach ($entity->getAttributes() as $attribute) {
-                if (!$this->columnExists($entity->getTableName(), $attribute->getColumnName())) {
-                    $this->log('Create column migration ' . $entity->getTableName() . '.' . $attribute->getColumnName());
-                    $name = $this->getMigrationName($entity->getTableName() . '_' . $attribute->getColumnName());
-                    $this->renderTemplate('sql/full/create-column', $path . $name, [
-                        'entity' => $entity,
-                        'attribute' => $attribute,
-                        'previous' => $previous,
-                    ]);
-                }
-                $previous = $attribute->getColumnName();
-            }
+    public function dbMigrate() {
+        $pdo = $this->getPdo(false);
+        if (!$this->db->databaseExists($this->getDatabaseName())) {
+            $this->log('Database doesn\' exist: ' . $this->getDatabaseName());
+            return;
+        }
+        $pdo->query("
+            USE `{$this->getDatabaseName()}`;
+        ");
 
-            // @todo indexes
-            // @todo triggers
+        $sqlSet = [];
+        foreach ($this->iterateTemplates() as $template) {
+            if ($template instanceof Template\Interfaces\DatabaseMigrate) {
+                $this->log('Migrating', get_class($template));
+                foreach ($template->iterateDatabaseMigrateSql($pdo) as $sql) {
+                    $sql = $this->unindent($sql);
+                    $this->debug($sql);
+                    $sqlSet[] = $sql;
+                }
+            }
+        }
+        if (empty($sqlSet)) {
+            $this->log('Nothing to migrate.');
+            return;
+        }
+        $migrationPath = $this->getPath() . '/src/sql/up/';
+        $this->createDirectory($migrationPath);
+        $migrationFile = $migrationPath . date('Y_m_d_His') . '.sql';
+        $this->writeFile($migrationFile, implode(PHP_EOL . PHP_EOL, $sqlSet));
+
+        if ($this->dryRun) {
+            $this->log('Not executing migration.');
+            return;
+        }
+
+        $this->log('Executing migration...');
+        foreach ($sqlSet as $sql) {
+            $this->debug($sql);
+            $this->getPdo()->query($sql);
         }
     }
 
@@ -126,15 +122,40 @@ class Codegen {
             ");
         }
         foreach ($this->iterateTemplates() as $template) {
-            if ($template instanceof Template\Interfaces\DbReset) {
+            if ($template instanceof Template\Interfaces\DatabaseReset) {
                 $this->log('Resetting', get_class($template));
-                foreach ($template->iterateSql() as $sql) {
+                foreach ($template->iterateDatabaseResetSql() as $sql) {
                     if (!$this->dryRun) {
                         $this->getPdo()->query($sql);
                     }
                 }
             }
         }
+    }
+
+    public function unindent(string $string) {
+        $minWhitespace = null;
+        foreach (preg_split('/\R/', $string) as $line) {
+            if ($line == '') {
+                continue;
+            }
+            if (preg_match('/^[ ]+$/', $line)) {
+                continue;
+            }
+            if (preg_match('/^(?<whitespace>[ ]*)[^ ]/', $line, $matches)) {
+                $whitespace = strlen($matches['whitespace']);
+                if ($minWhitespace === null || $whitespace < $minWhitespace) {
+                    $minWhitespace = $whitespace;
+                }
+            }
+        }
+        if ($minWhitespace === null) {
+            return $string;
+        }
+        $string = preg_replace('/^[ ]{' . $minWhitespace . '}/m', '', $string);
+        $string = preg_replace('/^[ ]+$/m', '', $string);
+        $string = trim($string);
+        return $string;
     }
 
     public function createDirectory(string $directory, $permissions = 0755): Codegen {
@@ -147,7 +168,7 @@ class Codegen {
         return $this;
     }
 
-    public function debug(string ...$messages) {
+    public function debug(...$messages) {
         // @todo inject a logger
         if (!$this->isDebug() || empty($messages)) {
             return;
@@ -155,7 +176,7 @@ class Codegen {
         echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
     }
 
-    public function log(string ...$messages) {
+    public function log(...$messages) {
         // @todo inject a logger
         if (empty($messages)) {
             return;
@@ -316,6 +337,7 @@ class Codegen {
                 \PDO::ATTR_EMULATE_PREPARES => true,
                 \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$this->getDatabaseCharset()} COLLATE {$this->getDatabaseCollation()}",
             ]);
+            $this->db = new Database\MySql($this->pdo);
             if ($useDatabase) {
                 $this->pdo->query("USE DATABASE `{$this->getDatabaseName()}`");
             }
