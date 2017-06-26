@@ -24,7 +24,6 @@ DEFAULT CHARSET = <?= $codegen->getDatabaseCharset(); ?>
 
 COLLATE = <?= $codegen->getDatabaseCollation(); ?>;
 
-
 <?php if ($entity->hasAuthentication()): ?>
 CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>_sessions` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

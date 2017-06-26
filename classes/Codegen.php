@@ -375,8 +375,6 @@ class Codegen {
     public function addTemplate(Template\Template $template) {
         $this->templates[] = $template;
         $template->setCodegen($this);
-        $template->setPath($this->getPath());
-        $template->setNamespace($this->getNamespace());
         return $template;
     }
 
