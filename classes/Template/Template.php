@@ -4,7 +4,6 @@ use Rhino\Codegen\Codegen;
 
 abstract class Template {
 
-    public $name;
     protected $codegen;
     protected $templateOverrides = [];
     protected $path = null;
@@ -16,38 +15,6 @@ abstract class Template {
         'controller-generated' => 'Controller\Generated',
         'controller-api-implemented' => 'Controller\Api',
         'controller-api-generated' => 'Controller\Api\Generated',
-    ];
-    protected $paths = [
-        'classes/model-abstract' => 'src/classes/Model/Generated',
-        'classes/model-generated' => 'src/classes/Model/Generated',
-        'classes/model-pdo' => 'src/classes/Model/Generated',
-        'classes/model-initial' => 'src/classes/Model',
-        'classes/model-serializer' => 'src/classes/Model/Serializer',
-        'sql/full/create-table' => 'src/sql/full',
-        'sql/full/alter-table-change' => 'src/sql/alter/change',
-        'sql/full/alter-table-add' => 'src/sql/alter/add',
-        'sql/full/alter-table-index' => 'src/sql/alter',
-
-// 'tests/api.js' => 'tests',
-// 'tests/index.js' => 'tests',
-// 'tests/api/model.js' => 'tests/api',
-// 'include' => '/',
-// 'environment/local' => 'environment',
-// 'bower' => '/',
-// 'classes/controller-abstract' => 'src/classes/Controller/Generated',
-// 'classes/controller-generated' => 'src/classes/Controller/Generated',
-// 'classes/controller-api-abstract' => 'src/classes/Controller/Api/Generated',
-// 'classes/controller-api' => 'src/classes/Controller/Api/Generated',
-// 'classes/controller-api-initial' => 'src/classes/Controller/Api',
-// 'classes/controller-home' => 'src/classes/Controller',
-// 'classes/controller-initial' => 'src/classes/Controller',
-// 'gulpfile' => '/',
-// 'bin/server' => 'bin',
-// 'bin/router' => 'bin',
-// 'public/index' => 'public',
-// '' => '',
-// '' => '',
-
     ];
 
     public abstract function generate();
@@ -93,7 +60,7 @@ abstract class Template {
     }
 
     protected function getTemplateFile($name) {
-        $standardFile = __DIR__ . '/../../templates/' . $this->name . '/' . $name . '.php';
+        $standardFile = __DIR__ . '/../../templates/' . $name . '.php';
         if (!is_file($standardFile)) {
             if (!is_file($name)) {
                 throw new \Exception('Could not find template file: ' . $name . ' tried ' . $standardFile . ' and ' . $name);
@@ -135,7 +102,7 @@ abstract class Template {
 
     public function getFilePath(string $template, string $file): string {
         if (!isset($this->paths[$template])) {
-            return $file;
+            return $this->codegen->getPath() . '/' . $file;
         }
         return $this->codegen->getPath() . '/' . $this->paths[$template] . '/' . $file;
     }
