@@ -59,7 +59,7 @@ class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
 <?php if ($attribute->is(['String', 'Text'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('data.attributes.<?= $attribute->getPropertyName(); ?>'));
 <?php elseif ($attribute->is(['Date'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->date('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
 <?php elseif ($attribute->is(['DateTime'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
 <?php elseif ($attribute->is(['Bool'])): ?>

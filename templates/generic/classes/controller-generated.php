@@ -35,7 +35,7 @@ class <?= $entity->getClassName(); ?>Controller extends AbstractController {
             $entity->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->date('<?= $attribute->getPropertyName(); ?>')));
+            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->getPropertyName(); ?>')));
 <?php endif; ?>
 <?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
             $entity->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
