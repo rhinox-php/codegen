@@ -79,7 +79,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     // Save/insert/update/delete
     protected function insert() {
-        $date = new \DateTimeImmutable();
+        $date = new \DateTimeImmutable('now', new \DateTimezone('UTC'));
         $this->setUpdated($date);
         $this->setCreated($date);
         $this->query('
@@ -102,7 +102,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     }
 
     protected function update() {
-        $this->setUpdated(new \DateTimeImmutable());
+        $this->setUpdated(new \DateTimeImmutable('now', new \DateTimezone('UTC')));
 
         $params = $this->getQueryParams();
         $params[':id'] = $this->getId();
@@ -170,8 +170,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
 <?php endif; ?>
 <?php endforeach; ?>
-            $entity->setCreated(new \DateTimeImmutable($row['created']));
-            $entity->setUpdated(new \DateTimeImmutable($row['updated']));
+            if (isset($row['created'])) {
+                $entity->setCreated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['created'], new \DateTimezone('UTC')));
+            }
+            if (isset($row['updated'])) {
+                $entity->setUpdated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['updated'], new \DateTimezone('UTC')));
+            }
             yield $entity;
         }
     }
@@ -392,16 +396,24 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
         // Parse date attributes
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->is(['Date'])): ?>
         if ($entity-><?= $attribute->getPropertyName(); ?>) {
-            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($entity-><?= $attribute->getPropertyName(); ?>));
+            $entity->set<?= $attribute->getMethodName(); ?>(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $entity-><?= $attribute->getPropertyName(); ?>, new \DateTimezone('UTC')));
+        }
+<?php elseif ($attribute->is(['DateTime'])): ?>
+        if ($entity-><?= $attribute->getPropertyName(); ?>) {
+            $entity->set<?= $attribute->getMethodName(); ?>(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity-><?= $attribute->getPropertyName(); ?>, new \DateTimezone('UTC')));
         }
 <?php endif; ?>
 <?php endforeach; ?>
 
         // Parse created/updated dates
-        $entity->setCreated(new \DateTimeImmutable($entity->created));
-        $entity->setUpdated(new \DateTimeImmutable($entity->updated));
+        if ($entity->created) {
+            $entity->setCreated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity->created, new \DateTimezone('UTC')));
+        }
+        if ($entity->updated) {
+            $entity->setUpdated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity->updated, new \DateTimezone('UTC')));
+        }
         return $entity;
     }
 
@@ -520,7 +532,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return null;
     }
 
-    public function login(\DateTime $expire) {
+    public function login(\DateTimeInterface $expire) {
         try {
             $this->query('
                 DELETE FROM <?= $entity->getTableName(); ?>_sessions
@@ -546,12 +558,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ', [
             ':entity_id' => $this->getId(),
             ':token' => $token,
-            ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+            ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format(static::MYSQL_DATE_TIME_FORMAT),
         ]);
         return $token;
     }
 
-    public static function resume($token, \DateTime $expire) {
+    public static function resume($token, \DateTimeInterface $expire) {
         $result = static::query('
             SELECT <?= $entity->getTableName(); ?>_id
             FROM <?= $entity->getTableName(); ?>_sessions
@@ -571,7 +583,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
                     WHERE token = :token;
                 ', [
                     ':token' => $token,
-                    ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+                    ':expire' => $expire->setTimezone(new \DateTimeZone('UTC'))->format(static::MYSQL_DATE_TIME_FORMAT),
                 ]);
             } catch (\Exception $exception) {
                 // Ignore (dead lock, back off try again)

@@ -8,10 +8,14 @@ class ControllerApi extends Controller {
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-json-api-list',
         ]);
+        $this->codegen->composer->addRepository([
+            'type' => 'vcs',
+            'url' => 'git@bitbucket.org:rhino-php/rhino-input-data',
+        ]);
 
-        $this->renderTemplate('classes/controller-api-abstract', 'src/classes/Controller/Api/Generated/AbstractController.php');
+        $this->renderTemplate('generic/classes/controller-api-abstract', 'src/classes/Controller/Api/Generated/AbstractController.php');
         foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('classes/controller-api', 'src/classes/Controller/Api/Generated/' . $entity->getClassName() . 'ApiController.php', [
+            $this->renderTemplate('generic/classes/controller-api', 'src/classes/Controller/Api/Generated/' . $entity->getClassName() . 'ApiController.php', [
                 'entity' => $entity,
             ]);
         }

@@ -8,7 +8,7 @@ class BelongsToParser extends AttributeParser {
         $to = $this->codegen->findEntity((string) $node['entity']);
 
         $attribute = new Attribute\IntAttribute();
-        $attribute->setName(((string) $node['name'] ?: (string) $node['entity']) . ' ID');
+        $attribute->setName(((string) $node['name'] ?: (string) $node['entity']) . ' Id');
         $attribute->setHasAccessors(false);
         $attribute->setIsForeignKey(true);
         $attribute->setIsIndexed(true);

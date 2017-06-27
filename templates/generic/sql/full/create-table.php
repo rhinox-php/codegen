@@ -20,8 +20,9 @@ CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>` (
     `updated` DATETIME NULL
 )
 ENGINE = InnoDB
-DEFAULT CHARSET = utf8
-COLLATE = utf8_unicode_ci;
+DEFAULT CHARSET = <?= $codegen->getDatabaseCharset(); ?>
+
+COLLATE = <?= $codegen->getDatabaseCollation(); ?>;
 
 <?php if ($entity->hasAuthentication()): ?>
 CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>_sessions` (
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>_sessions` (
     INDEX `expire` (`expire`)
 )
 ENGINE = InnoDB
-DEFAULT CHARSET = utf8
-COLLATE = utf8_unicode_ci;
+DEFAULT CHARSET = <?= $codegen->getDatabaseCharset(); ?>
+
+COLLATE = <?= $codegen->getDatabaseCollation(); ?>;
 <?php endif; ?>

@@ -7,6 +7,9 @@ abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\Mo
     const DATE_FORMAT = DATE_ISO8601;
     const DATE_TIME_FORMAT = DATE_ISO8601;
 
+    const MYSQL_DATE_FORMAT = 'Y-m-d';
+    const MYSQL_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+
     // Properties
     protected $id;
     protected $updated;
@@ -89,11 +92,11 @@ abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\Mo
     }
 
     public static function formatMySqlDate(\DateTimeInterface $date) {
-        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d');
+        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format(static::MYSQL_DATE_FORMAT);
     }
 
     public static function formatMySqlDateTime(\DateTimeInterface $date) {
-        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+        return (clone $date)->setTimezone(new \DateTimeZone('UTC'))->format(static::MYSQL_DATE_TIME_FORMAT);
     }
 
     public static function findById($id) {

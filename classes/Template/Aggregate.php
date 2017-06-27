@@ -1,7 +1,9 @@
 <?php
 namespace Rhino\Codegen\Template;
 
-abstract class Aggregate extends Template {
+trait Aggregate {
+    protected $name;
+
     public abstract function aggregate();
 
     public function generate() {
@@ -11,8 +13,11 @@ abstract class Aggregate extends Template {
     }
 
     public function iterateTemplates() {
-        foreach ($this->aggregate() as $template) {
-            yield $template->setCodegen($this->getCodegen());
+        foreach ($this->aggregate() as $templateClass) {
+            $template = new $templateClass();
+            $template->codegen = $this->codegen;
+            $template->namespaces = $this->namespaces;
+            yield $template;
         }
     }
 }

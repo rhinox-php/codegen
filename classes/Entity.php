@@ -18,7 +18,7 @@ class Entity {
         $this->name = $name;
         return $this;
     }
-    
+
     public function getPluralName() {
         return $this->pluralName ?: $this->pluralize($this->getName());
     }
@@ -72,10 +72,17 @@ class Entity {
         return $this->pluralize($this->humanize($this->getPluralName()));
     }
 
-    public function getAttributes(): array {
+    public function getAttributes(bool $sorted = false): array {
+        if ($sorted) {
+            $sortedAttributes = $this->attributes;
+            uksort($this->sortedAttributes, function($a, $b) {
+                return strnatcasecmp($a, $b);
+            });
+            return $sortedAttributes;
+        }
         return $this->attributes;
     }
-    
+
     public function iterateAttributesByType(array $types): \Generator {
         foreach ($this->attributes as $attribute) {
             foreach ($types as $type) {
@@ -88,17 +95,19 @@ class Entity {
         }
     }
 
-    public function setAttributes(array $attributes) {
-        $this->attributes = $attributes;
-        return $this;
-    }
-
     public function addAttribute(Attribute $attribute) {
-        $this->attributes[] = $attribute;
+        $this->attributes[$attribute->getName()] = $attribute;
         return $this;
     }
 
-    public function getRelationships(): array {
+    public function getRelationships(bool $sorted = false): array {
+        if ($sorted) {
+            $sortedRelationships = $this->relationships;
+            uksort($sortedRelationships, function($a, $b) {
+                return strnatcasecmp($a, $b);
+            });
+            return $sortedRelationships;
+        }
         return $this->relationships;
     }
 
@@ -117,13 +126,8 @@ class Entity {
         }
     }
 
-    public function setRelationships(array $relationships) {
-        $this->relationships = $relationships;
-        return $this;
-    }
-
     public function addRelationship(Relationship $relationship) {
-        $this->relationships[] = $relationship;
+        $this->relationships[$relationship->getName()] = $relationship;
         return $this;
     }
 

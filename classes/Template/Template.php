@@ -5,7 +5,6 @@ use Rhino\Codegen\Codegen;
 abstract class Template {
 
     protected $codegen;
-    protected $name;
     protected $templateOverrides = [];
     protected $path = null;
     protected $namespaces = [
@@ -20,43 +19,48 @@ abstract class Template {
 
     public abstract function generate();
 
-    protected function bufferTemplate($template, array $data = []) {
-        $codegen = $this->getCodegen();
-        $file = $this->getTemplateFile($template);
-        extract(get_object_vars($this), EXTR_SKIP);
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require $file;
-        return ob_get_clean();
+    protected function bufferTemplate(string $template, array $data = []) {
+        $templateFile = $this->getTemplateFile($template);
+        return $this->bufferTemplateFile($templateFile, $data);
     }
 
-    protected function renderTemplate($template, $outputFile, array $data = [], $overwrite = true) {
-        $outputFile = $this->getFilePath($outputFile);
+    protected function renderTemplate(string $template, string $outputFile, array $data = [], bool $overwrite = true) {
+        $outputFile = $this->getFilePath($template, $outputFile);
         if (file_exists($outputFile)) {
             $outputFile = realpath($outputFile);
-            if (!$overwrite) {
-                $this->getCodegen()->debug('Skipped ' . $outputFile);
-                return;
-            }
         } elseif (is_dir(dirname($outputFile))) {
             $outputFile = realpath(dirname($outputFile)) . DIRECTORY_SEPARATOR . basename($outputFile);
         }
 
         $templateFile = $this->getTemplateFile($template);
-        $output = $this->bufferTemplate($template, $data);
-        $directory = dirname($outputFile);
-        $this->getCodegen()->createDirectory($directory);
+        return $this->renderTemplateFile($templateFile, $outputFile, $data, $overwrite);
+    }
 
-        if ($overwrite && is_file($outputFile) && md5($output) == md5_file($outputFile)) {
-            $this->getCodegen()->debug('No changes ' . $outputFile . ' from template ' . $templateFile);
-            return;
+    protected function bufferTemplateFile(string $templateFile, array $data = []) {
+        $codegen = $this->getCodegen();
+        extract(get_object_vars($this), EXTR_SKIP);
+        extract($data, EXTR_SKIP);
+        ob_start();
+        require $templateFile;
+        return ob_get_clean();
+    }
+
+    protected function renderTemplateFile(string $templateFile, string $outputFile, array $data = [], bool $overwrite = true) {
+        if (file_exists($outputFile)) {
+            $outputFile = realpath($outputFile);
+            if (!$overwrite) {
+                $this->codegen->debug('Skipped ' . $outputFile);
+                return;
+            }
         }
-
-        $this->getCodegen()->writeFile($outputFile, $output);
+        $output = $this->bufferTemplateFile($templateFile, $data);
+        $directory = dirname($outputFile);
+        $this->codegen->createDirectory($directory);
+        $this->codegen->writeFile($outputFile, $output);
     }
 
     protected function getTemplateFile($name) {
-        $standardFile = __DIR__ . '/../../templates/' . $this->name . '/' . $name . '.php';
+        $standardFile = __DIR__ . '/../../templates/' . $name . '.php';
         if (!is_file($standardFile)) {
             if (!is_file($name)) {
                 throw new \Exception('Could not find template file: ' . $name . ' tried ' . $standardFile . ' and ' . $name);
@@ -69,10 +73,10 @@ abstract class Template {
     protected function createFiles(array $files) {
         foreach ($files as $file) {
             $directory = dirname($file);
-            $this->getCodegen()->createDirectory();
+            $this->codegen->createDirectory();
             if (!file_exists($file)) {
-                $this->getCodegen()->log('Creating file ' . $file);
-                if (!$this->getCodegen()->isDryRun()) {
+                $this->codegen->log('Creating file ' . $file);
+                if (!$this->codegen->isDryRun()) {
                     file_put_contents($file, '');
                 }
             }
@@ -96,25 +100,27 @@ abstract class Template {
         return $this;
     }
 
-    public function getFilePath($file) {
-        return $this->getPath() . '/' . $file;
+    public function getFilePath(string $template, string $file): string {
+        if (!isset($this->paths[$template])) {
+            return $this->codegen->getPath() . '/' . $file;
+        }
+        return $this->codegen->getPath() . '/' . $this->paths[$template] . '/' . $file;
     }
 
-    public function getPath(): string {
-        return $this->path;
-    }
-
-    public function setPath(string $path): self {
-        $this->path = $path;
+    public function setPath(string $template, string $path): self {
+        $this->paths[$template] = $path;
         return $this;
     }
 
     public function getNamespace(string $type): string {
-        return $this->getCodegen()->getNamespace() . '\\' . $this->namespaces[$type];
+        if (!isset($this->namespaces[$type])) {
+            throw new \Exception('Could not find namespace for type ' . $type);
+        }
+        return $this->codegen->getNamespace() . '\\' . $this->namespaces[$type];
     }
 
-    public function setNamespace(string $namespace): self {
-        $this->namespace = $namespace;
+    public function setNamespace(string $type, string $namespace): self {
+        $this->namespaces[$type] = $namespace;
         return $this;
     }
 
