@@ -17,6 +17,7 @@ trait Aggregate {
             $template = new $templateClass();
             $template->codegen = $this->codegen;
             $template->namespaces = $this->namespaces;
+            $template->paths = $this->paths;
             yield $template;
         }
     }

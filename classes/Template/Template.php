@@ -16,6 +16,7 @@ abstract class Template {
         'controller-api-implemented' => 'Controller\Api',
         'controller-api-generated' => 'Controller\Api\Generated',
     ];
+    protected $paths = [];
 
     public abstract function generate();
 
@@ -101,10 +102,11 @@ abstract class Template {
     }
 
     public function getFilePath(string $template, string $file): string {
+        // var_dump($this->paths);
         if (!isset($this->paths[$template])) {
             return $this->codegen->getPath() . '/' . $file;
         }
-        return $this->codegen->getPath() . '/' . $this->paths[$template] . '/' . $file;
+        return $this->codegen->getPath() . '/' . $this->paths[$template] . '/' . basename($file);
     }
 
     public function setPath(string $template, string $path): self {

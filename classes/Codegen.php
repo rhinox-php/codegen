@@ -27,6 +27,7 @@ class Codegen {
     protected $databaseCollation = 'utf8mb4_unicode_520_ci';
     protected $path;
     protected $debug = false;
+    protected $loggedOnce = [];
 
     public function __construct() {
     }
@@ -92,6 +93,7 @@ class Codegen {
             $this->log('Nothing to migrate.');
             return;
         }
+        // @todo make path customisable
         $migrationPath = $this->getPath() . '/src/sql/up/';
         $this->createDirectory($migrationPath);
         $migrationFile = $migrationPath . date('Y_m_d_His') . '.sql';
@@ -160,7 +162,7 @@ class Codegen {
 
     public function createDirectory(string $directory, $permissions = 0755): Codegen {
         if (!file_exists($directory)) {
-            $this->log('Creating directory ' . $directory);
+            $this->logOnce('Creating directory ' . $directory);
             if (!$this->isDryRun()) {
                 mkdir($directory, $permissions, true);
             }
@@ -182,6 +184,14 @@ class Codegen {
             return;
         }
         echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
+    }
+
+    public function logOnce(...$messages) {
+        $key = md5(implode(' ', $messages));
+        if (!isset($this->loggedOnce[$key])) {
+            $this->loggedOnce[$key] = true;
+            $this->log(...$messages);
+        }
     }
 
     public function getProjectName(): string {
@@ -332,6 +342,9 @@ class Codegen {
 
     public function getPdo($useDatabase = true): \PDO {
         if (!$this->pdo) {
+            if (!$this->databaseDsn) {
+                throw new \Exception('Database settings not set on Codegen.');
+            }
             $this->pdo = new \PDO($this->databaseDsn, $this->databaseUser, $this->databasePassword, [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_EMULATE_PREPARES => true,
@@ -364,7 +377,7 @@ class Codegen {
     public function iterateTemplates($templates = null) {
         $templates = $templates ?: $this->getTemplates();
         foreach ($templates as $template) {
-            if ($template instanceof Template\Aggregate) {
+            if ($template instanceof Template\AggregateInterface) {
                 yield from $this->iterateTemplates($template->iterateTemplates());
             } else {
                 yield $template;

@@ -7,6 +7,8 @@ class MySql implements ColumnInterface {
     const TYPE_TEXT = 'text';
     const TYPE_VARCHAR = 'varchar';
     const TYPE_MEDIUM_TEXT = 'mediumtext';
+    const TYPE_DATE = 'date';
+    const TYPE_DATE_TIME = 'datetime';
 
     public $mysql;
     public $tableName;
@@ -45,7 +47,7 @@ class MySql implements ColumnInterface {
     }
 
     public function isSigned(): bool {
-        return !preg_match('/^a-z+\([0-9]+\) unsigned/', $this->getDescription()['Type']);
+        return !preg_match('/^[a-z]+\([0-9]+\) unsigned/', $this->getDescription()['Type']);
     }
 
     public function isNullable() {
