@@ -15,6 +15,7 @@ abstract class Template {
         'controller-generated' => 'Controller\Generated',
         'controller-api-implemented' => 'Controller\Api',
         'controller-api-generated' => 'Controller\Api\Generated',
+        'test-model' => 'Test\Model',
     ];
     protected $paths = [];
 
