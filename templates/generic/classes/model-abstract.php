@@ -4,7 +4,7 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 
 abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\ModelInterface {
 
-    const DATE_FORMAT = DATE_ISO8601;
+    const DATE_FORMAT = 'Y-m-d';
     const DATE_TIME_FORMAT = DATE_ISO8601;
 
     const MYSQL_DATE_FORMAT = 'Y-m-d';

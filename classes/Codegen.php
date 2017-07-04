@@ -68,10 +68,10 @@ class Codegen {
         return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
     }
 
-    public function dbMigrate() {
+    public function dbMigrate(bool $write, bool $run) {
         $pdo = $this->getPdo(false);
         if (!$this->db->databaseExists($this->getDatabaseName())) {
-            $this->log('Database doesn\' exist: ' . $this->getDatabaseName());
+            $this->log('Database doesn\'t exist: ' . $this->getDatabaseName());
             return;
         }
         $pdo->query("
@@ -93,21 +93,27 @@ class Codegen {
             $this->log('Nothing to migrate.');
             return;
         }
-        // @todo make path customisable
+        // @todo make path customizable
         $migrationPath = $this->getPath() . '/src/sql/up/';
         $this->createDirectory($migrationPath);
         $migrationFile = $migrationPath . date('Y_m_d_His') . '.sql';
-        $this->writeFile($migrationFile, implode(PHP_EOL . PHP_EOL, $sqlSet));
+        if (!$write) {
+            $this->log('Not writing migration file', $migrationFile);
+        } else {
+            $this->writeFile($migrationFile, implode(PHP_EOL . PHP_EOL, $sqlSet));
+        }
 
-        if ($this->dryRun) {
-            $this->log('Not executing migration.');
+        if (!$run) {
+            $this->log('Not running migration.');
             return;
         }
 
-        $this->log('Executing migration...');
+        $this->log('Running migration...');
         foreach ($sqlSet as $sql) {
             $this->debug($sql);
-            $this->getPdo()->query($sql);
+            if (!$this->dryRun) {
+                $this->getPdo()->query($sql);
+            }
         }
     }
 
@@ -175,6 +181,12 @@ class Codegen {
         if (!$this->isDebug() || empty($messages)) {
             return;
         }
+        $messages = array_map(function($message) {
+            if (is_array($message)) {
+                return implode(' ', $message);
+            }
+            return $message;
+        }, $messages);
         echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
     }
 
@@ -183,6 +195,12 @@ class Codegen {
         if (empty($messages)) {
             return;
         }
+        $messages = array_map(function($message) {
+            if (is_array($message)) {
+                return implode(' ', $message);
+            }
+            return $message;
+        }, $messages);
         echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
     }
 

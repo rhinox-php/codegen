@@ -1,6 +1,6 @@
 <?= '<?php'; ?>
 
-namespace <?= $this->getNamespace(); ?>;
+namespace <?= $this->getNamespace('model-generated'); ?>;
 
 class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSerializable {
 

@@ -4,6 +4,7 @@ namespace Rhino\Codegen\Database\Column;
 class MySql implements ColumnInterface {
     const TYPE_INT = 'int';
     const TYPE_TINY_INT = 'tinyint';
+    const TYPE_DECIMAL = 'decimal';
     const TYPE_TEXT = 'text';
     const TYPE_VARCHAR = 'varchar';
     const TYPE_MEDIUM_TEXT = 'mediumtext';
@@ -42,8 +43,23 @@ class MySql implements ColumnInterface {
         return null;
     }
 
-    public function isSize(int $size): bool {
+    public function getDecimalSize() {
+        if (preg_match('/^[a-z]+\((?<size>[0-9]+),(?<dp>[0-9]+)\)/', $this->getDescription()['Type'], $matches)) {
+            return [
+                'size' => (int) $matches['size'],
+                'dp' => (int) $matches['dp'],
+            ];
+        }
+        return null;
+    }
+
+    public function isSize(int $size, int $dp = null): bool {
         return $this->getSize() == $size;
+    }
+
+    public function isDecimalSize(int $size, int $dp): bool {
+        ['size' => $actualSize, 'dp' => $actualDp] = $this->getDecimalSize();
+        return $actualSize == $size && $actualDp == $dp;
     }
 
     public function isSigned(): bool {

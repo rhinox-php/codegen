@@ -22,7 +22,7 @@ class PackageManager {
             return [];
         }
         $json = json_decode($contents, true);
-        if (!$json) {
+        if ($json === false) {
             throw new \Exception('Could not parse JSON ' . $file);
         }
         return $json;

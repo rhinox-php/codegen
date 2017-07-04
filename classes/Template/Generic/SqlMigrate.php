@@ -34,6 +34,8 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
             if (!$column->exists()) {
                 if ($attribute instanceof Attribute\IntAttribute) {
                     $type = 'INT(11) SIGNED NULL';
+                } elseif ($attribute instanceof Attribute\DecimalAttribute) {
+                    $type = 'DECIMAL(10, 2) NULL';
                 } elseif ($attribute instanceof Attribute\BoolAttribute) {
                     $type = 'TINYINT(1) UNSIGNED NULL';
                 } elseif ($attribute instanceof Attribute\TextAttribute) {
@@ -59,6 +61,11 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
             if (!$column->isType(MySqlColumn::TYPE_INT) || !$column->isSize(11) || !$column->isSigned()) {
                 $this->codegen->log('Changing column', $attribute->getColumnName(), 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
                 yield "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` INT(11) SIGNED NULL AFTER `$previous`;";
+            }
+        } elseif ($attribute instanceof Attribute\DecimalAttribute) {
+            if (!$column->isType(MySqlColumn::TYPE_DECIMAL) || !$column->isDecimalSize(10, 2) || !$column->isSigned()) {
+                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
+                yield "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` DECIMAL(10, 2) AFTER `$previous`;";
             }
         } elseif ($attribute instanceof Attribute\BoolAttribute) {
             if (!$column->isType(MySqlColumn::TYPE_TINY_INT) || !$column->isSize(1) || $column->isSigned()) {

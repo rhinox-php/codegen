@@ -22,6 +22,9 @@ class Npm extends \Rhino\Codegen\Codegen\PackageManager {
             }
             ksort($json['devDependencies']);
         }
+        if (empty($json)) {
+            $json = new \stdClass();
+        }
         $this->writeJsonFile('package.json', $json);
     }
 }
