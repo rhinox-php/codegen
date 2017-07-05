@@ -20,7 +20,7 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
         $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
     }
 
-<?php elseif ($attribute->is(['Text', 'Int', 'Decimal'])): ?>
+<?php elseif ($attribute->is(['Text'])): ?>
 
     public function testGetSet<?= $attribute->getMethodName(); ?>() {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
@@ -30,12 +30,12 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
         $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
     }
 
-<?php elseif ($attribute->is(['Int', 'Decimal'])): ?>
+<?php elseif ($attribute->is(['Int'])): ?>
 
     public function testGetSet<?= $attribute->getMethodName(); ?>() {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
         $this->assertNull($<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
-        $<?= $attribute->getPropertyName(); ?> = rand();
+        $<?= $attribute->getPropertyName(); ?> = mt_rand();
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
         $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
     }
@@ -45,7 +45,7 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
     public function testGetSet<?= $attribute->getMethodName(); ?>() {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
         $this->assertNull($<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
-        $<?= $attribute->getPropertyName(); ?> = rand();
+        $<?= $attribute->getPropertyName(); ?> = mt_rand() / mt_getrandmax();
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
         $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
     }
@@ -55,7 +55,7 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
     public function testGetSet<?= $attribute->getMethodName(); ?>() {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
         $this->assertNull($<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
-        $<?= $attribute->getPropertyName(); ?> = rand() < 0.5;
+        $<?= $attribute->getPropertyName(); ?> = mt_rand() < 0.5;
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
         $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
     }
