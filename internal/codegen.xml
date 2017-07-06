@@ -1,0 +1,8 @@
+<codegen>
+    <entity name="Route">
+        <string-attribute name="Http Method" />
+        <string-attribute name="Url Path" />
+        <string-attribute name="Controller Class" />
+        <string-attribute name="Controller Method" />
+    </entity>
+</codegen>

@@ -3,6 +3,12 @@
 $dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $router) {
     $router->addRoute('GET', '/', ['<?= $this->getNamespace('controller-implemented'); ?>\HomeController', 'home']);
 
+<?php foreach ($router->sort()->getRoutes() as $route): ?>
+<?php foreach ($route->getHttpMethods() as $httpMethod): ?>
+    $router->addRoute('<?= strtoupper($httpMethod); ?>', '<?= $route->getUrlPath(); ?>', [\<?= $route->getControllerClass(); ?>::class, '<?= $route->getControllerMethod(); ?>']);
+<?php endforeach; ?>
+<?php endforeach; ?>
+
 <?php foreach ($this->codegen->getTemplates() as $template): ?>
 <?php foreach ($template->iterateRoutes() as [$method, $url, $controller, $function]): ?>
     $router->addRoute('<?= strtoupper($method); ?>', '<?= $url; ?>', [<?= $controller; ?>::class, '<?= $function; ?>']);

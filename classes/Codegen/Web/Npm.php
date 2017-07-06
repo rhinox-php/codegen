@@ -3,6 +3,7 @@ namespace Rhino\Codegen\Codegen\Web;
 
 class Npm extends \Rhino\Codegen\Codegen\PackageManager {
     public function generate() {
+        $empty = true;
         $json = $this->loadJsonFile('package.json');
         if (!empty($this->dependencies)) {
             if (!isset($json['dependencies'])) {
@@ -10,6 +11,7 @@ class Npm extends \Rhino\Codegen\Codegen\PackageManager {
             }
             foreach ($this->dependencies as $name => $version) {
                 $json['dependencies'][$name] = $version;
+                $empty = false;
             }
             ksort($json['dependencies']);
         }
@@ -19,12 +21,10 @@ class Npm extends \Rhino\Codegen\Codegen\PackageManager {
             }
             foreach ($this->devDependencies as $name => $version) {
                 $json['devDependencies'][$name] = $version;
+                $empty = false;
             }
             ksort($json['devDependencies']);
         }
-        if (empty($json)) {
-            $json = new \stdClass();
-        }
-        $this->writeJsonFile('package.json', $json);
+        $this->writeJsonFile('package.json', $json, $empty);
     }
 }

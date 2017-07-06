@@ -28,7 +28,11 @@ class PackageManager {
         return $json;
     }
 
-    public function writeJsonFile(string $file, $json) {
+    public function writeJsonFile(string $file, $json, bool $empty) {
+        if ($empty) {
+            $this->codegen->log('Not writing', $file, 'no changes.');
+            return;
+        }
         $file = $this->codegen->getFile($file);
         $this->codegen->writeFile($file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }

@@ -48,6 +48,10 @@ class Env extends \Rhino\Codegen\Codegen\PackageManager {
     }
 
     public function generate() {
+        if (empty($this->env)) {
+            $this->codegen->log('No env variables to write.');
+            return;
+        }
         $env = $this->loadEnvFile('.env');
         foreach ($this->env as $key => $value) {
             $env[$key] = $value;

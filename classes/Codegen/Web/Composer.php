@@ -6,6 +6,7 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
     protected $autoload = [];
 
     public function generate() {
+        $empty = true;
         $json = $this->loadJsonFile('composer.json');
         $json['minimum-stability'] = 'dev';
         $json['prefer-stable'] = true;
@@ -15,6 +16,7 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
             }
             foreach ($this->dependencies as $name => $version) {
                 $json['require'][$name] = $version;
+                $empty = false;
             }
             ksort($json['require']);
         }
@@ -24,6 +26,7 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
             }
             foreach ($this->devDependencies as $name => $version) {
                 $json['require-dev'][$name] = $version;
+                $empty = false;
             }
             ksort($json['require-dev']);
         }
@@ -33,6 +36,7 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
             }
             foreach ($this->repositories as $repository) {
                 $json['repositories'][] = $repository;
+                $empty = false;
             }
             $json['repositories'] = array_unique($json['repositories'], SORT_REGULAR);
             $json['repositories'] = array_values($json['repositories']);
@@ -46,9 +50,10 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
                     $json['autoload'][$type] = [];
                 }
                 $json['autoload'][$type][$namespace . '\\'] = $path . '/';
+                $empty = false;
             }
         }
-        $this->writeJsonFile('composer.json', $json);
+        $this->writeJsonFile('composer.json', $json, $empty);
     }
 
     public function addRepository($repository): self {
