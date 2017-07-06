@@ -2,3 +2,4 @@ example
 vendor
 /nbproject/private/
 /nbproject/
+/internal/generated/

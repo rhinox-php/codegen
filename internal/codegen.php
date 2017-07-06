@@ -8,6 +8,6 @@ $codegen->setNamespace('Rhino\Codegen');
 (new \Rhino\Codegen\XmlParser($codegen, __DIR__ . '/codegen.xml'))
     ->parse();
 
-$codegen->addTemplate(new Template\Generic\ModelGenerated());
+$codegen->addTemplate(new Template\Generic\ModelClass());
 
 return $codegen;
