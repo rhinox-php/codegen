@@ -12,6 +12,8 @@ class EntityParser extends AggregateParser {
             'date-attribute' => new Entity\DateAttributeParser(),
             'date-time-attribute' => new Entity\DateTimeAttributeParser(),
             'bool-attribute' => new Entity\BoolAttributeParser(),
+            'object-attribute' => new Entity\ObjectAttributeParser(),
+            'array-attribute' => new Entity\ArrayAttributeParser(),
             'has-one' => new Entity\HasOneParser(),
             'has-many' => new Entity\HasManyParser(),
             'belongs-to' => new Entity\BelongsToParser(),

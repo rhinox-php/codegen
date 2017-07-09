@@ -5,4 +5,14 @@
         <string-attribute name="Controller Class" />
         <string-attribute name="Controller Method" />
     </entity>
+
+    <entity name="Template">
+        <object-attribute name="Codegen" class="Rhino\Codegen\Codegen" />
+        <array-attribute name="Namespaces" />
+        <array-attribute name="Paths" />
+    </entity>
+
+    <entity name="Object Attribute">
+        <string-attribute name="Class" />
+    </entity>
 </codegen>

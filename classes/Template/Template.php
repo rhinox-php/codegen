@@ -5,8 +5,6 @@ use Rhino\Codegen\Codegen;
 abstract class Template {
 
     protected $codegen;
-    protected $templateOverrides = [];
-    protected $path = null;
     protected $namespaces = [
         'model-implemented' => 'Model',
         'model-generated' => 'Model\Generated',
@@ -94,16 +92,7 @@ abstract class Template {
         return $this;
     }
 
-    public function setTemplateOverride($name, $file) {
-        if (!is_file($file)) {
-            throw new \Exception('Could not find template override file: ' . $name . ' tried: ' . $file);
-        }
-        $this->templateOverrides[$name] = $file;
-        return $this;
-    }
-
     public function getFilePath(string $template, string $file): string {
-        // var_dump($this->paths);
         if (!isset($this->paths[$template])) {
             return $this->codegen->getPath() . '/' . $file;
         }

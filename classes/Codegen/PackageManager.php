@@ -13,12 +13,12 @@ class PackageManager {
     protected function loadJsonFile(string $file) {
         $file = $this->codegen->getFile($file);
         if (!is_file($file)) {
-            $this->codegen->log('Could not find file ' . $file);
+            $this->codegen->debug('Could not find file ' . $file);
             return [];
         }
         $contents = file_get_contents($file);
         if (!$contents) {
-            $this->codegen->log('Package file was empty ' . $file);
+            $this->codegen->debug('Package file was empty ' . $file);
             return [];
         }
         $json = json_decode($contents, true);
@@ -30,7 +30,7 @@ class PackageManager {
 
     public function writeJsonFile(string $file, $json, bool $empty) {
         if ($empty) {
-            $this->codegen->log('Not writing', $file, 'no changes.');
+            $this->codegen->debug('Not writing', $file, 'no changes.');
             return;
         }
         $file = $this->codegen->getFile($file);

@@ -32,7 +32,22 @@ class Codegen {
     public function __construct() {
     }
 
+    public function validate() {
+        if (!$this->namespace) {
+            throw new \Exception('Codegen base namespace not set.');
+        }
+    }
+
+    public function info() {
+        foreach ($this->iterateTemplates() as $template) {
+            foreach ($this->getNamespaces() as $namespace) {
+                $this->log($namespace);
+            }
+        }
+    }
+
     public function generate() {
+        $this->validate();
         $this->log('Generating templates...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {

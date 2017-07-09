@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e372db95b7d5c5dadcb1efaaba711c8e",
+    "content-hash": "b7725507539e3ce051292d6ed5851677",
     "packages": [
         {
             "name": "icanboogie/inflector",
@@ -57,6 +57,47 @@
                 "underscore"
             ],
             "time": "2015-11-03T11:03:27+00:00"
+        },
+        {
+            "name": "microsoft/tolerant-php-parser",
+            "version": "v0.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Microsoft/tolerant-php-parser.git",
+                "reference": "74854c6eb522c5a4301670b5efa4d466a2ba2f97"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Microsoft/tolerant-php-parser/zipball/74854c6eb522c5a4301670b5efa4d466a2ba2f97",
+                "reference": "74854c6eb522c5a4301670b5efa4d466a2ba2f97",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Microsoft\\PhpParser\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rob Lourens",
+                    "email": "roblou@microsoft.com"
+                }
+            ],
+            "description": "Tolerant PHP-to-AST parser designed for IDE usage scenarios",
+            "time": "2017-06-13T03:09:39+00:00"
         },
         {
             "name": "symfony/console",
