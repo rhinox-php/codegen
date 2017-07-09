@@ -17,7 +17,7 @@ class MergeClass {
             throw new \Exception('Could not find file 1: ' . $file1);
         }
         $this->file2 = realpath($file2);
-        if (!$file2) {
+        if (!$this->file2) {
             throw new \Exception('Could not find file 2: ' . $file2);
         }
     }

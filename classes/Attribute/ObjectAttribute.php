@@ -5,19 +5,17 @@ use Rhino\Codegen\Attribute;
 
 class ObjectAttribute extends Attribute {
 
-    // Properties
     protected $class;
 
     public function getType() {
         return 'object';
     }
 
-    // Attribute accessors
-    public function getClass() {
+    public function getClass(): string {
         return $this->class;
     }
 
-    public function setClass($value) {
+    public function setClass($value): self {
         $this->class = $value;
         return $this;
     }

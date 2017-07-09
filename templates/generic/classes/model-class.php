@@ -4,12 +4,10 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 
 class <?= $entity->getClassName(); ?> {
 
-    // Properties
 <?php foreach ($entity->getAttributes() as $attribute): ?>
     protected $<?= $attribute->getPropertyName(); ?>;
 <?php endforeach; ?>
 
-    // Attribute accessors
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text'])): ?>
     public function get<?= $attribute->getMethodName(); ?>(): string {

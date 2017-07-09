@@ -445,6 +445,9 @@ class Codegen {
     }
 
     public function writeFile(string $file, string $content) {
+        if (!$file) {
+            throw new \Exception('Invalid file to write ' . $file);
+        }
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
