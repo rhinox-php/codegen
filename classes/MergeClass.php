@@ -27,29 +27,22 @@ class MergeClass {
     }
 
     public function parse() {
+
+        $this->parser = new Parser();
+
         $this->codegen->log('Parsing', $this->file1);
-
-        $parser = new Parser();
-
-        $this->root1 = $parser->parseSourceFile(file_get_contents($this->file1));
-
-        $this->output = file_get_contents($this->file2);
-        $this->root2 = $parser->parseSourceFile($this->output);
-
-        $errors = DiagnosticsProvider::getDiagnostics($this->root1);
-        if (!empty($errors)) {
-            foreach ($errors as $error) {
-                $this->codegen->log($error);
-            }
-            return;
+        $this->root1 = $this->parser->parseSourceFile(file_get_contents($this->file1));
+        if (!$this->validate($this->file1, $this->root1)) {
+            return $this;
         }
 
+        $this->output = file_get_contents($this->file2);
+        $this->codegen->log('Parsing', $this->file2);
+        $this->root2 = $this->parser->parseSourceFile($this->output);
+
         $errors = DiagnosticsProvider::getDiagnostics($this->root2);
-        if (!empty($errors)) {
-            foreach ($errors as $error) {
-                $this->codegen->log($error);
-            }
-            return;
+        if (!$this->validate($this->file2, $this->root2)) {
+            return $this;
         }
 
         foreach ($this->root1->getChildNodes() as $child) {
@@ -64,14 +57,29 @@ class MergeClass {
         return $this;
     }
 
-    public function parseClass(Node\Statement\ClassDeclaration $class) {
+    protected function validate($file, $root) {
+        $errors = DiagnosticsProvider::getDiagnostics($root);
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                $lineCharacterPosition = PositionUtilities::getLineCharacterPositionFromPosition(
+                    $error->start,
+                    $root->getFileContents()
+                );
+                $this->codegen->log($file, $error->message, 'line', $lineCharacterPosition->line);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected function parseClass(Node\Statement\ClassDeclaration $class) {
         $className = $class->name->getText($this->root1);
         foreach ($class->classMembers as $member) {
             $this->parseClassMember($className, $member);
         }
     }
 
-    public function parseClassMember(string $className, $members) {
+    protected function parseClassMember(string $className, $members) {
         if (!is_array($members)) {
             $members = [$members];
         }
@@ -84,52 +92,71 @@ class MergeClass {
         }
     }
 
-    public function replaceClassMethod(string $className1, string $memberName, string $replacement) {
-        foreach ($this->iterateClassMembers($this->root2) as $className2 => $member) {
-            if ($className1 != $className2) {
-                continue;
+    protected function replaceClassMethod(string $className1, string $memberName, string $replacement) {
+        $found = false;
+        foreach ($this->iterateClassMembers($className1, $this->root2, Node\MethodDeclaration::class) as $member) {
+            if ($member->name->getText($this->root2) == $memberName) {
+                $found = true;
+                if ($member->getFullText() != $replacement) {
+                    $this->codegen->log('Replacing class method', $className1, $memberName);
+                    $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
+                }
             }
-            if ($member instanceof Node\MethodDeclaration) {
-                if ($member->name->getText($this->root2) == $memberName) {
-                    if ($member->getFullText() != $replacement) {
-                        $this->codegen->log('Replacing class method', $className1, $memberName);
-                        $this->output = str_replace($member->getFullText(), $replacement, $this->output);
-                    }
+        }
+        if (!$found) {
+            $this->codegen->log('Class method not found, appending', $className1, $memberName);
+            $classDeclaration = $this->getClassDeclaration($className1, $this->root2);
+            $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
+            $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
+        }
+        // @todo create class if it doesnt exist
+    }
+
+    protected function replaceClassProperty(string $className1, string $memberName, string $replacement) {
+        $found = false;
+        foreach ($this->iterateClassMembers($className1, $this->root2, Node\PropertyDeclaration::class) as $member) {
+            if ($member->propertyElements->getText($this->root2) == $memberName) {
+                if ($member->getFullText() != $replacement) {
+                    $this->codegen->log('Replacing class property', $className1, $memberName);
+                    $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
+                    $found = true;
                 }
             }
         }
     }
 
-    public function replaceClassProperty(string $className1, string $memberName, string $replacement) {
-        foreach ($this->iterateClassMembers($this->root2) as $className2 => $member) {
-            if ($className1 != $className2) {
-                continue;
-            }
-            if ($member instanceof Node\PropertyDeclaration) {
-                if ($member->propertyElements->getText($this->root2) == $memberName) {
-                    if ($member->getFullText() != $replacement) {
-                        $this->codegen->log('Replacing class property', $className1, $memberName);
-                        $this->output = str_replace($member->getFullText(), $replacement, $this->output);
-                    }
-                }
-            }
-        }
-    }
-
-    public function iterateClassMembers($root) {
-        foreach ($this->root2->getChildNodes() as $child) {
+    protected function getClassDeclaration($className1, $root) {
+        foreach ($root->getChildNodes() as $child) {
             if ($child instanceof Node\Statement\ClassDeclaration) {
-                $className = $child->name->getText($this->root2);
-                foreach ($child->classMembers as $members) {
-                    if (!is_array($members)) {
-                        $members = [$members];
-                    }
-                    foreach ($members as $member) {
-                        yield $className => $member;
-                    }
+                $className2 = $child->name->getText($root);
+                if ($className1 == $className2) {
+                    return $child;
                 }
             }
         }
+        return null;
+    }
+
+    protected function iterateClassMembers($className1, $root, string $type = null) {
+        $classDeclaration = $this->getClassDeclaration($className1, $root);
+        if (!$classDeclaration) {
+            return;
+        }
+        foreach ($classDeclaration->classMembers as $members) {
+            if (!is_array($members)) {
+                $members = [$members];
+            }
+            foreach ($members as $member) {
+                if (!$type || $member instanceof $type) {
+                    yield $member;
+                }
+            }
+        }
+    }
+
+    protected function setOutput(string $output) {
+        $this->output = $output;
+        $this->root2 = $this->parser->parseSourceFile($this->output);
     }
 }
 

@@ -15,6 +15,6 @@ class Info extends AbstractCommand {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
-            ->info();
+            ->codegenInfo();
     }
 }

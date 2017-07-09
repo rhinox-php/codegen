@@ -83,12 +83,13 @@ abstract class Template {
         }
     }
 
-    public function getCodegen(): Codegen {
+
+    public function getCodegen(): \Rhino\Codegen\Codegen {
         return $this->codegen;
     }
 
-    public function setCodegen(Codegen $codegen): Template {
-        $this->codegen = $codegen;
+    public function setCodegen(\Rhino\Codegen\Codegen $value): self {
+        $this->codegen = $value;
         return $this;
     }
 
@@ -118,5 +119,23 @@ abstract class Template {
 
     public function iterateRoutes() {
         return [];
+    }
+
+    public function getNamespaces(): array {
+        return $this->namespaces;
+    }
+
+    public function setNamespaces(array $value): self {
+        $this->namespaces = $value;
+        return $this;
+    }
+
+    public function getPaths(): array {
+        return $this->paths;
+    }
+
+    public function setPaths(array $value): self {
+        $this->paths = $value;
+        return $this;
     }
 }

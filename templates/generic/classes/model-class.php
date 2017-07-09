@@ -66,6 +66,28 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
+<?php elseif ($attribute->is(['Object'])): ?>
+
+    public function get<?= $attribute->getMethodName(); ?>(): \<?= $attribute->getClass(); ?> {
+        return $this-><?= $attribute->getPropertyName(); ?>;
+    }
+
+    public function set<?= $attribute->getMethodName(); ?>(\<?= $attribute->getClass(); ?> $value): self {
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
+        return $this;
+    }
+
+<?php elseif ($attribute->is(['Array'])): ?>
+
+    public function get<?= $attribute->getMethodName(); ?>(): array {
+        return $this-><?= $attribute->getPropertyName(); ?>;
+    }
+
+    public function set<?= $attribute->getMethodName(); ?>(array $value): self {
+        $this-><?= $attribute->getPropertyName(); ?> = $value;
+        return $this;
+    }
+
 <?php endif; ?>
 <?php endforeach; ?>
 }

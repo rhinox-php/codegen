@@ -38,10 +38,11 @@ class Codegen {
         }
     }
 
-    public function info() {
+    public function codegenInfo() {
         foreach ($this->iterateTemplates() as $template) {
-            foreach ($this->getNamespaces() as $namespace) {
-                $this->log($namespace);
+            $this->info('Namespaces:');
+            foreach ($template->getNamespaces() as $key => $namespace) {
+                $this->info($key, $namespace);
             }
         }
     }
@@ -203,6 +204,20 @@ class Codegen {
             return $message;
         }, $messages);
         echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
+    }
+
+    public function info(...$messages) {
+        // @todo inject a logger
+        if (empty($messages)) {
+            return;
+        }
+        $messages = array_map(function($message) {
+            if (is_array($message)) {
+                return implode(' ', $message);
+            }
+            return $message;
+        }, $messages);
+        echo implode(' ', $messages) . PHP_EOL;
     }
 
     public function log(...$messages) {
