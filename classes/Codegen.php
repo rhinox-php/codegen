@@ -39,10 +39,10 @@ class Codegen {
     }
 
     public function codegenInfo() {
+        $this->info('Namespaces:');
         foreach ($this->iterateTemplates() as $template) {
-            $this->info('Namespaces:');
             foreach ($template->getNamespaces() as $key => $namespace) {
-                $this->info($key, $namespace);
+                $this->infoOnce($key, $namespace);
             }
         }
     }
@@ -232,6 +232,14 @@ class Codegen {
             return $message;
         }, $messages);
         echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
+    }
+
+    public function infoOnce(...$messages) {
+        $key = md5(implode(' ', $messages));
+        if (!isset($this->loggedOnce[$key])) {
+            $this->loggedOnce[$key] = true;
+            $this->info(...$messages);
+        }
     }
 
     public function logOnce(...$messages) {
