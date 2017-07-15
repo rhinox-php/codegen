@@ -12,7 +12,7 @@ class SqlFull extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\
 
     public function iterateDatabaseResetSql(): iterable {
         foreach ($this->codegen->getEntities() as $entity) {
-            yield $this->bufferTemplate('sql/full/create-table', [
+            yield $this->bufferTemplate('generic/sql/full/create-table', [
                 'entity' => $entity,
             ]);
         }

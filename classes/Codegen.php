@@ -149,6 +149,7 @@ class Codegen {
             if ($template instanceof Template\Interfaces\DatabaseReset) {
                 $this->log('Resetting', get_class($template));
                 foreach ($template->iterateDatabaseResetSql() as $sql) {
+                    $this->debug($sql);
                     if (!$this->dryRun) {
                         $this->getPdo()->query($sql);
                     }
