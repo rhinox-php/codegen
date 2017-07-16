@@ -9,7 +9,7 @@
             <div class="form-group">
                 <label class="col-md-2"><?= $attribute->getLabel(); ?></label>
                 <div class="col-md-10">
-                    <input type="date" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="<?= '<?= $entity->get' . $attribute->getMethodName() . '()->format("Y-m-d")->attr(); ?>'; ?>" placeholder="<?= $attribute->getLabel(); ?>" />
+                    <input type="date" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="<?= '<?= $' . $entity->getPropertyName() . '->get' . $attribute->getMethodName() . '()->format("Y-m-d")->attr(); ?>'; ?>" placeholder="<?= $attribute->getLabel(); ?>" />
                 </div>
             </div>
 <?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
@@ -17,7 +17,7 @@
                 <div class="col-md-offset-2 col-md-10">
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" name="<?= $attribute->getPropertyName(); ?>" <?= '<?= $entity->get' . $attribute->getMethodName() . '()->raw() ? "checked" : ""; ?>'; ?> placeholder="<?= $attribute->getLabel(); ?>" />
+                            <input type="checkbox" name="<?= $attribute->getPropertyName(); ?>" <?= '<?= $' . $entity->getPropertyName() . '->get' . $attribute->getMethodName() . '()->raw() ? "checked" : ""; ?>'; ?> placeholder="<?= $attribute->getLabel(); ?>" />
                             <?= $attribute->getLabel(); ?>
                         </label>
                     </div>
@@ -27,7 +27,7 @@
             <div class="form-group">
                 <label class="col-md-2"><?= $attribute->getLabel(); ?></label>
                 <div class="col-md-10">
-                    <input type="text" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="<?= '<?= $entity->get' . $attribute->getMethodName() . '()->attr(); ?>'; ?>" placeholder="<?= $attribute->getLabel(); ?>" />
+                    <input type="text" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="<?= '<?= $' . $entity->getPropertyName() . '->get' . $attribute->getMethodName() . '()->attr(); ?>'; ?>" placeholder="<?= $attribute->getLabel(); ?>" />
                 </div>
             </div>
 <?php endif; ?>
