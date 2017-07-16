@@ -25,11 +25,9 @@ abstract class Template {
     }
 
     protected function renderTemplate(string $template, string $outputFile, array $data = [], bool $overwrite = true) {
-        $outputFile = $this->getFilePath($template, $outputFile);
+        $outputFile = $this->getFilePath($template, $outputFile, $data);
         if (file_exists($outputFile)) {
             $outputFile = realpath($outputFile);
-        } elseif (is_dir(dirname($outputFile))) {
-            $outputFile = realpath(dirname($outputFile)) . DIRECTORY_SEPARATOR . basename($outputFile);
         }
 
         $templateFile = $this->getTemplateFile($template);
@@ -93,11 +91,17 @@ abstract class Template {
         return $this;
     }
 
-    public function getFilePath(string $template, string $file): string {
+    private function getFilePath(string $template, string $file, array $data): string {
         if (!isset($this->paths[$template])) {
-            return $this->codegen->getPath() . '/' . $file;
+            $path = $this->codegen->getPath() . '/' . $file;
+        } else {
+            $path = $this->codegen->getPath() . '/' . $this->paths[$template];
         }
-        return $this->codegen->getPath() . '/' . $this->paths[$template] . '/' . basename($file);
+        $path = preg_replace_callback('/{{(?<expression>.*?)}}/', function($matches) use($data) {
+            extract($data);
+            return eval('return ' . $matches['expression'] . ';');
+        }, $path);
+        return $path;
     }
 
     public function setPath(string $template, string $path): self {
