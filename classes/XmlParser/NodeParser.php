@@ -2,8 +2,6 @@
 namespace Rhino\Codegen\XmlParser;
 
 abstract class NodeParser {
-    use \Rhino\Codegen\Logger;
-
     public abstract function parse(\SimpleXMLElement $node);
 
     public function preparse(\SimpleXMLElement $node) {

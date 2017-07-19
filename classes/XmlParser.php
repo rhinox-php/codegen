@@ -13,7 +13,9 @@ class XmlParser {
         $this->file = $file;
         $this->codegen = $codegen;
 
+        $this->addParser('codegen', new XmlParser\CodegenParser());
         $this->addParser('entity', new XmlParser\EntityParser());
+        $this->addParser('routes', new XmlParser\RoutesParser());
     }
 
     public function parse(): Codegen {
@@ -22,14 +24,19 @@ class XmlParser {
             $file = $this->getFile();
             $xml = simplexml_load_file($file);
             if (!$xml) {
-                throw new \Exception('Could not read XML.');
+                throw new \Exception('Could not read XML: ' . implode(PHP_EOL, array_map(function($error) {
+                    return "$error->line:$error->column $error->message";
+                }, libxml_get_errors())));
             }
-            foreach ($xml as $child) {
-                $this->preparseNode($child);
-            }
-            foreach ($xml as $child) {
-                $this->parseNode($child);
-            }
+            $this->preparseNode($xml);
+            $this->parseNode($xml);
+            // var_dump($xml->getName());die();
+            // foreach ($xml as $child) {
+            //     $this->preparseNode($child);
+            // }
+            // foreach ($xml as $child) {
+            //     $this->parseNode($child);
+            // }
         } catch (\Exception $exception) {
             throw new \Exception('Error parsing XML in ' . $file, 1, $exception);
         } finally {
@@ -44,6 +51,7 @@ class XmlParser {
         if (!isset($this->parsers[$node->getName()])) {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
+        $this->codegen->log('Pre-parsing node', $node->getName(), 'with', get_class($this->parsers[$node->getName()]));
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->preparse($node);
     }
 
@@ -51,6 +59,7 @@ class XmlParser {
         if (!isset($this->parsers[$node->getName()])) {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
+        $this->codegen->log('Parsing node', $node->getName(), 'with', get_class($this->parsers[$node->getName()]));
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->parse($node);
     }
 

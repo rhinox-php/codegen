@@ -2,6 +2,7 @@
 namespace Rhino\Codegen\XmlParser;
 
 class EntityParser extends AggregateParser {
+    private $entity;
     
     public function getChildParsers(): array {
         return [
@@ -22,8 +23,8 @@ class EntityParser extends AggregateParser {
         ];
     }
     
-    public function preparse(\SimpleXMLElement $node) {
-        $this->log('Parsing entity', (string) $node['name']);
+    public function preparse(\SimpleXMLElement $node): void {
+        $this->codegen->log('Parsing entity', (string) $node['name']);
 
         $entity = new \Rhino\Codegen\Entity();
         $entity->setName((string) $node['name']);
@@ -31,11 +32,11 @@ class EntityParser extends AggregateParser {
         $this->codegen->addEntity($entity);
     }
     
-    public function parseNode(\SimpleXMLElement $node) {
+    public function parseNode(\SimpleXMLElement $node): void {
         $this->entity = $this->codegen->findEntity((string) $node['name']);
     }
     
-    public function parseChild(\SimpleXMLElement $node, $child) {
-        return $child->setEntity($this->entity);
+    public function parseChildNode(\SimpleXMLElement $node, NodeParser $childParser): void {
+        $childParser->setEntity($this->entity);
     }
 }

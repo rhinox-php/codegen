@@ -5,7 +5,7 @@ class ControllerModelIndex extends \Rhino\Codegen\Template\Generic {
     public function generate() {
         foreach ($this->codegen->getEntities() as $entity) {
             $this->codegen->router->addRoute()
-                ->setHttpMethods('get', 'post')
+                ->setHttpMethods(['get', 'post'])
                 ->setUrlPath('/admin/' . $entity->getPluralRouteName())
                 ->setControllerClass($this->getNamespace('controller-implemented') . '\\' . $entity->getClassName() . '\\IndexController')
                 ->setControllerMethod('index');

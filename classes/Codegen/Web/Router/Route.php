@@ -12,8 +12,8 @@ class Route {
         return $this->httpMethods;
     }
 
-    public function setHttpMethods(string ...$value): self {
-        $this->httpMethods = $value;
+    public function setHttpMethods(array $httpMethods): self {
+        $this->httpMethods = $httpMethods;
         return $this;
     }
 
