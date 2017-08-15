@@ -5,7 +5,35 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 class <?= $entity->getClassName(); ?> {
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute->is(['Array'])): ?>
+<?php if ($attribute->isNullable()): ?>
+    /** @var array|null <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPluralPropertyName(); ?>;
+<?php else: ?>
+    /** @var array <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPluralPropertyName(); ?> = [];
+<?php endif; ?>
+<?php elseif ($attribute->is(['String', 'Text'])): ?>
+    /** @var string|null <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
+
+<?php elseif ($attribute->is(['Int'])): ?>
+    /** @var int|null <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPropertyName(); ?>;
+
+<?php elseif ($attribute->is(['Decimal'])): ?>
+    /** @var float|null <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPropertyName(); ?>;
+
+<?php elseif ($attribute->is(['Bool'])): ?>
+    /** @var bool|null <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPropertyName(); ?>;
+
+<?php else: ?>
+    /** @var mixed <?= $attribute->getName(); ?> */
+    protected $<?= $attribute->getPropertyName(); ?>;
+    
+<?php endif; ?>
 <?php endforeach; ?>
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
@@ -79,12 +107,17 @@ class <?= $entity->getClassName(); ?> {
 
 <?php elseif ($attribute->is(['Array'])): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>(): array {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+    public function get<?= $attribute->getPluralMethodName(); ?>(): array {
+        return $this-><?= $attribute->getPluralPropertyName(); ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(array $value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->getPluralMethodName(); ?>(array $<?= $attribute->getPluralPropertyName(); ?>): self {
+        $this-><?= $attribute->getPluralPropertyName(); ?> = $<?= $attribute->getPluralPropertyName(); ?>;
+        return $this;
+    }
+
+    public function add<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>): self {
+        $this-><?= $attribute->getPropertyName(); ?> = $<?= $attribute->getPropertyName(); ?>;
         return $this;
     }
 
