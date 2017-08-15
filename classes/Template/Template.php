@@ -1,6 +1,7 @@
 <?php
 namespace Rhino\Codegen\Template;
 use Rhino\Codegen\Codegen;
+use Rhino\Codegen\Hook;
 
 abstract class Template {
 
@@ -60,6 +61,7 @@ abstract class Template {
         $this->codegen->createDirectory($directory);
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
         $this->codegen->writeFile($outputFile, $output);
+        $this->hook('gen:write', [$outputFile]);
     }
 
     protected function getTemplateFile($name) {
@@ -87,8 +89,10 @@ abstract class Template {
     }
 
     protected function hook(string $hookName, array $parameters): array {
-        foreach ($this->hooks[$hookName] as $hook) {
-            $parameters = $hook(...$parameters);
+        if (isset($this->hooks[$hookName])) {
+            foreach ($this->hooks[$hookName] as $hook) {
+                $parameters = $hook->process(...$parameters);
+            }
         }
         return $parameters;
     }
@@ -154,8 +158,13 @@ abstract class Template {
         return $this;
     }
 
-    public function addHook(string $hookName, callable $callback): self {
-        $this->hooks[$hookName][] = $callback;
+    public function addHook(Hook\Hook $hook): self {
+        $this->hooks[$hook->getHook()][] = $hook;
+        return $this;
+    }
+
+    public function addHookCallback(string $hookName, callable $callback): self {
+        $this->hooks[$hookName][] = new Hook\Callback($hookName, $callback);
         return $this;
     }
 }
