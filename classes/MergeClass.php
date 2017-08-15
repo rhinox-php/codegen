@@ -4,60 +4,76 @@ namespace Rhino\Codegen;
 use Microsoft\PhpParser\{DiagnosticsProvider, Node, Parser, PositionUtilities};
 
 class MergeClass {
-    protected $file1;
-    protected $file2;
+    protected $classSourceFrom;
+    protected $classSourceInto;
     protected $root1;
     protected $root2;
     protected $output;
 
-    public function __construct(Codegen $codegen, string $file1, string $file2) {
+    public function __construct(Codegen $codegen) {
         $this->codegen = $codegen;
-        $this->file1 = realpath($file1);
-        if (!$this->file1) {
-            throw new \Exception('Could not find file 1: ' . $file1);
-        }
-        $this->file2 = realpath($file2);
-        if (!$this->file2) {
-            throw new \Exception('Could not find file 2: ' . $file2);
-        }
+    }
+
+    public function setClassSourceFrom(string $classSourceFrom): self {
+        $this->classSourceFrom = $classSourceFrom;
+        return $this;
+    }
+
+    public function setClassSourceInto(string $classSourceInto): self {
+        $this->classSourceInto = $classSourceInto;
+        return $this;
     }
 
     public static function merge(Codegen $codegen, string $file1, string $file2): self {
-        return (new static($codegen, $file1, $file2))->parse();
+        $file1 = realpath($file1);
+        if (!$file1) {
+            throw new \Exception('Could not find file 1: ' . $file1);
+        }
+        $file2 = realpath($file2);
+        if (!$file2) {
+            throw new \Exception('Could not find file 2: ' . $file2);
+        }
+
+        $instance = new static($codegen);
+        $this->codegen->log('Loading ' . $file1);
+        $instance->setClassSourceFrom(file_get_contents($file1));
+        $this->codegen->log('Loading ' . $file2);
+        $instance->setClassSourceInto(file_get_contents($file2));
+        $instance->parse();
+        return $instance;
     }
 
     public function parse() {
-
         $this->parser = new Parser();
 
-        $this->codegen->log('Parsing', $this->file1);
-        $this->root1 = $this->parser->parseSourceFile(file_get_contents($this->file1));
-        if (!$this->validate($this->file1, $this->root1)) {
+        $this->codegen->log('Parsing class source from');
+        $this->root1 = $this->parser->parseSourceFile($this->classSourceFrom);
+        if (!$this->validate($this->classSourceFrom, $this->root1)) {
             return $this;
         }
 
-        $this->output = file_get_contents($this->file2);
-        $this->codegen->log('Parsing', $this->file2);
+        $this->output = $this->classSourceInto;
+        $this->codegen->log('Parsing class source into');
         $this->root2 = $this->parser->parseSourceFile($this->output);
 
         $errors = DiagnosticsProvider::getDiagnostics($this->root2);
-        if (!$this->validate($this->file2, $this->root2)) {
+        if (!$this->validate($this->classSourceInto, $this->root2)) {
             return $this;
         }
 
         foreach ($this->root1->getChildNodes() as $child) {
-            // var_dump(get_class($child));
             if ($child instanceof Node\Statement\ClassDeclaration) {
                 $this->parseClass($child);
             }
         }
 
-        $this->codegen->writeFile($this->file2, $this->output);
-
         return $this;
     }
 
-    protected function validate($file, $root) {
+    protected function validate($content, $root) {
+        assert(is_string($content), new \InvalidArgumentException('Expected source to be a string.'));
+        assert(strlen($content) > 0, new \InvalidArgumentException('Expected source string to not be empty.'));
+
         $errors = DiagnosticsProvider::getDiagnostics($root);
         if (!empty($errors)) {
             foreach ($errors as $error) {
@@ -65,7 +81,7 @@ class MergeClass {
                     $error->start,
                     $root->getFileContents()
                 );
-                $this->codegen->log($file, $error->message, 'line', $lineCharacterPosition->line);
+                $this->codegen->log($content, $error->message, 'line', $lineCharacterPosition->line);
                 return false;
             }
         }
@@ -106,6 +122,10 @@ class MergeClass {
         if (!$found) {
             $this->codegen->log('Class method not found, appending', $className1, $memberName);
             $classDeclaration = $this->getClassDeclaration($className1, $this->root2);
+            if (!$classDeclaration) {
+                return;
+            }
+            var_dump($classDeclaration);
             $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
             $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
         }
@@ -157,6 +177,10 @@ class MergeClass {
     protected function setOutput(string $output) {
         $this->output = $output;
         $this->root2 = $this->parser->parseSourceFile($this->output);
+    }
+
+    public function getOutput() {
+        return $this->output;
     }
 }
 
