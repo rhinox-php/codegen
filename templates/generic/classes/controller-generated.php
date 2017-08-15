@@ -3,10 +3,10 @@
 namespace <?= $this->getNamespace('controller-generated'); ?>;
 use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>;
 
-class <?= $entity->getClassName(); ?>Controller extends AbstractController {
+class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace('controller-implemented'); ?>\AbstractController {
 
     public function index() {
-        $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
+        $dataTable = $this->getDataTable();
         if ($dataTable->process($this->request, $this->response)) {
             return;
         }
@@ -28,24 +28,14 @@ class <?= $entity->getClassName(); ?>Controller extends AbstractController {
         $this->form($entity);
     }
 
-    protected function form(<?= $entity->getClassName(); ?> $entity) {
+    protected function form(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
         if ($this->hasInput()) {
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
-<?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->getPropertyName(); ?>')));
-<?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
-<?php endif; ?>
-<?php endforeach; ?>
-
-            $entity->save();
-            $this->response->redirect('/<?= $entity->getPluralRouteName(); ?>');
-            return;
+            $this->processInput($<?= $entity->getPropertyName(); ?>);
+            if ($this->validate($<?= $entity->getPropertyName(); ?>)) {
+                $<?= $entity->getPropertyName(); ?>->save();
+                $this->response->redirect('/<?= $entity->getRouteName(); ?>/edit/' . $<?= $entity->getPropertyName(); ?>->getId());
+                return;
+            }
         }
 
         $this->render('<?= $entity->getFileName(); ?>/form', [
@@ -53,4 +43,26 @@ class <?= $entity->getClassName(); ?>Controller extends AbstractController {
         ]);
     }
 
+    protected function getDataTable(): \Rhino\DataTable\DataTable {
+        return <?= $entity->getClassName(); ?>::getDataTable();
+    }
+
+    protected function processInput(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>): void {
+<?php foreach ($entity->getAttributes() as $attribute): ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
+    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
+<?php endif; ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->getPropertyName(); ?>')));
+<?php endif; ?>
+<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
+<?php endif; ?>
+<?php endforeach; ?>
+    }
+
+    public function validate(): bool {
+        return true;
+    }
 }

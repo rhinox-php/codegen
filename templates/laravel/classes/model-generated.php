@@ -191,6 +191,14 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         return $this-><?= $relationship->getPropertyName(); ?>;
     }
 
+    /**
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     */
+    public function set<?= $relationship->getClassName(); ?>(<?= $relationship->getClassName(); ?> $<?= $relationship->getPropertyName(); ?>) {
+        $this-><?= $relationship->getPropertyName(); ?> = $<?= $relationship->getPropertyName(); ?>;
+        return $this;
+    }
+
 <?php endforeach; ?>
 
     // Attribute accessors
