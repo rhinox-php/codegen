@@ -10,6 +10,7 @@ class ArrayAttributeParser extends AttributeParser {
         $attribute->setMethodName((string) $node['method']);
         $attribute->setColumnName((string) $node['column']);
         $attribute->setJsonSerialize((string) $node['json-serialize'] !== false);
+        $attribute->setNullable((string) $node['nullable'] !== 'false');
         $this->entity->addAttribute($attribute);
     }
 }
