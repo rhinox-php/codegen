@@ -44,6 +44,10 @@ class Attribute {
         $this->propertyName = $propertyName;
         return $this;
     }
+    
+    public function getPluralPropertyName() {
+        return $this->pluralize($this->getPropertyName());
+    }
 
     public function getMethodName(): string {
         return $this->methodName ?: $this->camelize($this->getName());
@@ -52,6 +56,10 @@ class Attribute {
     public function setMethodName($methodName) {
         $this->methodName = $methodName;
         return $this;
+    }
+    
+    public function getPluralMethodName() {
+        return $this->pluralize($this->getMethodName());
     }
 
     public function getColumnName(): string {
