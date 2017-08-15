@@ -11,7 +11,7 @@ class FastRoute extends \Rhino\Codegen\Template\Generic {
         ]);
         $this->codegen->composer->addDependency('nikic/fast-route', '~1.2');
         $this->codegen->composer->addDependency('rhinox/http', 'dev-master');
-        $this->renderTemplate('generic/route-fast-route', 'router.php', [
+        $this->renderTemplate('generic/route-fast-route', 'src/router.php', [
             'router' => $this->codegen->router,
             'entities' => $this->codegen->getEntities(),
         ]);
