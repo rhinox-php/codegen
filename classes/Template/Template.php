@@ -16,6 +16,11 @@ abstract class Template {
         'test-model' => 'Test\Model',
     ];
     protected $paths = [];
+    protected $merge = false;
+    protected $hooks = [
+        'gen:pre' => [],
+        'gen:post' => [],
+    ];
 
     public abstract function generate();
 
@@ -54,6 +59,23 @@ abstract class Template {
         $output = $this->bufferTemplateFile($templateFile, $data);
         $directory = dirname($outputFile);
         $this->codegen->createDirectory($directory);
+        if ($this->getMerge()) {
+            if (is_file($outputFile)) {
+                var_dump($outputFile);
+            }
+
+            $merge = new \Rhino\Codegen\MergeClass($this->codegen);
+            if (!is_file($outputFile)) {
+                $this->codegen->writeFile($outputFile, $output);
+                return;
+            }
+            $merge->setClassSourceFrom($output);
+            $merge->setClassSourceInto(file_get_contents($outputFile));
+            $merge->parse();
+            $this->codegen->writeFile($outputFile, $merge->getOutput());
+            return;
+        }
+        [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
         $this->codegen->writeFile($outputFile, $output);
     }
 
@@ -81,6 +103,12 @@ abstract class Template {
         }
     }
 
+    protected function hook(string $hookName, array $parameters): array {
+        foreach ($this->hooks[$hookName] as $hook) {
+            $parameters = $hook(...$parameters);
+        }
+        return $parameters;
+    }
 
     public function getCodegen(): \Rhino\Codegen\Codegen {
         return $this->codegen;
@@ -113,7 +141,7 @@ abstract class Template {
         if (!isset($this->namespaces[$type])) {
             throw new \Exception('Could not find namespace for type ' . $type);
         }
-        return $this->codegen->getNamespace() . '\\' . $this->namespaces[$type];
+        return rtrim($this->codegen->getNamespace() . '\\' . $this->namespaces[$type], '\\');
     }
 
     public function setNamespace(string $type, string $namespace): self {
@@ -140,6 +168,20 @@ abstract class Template {
 
     public function setPaths(array $value): self {
         $this->paths = $value;
+        return $this;
+    }
+
+    public function getMerge(): bool {
+        return $this->merge;
+    }
+
+    public function setMerge(bool $merge): self {
+        $this->merge = $merge;
+        return $this;
+    }
+
+    public function addHook(string $hookName, callable $callback): self {
+        $this->hooks[$hookName][] = $callback;
         return $this;
     }
 }
