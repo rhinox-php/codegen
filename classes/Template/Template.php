@@ -16,7 +16,6 @@ abstract class Template {
         'test-model' => 'Test\Model',
     ];
     protected $paths = [];
-    protected $merge = false;
     protected $hooks = [
         'gen:pre' => [],
         'gen:post' => [],
@@ -59,22 +58,6 @@ abstract class Template {
         $output = $this->bufferTemplateFile($templateFile, $data);
         $directory = dirname($outputFile);
         $this->codegen->createDirectory($directory);
-        if ($this->getMerge()) {
-            if (is_file($outputFile)) {
-                var_dump($outputFile);
-            }
-
-            $merge = new \Rhino\Codegen\MergeClass($this->codegen);
-            if (!is_file($outputFile)) {
-                $this->codegen->writeFile($outputFile, $output);
-                return;
-            }
-            $merge->setClassSourceFrom($output);
-            $merge->setClassSourceInto(file_get_contents($outputFile));
-            $merge->parse();
-            $this->codegen->writeFile($outputFile, $merge->getOutput());
-            return;
-        }
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
         $this->codegen->writeFile($outputFile, $output);
     }
@@ -168,15 +151,6 @@ abstract class Template {
 
     public function setPaths(array $value): self {
         $this->paths = $value;
-        return $this;
-    }
-
-    public function getMerge(): bool {
-        return $this->merge;
-    }
-
-    public function setMerge(bool $merge): self {
-        $this->merge = $merge;
         return $this;
     }
 
