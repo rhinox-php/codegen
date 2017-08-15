@@ -4,6 +4,7 @@ namespace Rhino\Codegen;
 class Entity {
     use Inflector;
 
+    protected $type;
     protected $name;
     protected $pluralName;
     protected $authentication = false;
@@ -16,6 +17,15 @@ class Entity {
 
     public function setName(string $name) {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getType(): string {
+        return $this->type;
+    }
+
+    public function setType(string $type) {
+        $this->type = $type;
         return $this;
     }
 

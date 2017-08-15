@@ -68,8 +68,15 @@ class XmlParser {
     }
 
     public function addParser($nodeName, $parser) {
+        $this->codegen->log('Adding parser', $nodeName, get_class($parser));
         $this->parsers[$nodeName] = $parser;
         return $this;
     }
 
+    public function getParser(string $name) {
+        if (!isset($this->parsers[$name])) {
+            throw new \Exception('Could not find child parser for ' . $name . ' in ' . get_class($this));
+        }
+        return $this->parsers[$name];
+    }
 }
