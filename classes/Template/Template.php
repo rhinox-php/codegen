@@ -106,7 +106,7 @@ abstract class Template {
         return $this;
     }
 
-    private function getFilePath(string $template, string $file, array $data): string {
+    protected function getFilePath(string $template, string $file, array $data): string {
         if (!isset($this->paths[$template])) {
             $path = $this->codegen->getPath() . '/' . $file;
         } else {

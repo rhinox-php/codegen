@@ -94,29 +94,35 @@ class Codegen {
             USE `{$this->getDatabaseName()}`;
         ");
 
+        $date = date('Y_m_d_His');
+
         $sqlSet = [];
         foreach ($this->iterateTemplates() as $template) {
             if ($template instanceof Template\Interfaces\DatabaseMigrate) {
                 $this->log('Migrating', get_class($template));
-                foreach ($template->iterateDatabaseMigrateSql($pdo) as $sql) {
+                foreach ($template->iterateDatabaseMigrateSql($pdo, $date) as $path => $sql) {
                     $sql = $this->unindent($sql);
                     $this->debug($sql);
-                    $sqlSet[] = $sql;
+                    if (!isset($sqlSet[$path])) {
+                        $sqlSet[$path] = [];
+                    }
+                    $sqlSet[$path][] = $sql;
                 }
             }
         }
+
         if (empty($sqlSet)) {
             $this->log('Nothing to migrate.');
             return;
         }
-        // @todo make path customizable
-        $migrationPath = $this->getPath() . '/src/sql/up/';
-        $this->createDirectory($migrationPath);
-        $migrationFile = $migrationPath . date('Y_m_d_His') . '.sql';
-        if (!$write) {
-            $this->log('Not writing migration file', $migrationFile);
-        } else {
-            $this->writeFile($migrationFile, implode(PHP_EOL . PHP_EOL, $sqlSet));
+
+        foreach ($sqlSet as $migrationFile => $migrations) {
+            $this->createDirectory(dirname($migrationFile));
+            if (!$write) {
+                $this->log('Not writing migration file', $migrationFile);
+            } else {
+                $this->writeFile($migrationFile, implode(PHP_EOL . PHP_EOL, $migrations) . PHP_EOL);
+            }
         }
 
         if (!$run) {
