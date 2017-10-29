@@ -131,10 +131,12 @@ class Codegen {
         }
 
         $this->log('Running migration...');
-        foreach ($sqlSet as $sql) {
-            $this->debug($sql);
-            if (!$this->dryRun) {
-                $this->getPdo()->query($sql);
+        foreach ($sqlSet as $migrationFile => $migrations) {
+            foreach ($migrations as $sql) {
+                $this->debug($sql);
+                if (!$this->dryRun) {
+                    $this->getPdo()->query($sql);
+                }
             }
         }
     }

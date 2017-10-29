@@ -39,7 +39,7 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
         }).catch(api.handleError(done));
     });
 
-    it('should read a <?= $entity->getName(); ?>', function (done) {
+    it('should list <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
             return api.get('<?= $entity->getRouteName(); ?>/index?page[limit]=10');
         }).then(function(response) {
@@ -105,6 +105,14 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
         }).catch(api.handleError(done));
     });
 
+    it('should fail to update a <?= $entity->getName(); ?>', function (done) {
+        api.auth().then(function() {
+            return api.post('<?= $entity->getRouteName(); ?>/update/' + api.idNotFound, {}, 404);
+        }).then(function() {
+            done();
+        }).catch(api.handleError(done));
+    });
+
     it('should delete a <?= $entity->getName(); ?>', function (done) {
         api.auth().then(function() {
             return api.post('<?= $entity->getRouteName(); ?>/delete/' + <?= $entity->getPropertyName(); ?>.data.id, <?= $entity->getPropertyName(); ?>);
@@ -113,6 +121,14 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
             api.validateJsonApi(response);
         }).then(function() {
             return api.get('<?= $entity->getRouteName(); ?>/get/' + <?= $entity->getPropertyName(); ?>.data.id, null, 404);
+        }).then(function() {
+            done();
+        }).catch(api.handleError(done));
+    });
+
+    it('should fail to delete a <?= $entity->getName(); ?>', function (done) {
+        api.auth().then(function() {
+            return api.post('<?= $entity->getRouteName(); ?>/delete/' + api.idNotFound, null, 404);
         }).then(function() {
             done();
         }).catch(api.handleError(done));

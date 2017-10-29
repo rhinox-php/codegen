@@ -3,13 +3,13 @@
 $dispatcher = \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $router) {
 <?php foreach ($router->sort()->getRoutes() as $route): ?>
 <?php foreach ($route->getHttpMethods() as $httpMethod): ?>
-    $router->addRoute('<?= strtoupper($httpMethod); ?>', '<?= $route->getUrlPath(); ?>', [\<?= $this->getNamespace('controller-implemented'); ?>\<?= $route->getControllerClass(); ?>::class, '<?= $route->getControllerMethod(); ?>']);
+    $router->addRoute('<?= strtoupper($httpMethod); ?>', '<?= $route->getUrlPath(); ?>', [<?= $route->getControllerClass(); ?>::class, '<?= $route->getControllerMethod(); ?>']);
 <?php endforeach; ?>
 <?php endforeach; ?>
 
 <?php foreach ($this->codegen->getTemplates() as $template): ?>
 <?php foreach ($template->iterateRoutes() as [$method, $url, $controller, $function]): ?>
-    $router->addRoute('<?= strtoupper($method); ?>', '<?= $url; ?>', [\<?= $this->getNamespace('controller-implemented'); ?>\<?= $controller; ?>::class, '<?= $function; ?>']);
+    $router->addRoute('<?= strtoupper($method); ?>', '<?= $url; ?>', [<?= $controller; ?>::class, '<?= $function; ?>']);
 <?php endforeach; ?>
 <?php endforeach; ?>
 });
@@ -31,7 +31,13 @@ switch ($routeInfo[0]) {
     case \FastRoute\Dispatcher::FOUND: {
         list($status, $handler, $parameters) = $routeInfo;
         list($controllerName, $methodName) = $handler;
+
+        assert(class_exists($controllerName), new \Exception('Expected controller class to exist: ' . $controllerName));
+
         $controller = new $controllerName();
+
+        assert(method_exists($controller, $methodName), new \Exception('Expected controller method to exist: ' . $methodName . ' on class ' . $controllerName));
+
         $controller->setRequest($request);
         $controller->setResponse($response);
         $controller->setInput(new \Rhino\InputData\InputData(array_merge(

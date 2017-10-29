@@ -29,7 +29,7 @@ class Watch extends AbstractCommand {
             $genInput = new ArrayInput($arguments);
             $returnCode = $command->run($genInput, $output);
         });
-        $watcher->addDirectory(__DIR__ . '/../');
+        $watcher->addDirectory(__DIR__ . '/../../../');
         $watcher->addDirectory('.');
         $watcher->start();
     }

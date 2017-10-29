@@ -10,6 +10,7 @@ class Model extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Te
         yield ModelInitial::class;
         yield ModelPdo::class;
         yield ModelSerializer::class;
+        yield ModelTest::class;
     }
 
 }

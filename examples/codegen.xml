@@ -1,0 +1,52 @@
+<codegen>
+    <entity name="Address">
+        <string-attribute name="Type" />
+        <string-attribute name="Street" />
+        <string-attribute name="Suburb" />
+        <string-attribute name="City" />
+        <string-attribute name="Country" />
+        <string-attribute name="Post Code" />
+    </entity>
+
+    <entity name="Phone Number">
+        <string-attribute name="Type" />
+        <string-attribute name="Number" />
+    </entity>
+
+    <entity name="Person">
+        <string-attribute name="First Name" />
+        <string-attribute name="Last Name" />
+        <string-attribute name="Email Address" />
+
+        <has-many entity="Person Address" />
+        <has-many entity="Person Phone Number" />
+    </entity>
+
+    <entity name="Person Address">
+        <belongs-to entity="Person" />
+        <belongs-to entity="Address" />
+    </entity>
+
+    <entity name="Person Phone Number">
+        <belongs-to entity="Person" />
+        <belongs-to entity="Phone Number" />
+    </entity>
+
+    <entity name="Company">
+        <string-attribute name="Name" />
+
+        <has-many entity="Company Address" />
+        <has-many entity="Company Phone Number" />
+    </entity>
+
+    <entity name="Company Address">
+        <belongs-to entity="Company" />
+        <belongs-to entity="Address" />
+    </entity>
+
+    <entity name="Company Phone Number">
+        <belongs-to entity="Company" />
+        <belongs-to entity="Phone Number" />
+    </entity>
+</codegen>
+
