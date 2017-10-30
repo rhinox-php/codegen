@@ -15,4 +15,8 @@
     <entity name="Object Attribute">
         <string-attribute name="Class" />
     </entity>
+
+    <entity name="Output File">
+        <string-attribute name="Path" />
+    </entity>
 </codegen>

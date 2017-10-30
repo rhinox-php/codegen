@@ -32,7 +32,7 @@ class <?= $entity->getClassName(); ?> {
 <?php else: ?>
     /** @var mixed <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
-    
+
 <?php endif; ?>
 <?php endforeach; ?>
 
@@ -42,7 +42,7 @@ class <?= $entity->getClassName(); ?> {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value): self {
+    public function set<?= $attribute->getMethodName(); ?>(string $value): self {
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }

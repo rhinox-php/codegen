@@ -1,7 +1,7 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class Server extends \Rhino\Codegen\Template\Generic {
+class BinServer extends \Rhino\Codegen\Template\Generic {
 
     protected $port = 3000;
 

@@ -24,36 +24,40 @@ class MergeClass {
         return $this;
     }
 
-    public static function merge(Codegen $codegen, string $file1, string $file2): self {
-        $file1 = realpath($file1);
-        if (!$file1) {
-            throw new \Exception('Could not find file 1: ' . $file1);
+    public static function merge(Codegen $codegen, string $fromFile, string $intoFile): self {
+        $fromFile = realpath($fromFile);
+        if (!$fromFile) {
+            throw new \Exception('Could not find file 1: ' . $fromFile);
         }
-        $file2 = realpath($file2);
-        if (!$file2) {
-            throw new \Exception('Could not find file 2: ' . $file2);
+        $intoFile = realpath($intoFile);
+        if (!$intoFile) {
+            throw new \Exception('Could not find file 2: ' . $intoFile);
         }
 
         $instance = new static($codegen);
-        $this->codegen->log('Loading ' . $file1);
-        $instance->setClassSourceFrom(file_get_contents($file1));
-        $this->codegen->log('Loading ' . $file2);
-        $instance->setClassSourceInto(file_get_contents($file2));
+        $codegen->log('Loading ' . $fromFile);
+        $instance->setClassSourceFrom(file_get_contents($fromFile));
+        $codegen->log('Loading ' . $intoFile);
+        $instance->setClassSourceInto(file_get_contents($intoFile));
         $instance->parse();
+
+        $codegen->writeFile($intoFile, $instance->getOutput());
+        FormatPhp::formatFile($intoFile);
+
         return $instance;
     }
 
     public function parse() {
         $this->parser = new Parser();
 
-        $this->codegen->log('Parsing class source from');
+        $this->codegen->log('Parsing "from" class source...');
         $this->root1 = $this->parser->parseSourceFile($this->classSourceFrom);
         if (!$this->validate($this->classSourceFrom, $this->root1)) {
             return $this;
         }
 
         $this->output = $this->classSourceInto;
-        $this->codegen->log('Parsing class source into');
+        $this->codegen->log('Parsing "into" class source...');
         $this->root2 = $this->parser->parseSourceFile($this->output);
 
         $errors = DiagnosticsProvider::getDiagnostics($this->root2);
@@ -109,6 +113,7 @@ class MergeClass {
     }
 
     protected function replaceClassMethod(string $className1, string $memberName, string $replacement) {
+        $this->codegen->log('Found class method', $className1, $memberName);
         $found = false;
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\MethodDeclaration::class) as $member) {
             if ($member->name->getText($this->root2) == $memberName) {
@@ -125,17 +130,18 @@ class MergeClass {
             if (!$classDeclaration) {
                 return;
             }
-            var_dump($classDeclaration);
             $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
             $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
         }
-        // @todo create class if it doesnt exist
+        // @todo create class if it doesn't exist
     }
 
     protected function replaceClassProperty(string $className1, string $memberName, string $replacement) {
+        $this->codegen->log('Found class property', $className1, $memberName);
         $found = false;
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\PropertyDeclaration::class) as $member) {
             if ($member->propertyElements->getText($this->root2) == $memberName) {
+                $found = true;
                 if ($member->getFullText() != $replacement) {
                     $this->codegen->log('Replacing class property', $className1, $memberName);
                     $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
@@ -143,6 +149,16 @@ class MergeClass {
                 }
             }
         }
+        if (!$found) {
+            $this->codegen->log('Class property not found, appending', $className1, $memberName);
+            $classDeclaration = $this->getClassDeclaration($className1, $this->root2);
+            if (!$classDeclaration) {
+                return;
+            }
+            $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
+            $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
+        }
+        // @todo create class if it doesn't exist
     }
 
     protected function getClassDeclaration($className1, $root) {

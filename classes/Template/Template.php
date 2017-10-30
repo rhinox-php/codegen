@@ -62,6 +62,7 @@ abstract class Template {
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
         $this->codegen->writeFile($outputFile, $output);
         $this->hook('gen:write', [$outputFile]);
+        return new OutputFile($outputFile);
     }
 
     protected function getTemplateFile($name) {

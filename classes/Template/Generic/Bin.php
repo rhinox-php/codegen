@@ -5,7 +5,8 @@ class Bin extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Temp
     use \Rhino\Codegen\Template\Aggregate;
 
     public function aggregate() {
-        yield Server::class;
+        yield BinServer::class;
+        yield BinLint::class;
     }
 
 }

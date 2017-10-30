@@ -2,8 +2,9 @@
     "name": "rhinox/codegen",
     "require": {
         "icanboogie/inflector": "^1.4",
-        "symfony/console": "^2.7",
-        "microsoft/tolerant-php-parser": "^0.0.3"
+        "symfony/console": "^3.2",
+        "microsoft/tolerant-php-parser": "^0.0.3",
+        "friendsofphp/php-cs-fixer": "^2.7"
     },
     "autoload": {
         "psr-4": {
