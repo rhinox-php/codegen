@@ -11,8 +11,18 @@ class OutputFile
         $this->path = $path;
     }
 
-    public function chmod() {
-        // @todo
+    public function chmod(int $mode): self {
+        if (is_file($this->path)) {
+            chmod($this->path, $mode);
+        }
+        return $this;
+    }
+
+    public function setExecutable(bool $executable): self {
+        if ($executable) {
+            return $this->chmod(0755);
+        }
+        return $this->chmod(0644);
     }
 
     public function getPath(): string

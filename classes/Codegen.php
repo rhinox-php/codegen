@@ -28,6 +28,7 @@ class Codegen {
     protected $path;
     protected $debug = false;
     protected $loggedOnce = [];
+    protected $hooks = [];
 
     public function __construct() {
     }
@@ -73,7 +74,7 @@ class Codegen {
                 $rows[] = [$attribute->getName(), $attribute->getPropertyName(), $attribute->getType()];
             }
             (new Table($output))
-                ->setHeaders(['Class Name', 'Property Name', 'Type'])
+                ->setHeaders(['Name', 'Property Name', 'Type'])
                 ->setRows($rows)
                 ->render();
             $output->writeln('');
@@ -476,20 +477,21 @@ class Codegen {
         return $file;
     }
 
-    public function writeFile(string $file, string $content) {
+    public function writeFile(string $file, string $content): self {
         if (!$file) {
             throw new \Exception('Invalid file to write ' . $file);
         }
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
-                return;
+                return $this;
             }
         }
         $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file);
         if (!$this->isDryRun()) {
             file_put_contents($file, $content);
         }
+        return $this;
     }
 
     public function isDebug(): bool {
@@ -510,4 +512,22 @@ class Codegen {
         return $this;
     }
 
+    public function hook(string $hookName, array $parameters): array {
+        if (isset($this->hooks[$hookName])) {
+            foreach ($this->hooks[$hookName] as $hook) {
+                $parameters = $hook->process(...$parameters);
+            }
+        }
+        return $parameters;
+    }
+
+    public function addHook(Hook\Hook $hook): self {
+        $this->hooks[$hook->getHook()][] = $hook;
+        return $this;
+    }
+
+    public function addHookCallback(string $hookName, callable $callback): self {
+        $this->hooks[$hookName][] = new Hook\Callback($hookName, $callback);
+        return $this;
+    }
 }

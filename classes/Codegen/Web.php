@@ -2,6 +2,7 @@
 namespace Rhino\Codegen\Codegen;
 
 class Web extends \Rhino\Codegen\Codegen {
+    public $gitIgnore;
     public $composer;
     public $npm;
     public $bower;
@@ -10,6 +11,7 @@ class Web extends \Rhino\Codegen\Codegen {
 
     public function __construct() {
         parent::__construct();
+        $this->gitIgnore = new GitIgnore($this);
         $this->composer = new Web\Composer($this);
         $this->npm = new Web\Npm($this);
         $this->bower = new Web\Bower($this);
@@ -20,6 +22,7 @@ class Web extends \Rhino\Codegen\Codegen {
 
     public function generate() {
         parent::generate();
+        $this->gitIgnore->generate();
         $this->composer->generate();
         $this->npm->generate();
         $this->env->generate();

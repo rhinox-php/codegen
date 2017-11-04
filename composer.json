@@ -9,7 +9,10 @@
     "autoload": {
         "psr-4": {
             "Rhino\\Codegen\\": "classes/"
-        }
+        },
+        "files": [
+            "./include.php"
+        ]
     },
     "bin": [
         "bin/rhino-codegen"

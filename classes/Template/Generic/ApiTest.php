@@ -17,6 +17,8 @@ class ApiTest extends \Rhino\Codegen\Template\Generic {
         // @todo use custom port
         $this->codegen->env->add('TEST_BASE_URL', 'http://localhost:3000/api/v1/');
 
+        $this->renderTemplate('generic/bin/test-api.sh', 'bin/test-api.sh')->setExecutable(true);
+
         foreach ($this->codegen->getEntities() as $entity) {
             $this->renderTemplate('generic/tests/api/model.js', 'tests/api/' . $entity->getFileName() . '.js', [
                 'entity' => $entity,

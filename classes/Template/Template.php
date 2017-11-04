@@ -48,21 +48,22 @@ abstract class Template {
         return ob_get_clean();
     }
 
-    protected function renderTemplateFile(string $templateFile, string $outputFile, array $data = [], bool $overwrite = true) {
-        if (file_exists($outputFile)) {
-            $outputFile = realpath($outputFile);
+    protected function renderTemplateFile(string $templateFile, string $outputPath, array $data = [], bool $overwrite = true): ?OutputFile {
+        if (file_exists($outputPath)) {
+            $outputPath = realpath($outputPath);
             if (!$overwrite) {
-                $this->codegen->debug('Skipped ' . $outputFile);
-                return;
+                $this->codegen->debug('Skipped ' . $outputPath);
+                return null;
             }
         }
+        $outputFile = new OutputFile($outputPath);
         $output = $this->bufferTemplateFile($templateFile, $data);
-        $directory = dirname($outputFile);
+        $directory = dirname($outputPath);
         $this->codegen->createDirectory($directory);
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
-        $this->codegen->writeFile($outputFile, $output);
+        $this->codegen->writeFile($outputPath, $output);
         $this->hook('gen:write', [$outputFile]);
-        return new OutputFile($outputFile);
+        return $outputFile;
     }
 
     protected function getTemplateFile($name) {
@@ -87,15 +88,6 @@ abstract class Template {
                 }
             }
         }
-    }
-
-    protected function hook(string $hookName, array $parameters): array {
-        if (isset($this->hooks[$hookName])) {
-            foreach ($this->hooks[$hookName] as $hook) {
-                $parameters = $hook->process(...$parameters);
-            }
-        }
-        return $parameters;
     }
 
     public function getCodegen(): \Rhino\Codegen\Codegen {
@@ -157,6 +149,16 @@ abstract class Template {
     public function setPaths(array $value): self {
         $this->paths = $value;
         return $this;
+    }
+
+    public function hook(string $hookName, array $parameters): array {
+        $parameters = $this->codegen->hook($hookName, $parameters);
+        if (isset($this->hooks[$hookName])) {
+            foreach ($this->hooks[$hookName] as $hook) {
+                $parameters = $hook->process(...$parameters);
+            }
+        }
+        return $parameters;
     }
 
     public function addHook(Hook\Hook $hook): self {

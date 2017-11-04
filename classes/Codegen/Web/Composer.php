@@ -5,6 +5,11 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
     protected $repositories = [];
     protected $autoload = [];
 
+    public function __construct(\Rhino\Codegen\Codegen $codegen) {
+        parent::__construct($codegen);
+        $this->codegen->gitIgnore->addIgnore('vendor');
+    }
+
     public function generate() {
         $empty = true;
         $json = $this->loadJsonFile('composer.json');
