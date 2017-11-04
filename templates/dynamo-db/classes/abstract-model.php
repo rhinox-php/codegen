@@ -29,12 +29,12 @@ abstract class AbstractModel implements \JsonSerializable {
         $response = static::getDynamoDbClient()->scan([
             'TableName' => static::getTableName(),
         ]);
-        
+
         foreach ($response['Items'] as $item) {
             yield static::fetchInstance($item);
         }
     }
-    
+
     public static function getAll() {
         return iterator_to_array(static::iterateAll());
     }
@@ -43,7 +43,7 @@ abstract class AbstractModel implements \JsonSerializable {
     public function getId() {
         return $this->id;
     }
-    
+
     public function setId($id) {
         $this->id = $id;
         return $this;
@@ -56,12 +56,12 @@ abstract class AbstractModel implements \JsonSerializable {
         //9223372036854775807
         return $id;
     }
-    
+
     // Created/updated date accessors
     public function getCreated() {
         return $this->createdAt;
     }
-    
+
     public function setCreated(\DateTimeImmutable $created) {
         $this->createdAt = $created;
         return $this;
@@ -70,12 +70,12 @@ abstract class AbstractModel implements \JsonSerializable {
     public function getUpdated() {
         return $this->updatedAt;
     }
-    
+
     public function setUpdated(\DateTimeImmutable $updated) {
         $this->updatedAt = $updated;
         return $this;
     }
-    
+
     // Camel case properties
     public function getAttribute($key)
     {

@@ -6,6 +6,11 @@ class Codegen {
     use Inflector;
     use Logger;
 
+    const OUTPUT_LEVEL_NONE = 0;
+    const OUTPUT_LEVEL_INFO = 1;
+    const OUTPUT_LEVEL_LOG = 2;
+    const OUTPUT_LEVEL_DEBUG = 3;
+
     public $pdo;
     public $db;
 
@@ -26,7 +31,7 @@ class Codegen {
     protected $databaseCharset = 'utf8mb4';
     protected $databaseCollation = 'utf8mb4_unicode_520_ci';
     protected $path;
-    protected $debug = false;
+    protected $outputLevel = self::OUTPUT_LEVEL_LOG;
     protected $loggedOnce = [];
     protected $hooks = [];
 
@@ -57,28 +62,6 @@ class Codegen {
             $template->generate();
         }
         $this->log('Generating templates complete!');
-    }
-
-    public function describe(\Symfony\Component\Console\Output\OutputInterface $output) {
-        foreach ($this->entities as $entity) {
-            $output->writeln('Entity:');
-            (new Table($output))
-                ->setHeaders(['Class Name', 'Property Name'])
-                ->setRows([
-                    [$entity->getClassName(), $entity->getPropertyName()],
-                ])
-                ->render();
-            $output->writeln('Attributes:');
-            $rows = [];
-            foreach ($entity->getAttributes() as $attribute) {
-                $rows[] = [$attribute->getName(), $attribute->getPropertyName(), $attribute->getType()];
-            }
-            (new Table($output))
-                ->setHeaders(['Name', 'Property Name', 'Type'])
-                ->setRows($rows)
-                ->render();
-            $output->writeln('');
-        }
     }
 
     protected function getMigrationName($name) {
@@ -203,8 +186,11 @@ class Codegen {
     }
 
     public function debug(...$messages) {
+        if ($this->outputLevel < static::OUTPUT_LEVEL_DEBUG) {
+            return;
+        }
         // @todo inject a logger
-        if (!$this->isDebug() || empty($messages)) {
+        if (empty($messages)) {
             return;
         }
         $messages = array_map(function($message) {
@@ -217,6 +203,9 @@ class Codegen {
     }
 
     public function info(...$messages) {
+        if ($this->outputLevel < static::OUTPUT_LEVEL_INFO) {
+            return;
+        }
         // @todo inject a logger
         if (empty($messages)) {
             return;
@@ -231,6 +220,9 @@ class Codegen {
     }
 
     public function log(...$messages) {
+        if ($this->outputLevel < static::OUTPUT_LEVEL_LOG) {
+            return;
+        }
         // @todo inject a logger
         if (empty($messages)) {
             return;
@@ -509,6 +501,15 @@ class Codegen {
 
     public function setNamespace(string $namespace): self {
         $this->namespace = $namespace;
+        return $this;
+    }
+
+    public function getOutputLevel(): int {
+        return $this->outputLevel;
+    }
+
+    public function setOutputLevel(int $outputLevel): self {
+        $this->outputLevel = $outputLevel;
         return $this;
     }
 

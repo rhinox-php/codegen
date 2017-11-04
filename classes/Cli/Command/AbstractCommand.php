@@ -1,6 +1,7 @@
 <?php
 namespace Rhino\Codegen\Cli\Command;
 
+use Rhino\Codegen\Codegen;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,7 +32,9 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
             }
         }
         $codegen->setDryRun($dryRun);
-        $codegen->setDebug($debug);
+        if ($debug) {
+            $codegen->setOutputLevel(Codegen::OUTPUT_LEVEL_DEBUG);
+        }
         return $codegen;
     }
 }

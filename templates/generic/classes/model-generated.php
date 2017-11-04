@@ -389,7 +389,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>|null
      */
     protected static function fetch<?= $entity->getClassName(); ?>(\PDOStatement $result) {
-        $entity = $result->fetchObject(static::class);
+        $entity = static::fetchObject($result);
         if (!$entity) {
             return null;
         }
@@ -483,7 +483,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     // Fetch belongs to <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
 
     public function fetch<?= $relationship->getClassName(); ?>() {
-        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getTo()->getClassName(); ?>Id());
+        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getClassName(); ?>Id());
     }
 
     public function get<?= $relationship->getClassName(); ?>() {
