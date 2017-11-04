@@ -1,11 +1,12 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class BinServer extends \Rhino\Codegen\Template\Generic {
-
+class BinServer extends \Rhino\Codegen\Template\Generic
+{
     protected $port = 3000;
 
-    public function generate() {
+    public function generate()
+    {
         $this->renderTemplate('generic/bin/server.bat', 'bin/server.bat');
         $this->renderTemplate('generic/bin/server.sh', 'bin/server.sh');
         $this->renderTemplate('generic/bin/router', 'bin/router.php');
@@ -14,13 +15,14 @@ class BinServer extends \Rhino\Codegen\Template\Generic {
         ]);
     }
 
-    public function getPort(): int {
+    public function getPort(): int
+    {
         return $this->port;
     }
 
-    public function setPort(int $port) {
+    public function setPort(int $port)
+    {
         $this->port = $port;
         return $this;
     }
-
 }

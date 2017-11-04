@@ -1,9 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class ApiTest extends \Rhino\Codegen\Template\Generic {
-
-    public function generate() {
+class ApiTest extends \Rhino\Codegen\Template\Generic
+{
+    public function generate()
+    {
         $this->renderTemplate('generic/tests/api.js', 'tests/api.js');
         $this->renderTemplate('generic/tests/index.js', 'tests/index.js', [
             'entities' => $this->codegen->getEntities(),
@@ -25,5 +26,4 @@ class ApiTest extends \Rhino\Codegen\Template\Generic {
             ]);
         }
     }
-
 }

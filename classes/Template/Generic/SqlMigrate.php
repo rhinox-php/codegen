@@ -1,14 +1,18 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
+
 use Rhino\Codegen\Attribute;
 use Rhino\Codegen\Entity;
 use Rhino\Codegen\Database\Column\MySql as MySqlColumn;
 
-class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Template\Interfaces\DatabaseMigrate {
-    public function generate() {
+class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Template\Interfaces\DatabaseMigrate
+{
+    public function generate()
+    {
     }
 
-    public function iterateDatabaseMigrateSql(\PDO $pdo, string $date): iterable {
+    public function iterateDatabaseMigrateSql(\PDO $pdo, string $date): iterable
+    {
         foreach ($this->codegen->getEntities() as $entity) {
             $path = $this->getFilePath('generic/sql/migrate', 'src/sql/up/' . $date . '.sql', [
                 'date' => $date,
@@ -31,7 +35,8 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
         }
     }
 
-    private function migrateColumns(Entity $entity, string $path): iterable {
+    private function migrateColumns(Entity $entity, string $path): iterable
+    {
         $previous = 'id';
         foreach ($entity->getAttributes() as $attribute) {
             $column = $this->codegen->db->getColumn($entity->getTableName(), $attribute->getColumnName());
@@ -60,7 +65,8 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
         }
     }
 
-    private function migrateColumn(Entity $entity, Attribute $attribute, MySqlColumn $column, string $previous, string $path): iterable {
+    private function migrateColumn(Entity $entity, Attribute $attribute, MySqlColumn $column, string $previous, string $path): iterable
+    {
         if ($attribute instanceof Attribute\IntAttribute) {
             if (!$column->isType(MySqlColumn::TYPE_INT) || !$column->isSize(11) || !$column->isSigned()) {
                 $this->codegen->log('Changing column', $attribute->getColumnName(), 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
@@ -103,4 +109,3 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
         // @todo check collation
     }
 }
-

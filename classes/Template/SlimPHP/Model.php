@@ -3,11 +3,12 @@ namespace Rhino\Codegen\Template\SlimPhp;
 
 use Rhino\Codegen\Template\SlimPhp;
 
-class Model extends SlimPhp {
-
+class Model extends SlimPhp
+{
     protected $template = 'classes/models/model-generated';
 
-    public function generate() {
+    public function generate()
+    {
         $this->renderTemplate('classes/models/model-abstract', 'AbstractModel.php');
         foreach ($this->codegen->getEntities() as $entity) {
             $this->renderTemplate($this->getTemplate(), 'Base' . $entity->getClassName() . '.php', [
@@ -18,5 +19,4 @@ class Model extends SlimPhp {
             ]);
         }
     }
-
 }

@@ -1,9 +1,12 @@
 <?php
 namespace Rhino\Codegen\XmlParser\Entity;
+
 use Rhino\Codegen\Attribute;
 
-class ArrayAttributeParser extends AttributeParser {
-    public function parse(\SimpleXMLElement $node) {
+class ArrayAttributeParser extends AttributeParser
+{
+    public function parse(\SimpleXMLElement $node)
+    {
         $attribute = new Attribute\ArrayAttribute();
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);

@@ -1,8 +1,8 @@
 <?php
 namespace Rhino\Codegen;
 
-class Attribute {
-
+class Attribute
+{
     use Inflector;
 
     protected $name;
@@ -27,64 +27,77 @@ class Attribute {
      */
     protected $isForeignKey = false;
 
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
         return $this;
     }
 
-    public function getPropertyName(): string {
+    public function getPropertyName(): string
+    {
         return $this->propertyName ?: $this->camelize($this->getName(), true);
     }
 
-    public function setPropertyName($propertyName) {
+    public function setPropertyName($propertyName)
+    {
         $this->propertyName = $propertyName;
         return $this;
     }
     
-    public function getPluralPropertyName() {
+    public function getPluralPropertyName()
+    {
         return $this->pluralize($this->getPropertyName());
     }
 
-    public function getMethodName(): string {
+    public function getMethodName(): string
+    {
         return $this->methodName ?: $this->camelize($this->getName());
     }
 
-    public function setMethodName($methodName) {
+    public function setMethodName($methodName)
+    {
         $this->methodName = $methodName;
         return $this;
     }
     
-    public function getPluralMethodName() {
+    public function getPluralMethodName()
+    {
         return $this->pluralize($this->getMethodName());
     }
 
-    public function getColumnName(): string {
+    public function getColumnName(): string
+    {
         return $this->columnName ?: $this->underscore($this->getName());
     }
 
-    public function setColumnName($columnName) {
+    public function setColumnName($columnName)
+    {
         $this->columnName = $columnName;
         return $this;
     }
 
-    public function getGetterName() {
+    public function getGetterName()
+    {
         if ($this->is(['Bool'])) {
             return 'is' . $this->getMethodName();
         }
         return 'get' . $this->getMethodName();
     }
 
-    public function getLabel(): string {
+    public function getLabel(): string
+    {
         $inflector = $this->getInflector();
         $label = $inflector->underscore($this->getName());
         return $inflector->humanize($label, true);
     }
 
-    public function is(array $types): bool {
+    public function is(array $types): bool
+    {
         foreach ($types as $type) {
             $type = 'Rhino\\Codegen\\Attribute\\' . $type . 'Attribute';
             if ($this instanceof $type) {
@@ -94,11 +107,13 @@ class Attribute {
         return false;
     }
 
-    public function isNullable(): bool {
+    public function isNullable(): bool
+    {
         return $this->nullable;
     }
 
-    public function setNullable(bool $nullable) {
+    public function setNullable(bool $nullable)
+    {
         $this->nullable = $nullable;
         return $this;
     }
@@ -157,11 +172,13 @@ class Attribute {
         return $this;
     }
 
-    public function isIndexed() {
+    public function isIndexed()
+    {
         return $this->indexed;
     }
 
-    public function setIsIndexed($indexed) {
+    public function setIsIndexed($indexed)
+    {
         $this->indexed = $indexed;
         return $this;
     }

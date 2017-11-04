@@ -1,62 +1,74 @@
 <?php
 namespace Rhino\Codegen;
 
-class Relationship {
+class Relationship
+{
     use Inflector;
 
     protected $from;
     protected $to;
     protected $name;
     
-    public function getPropertyName() {
+    public function getPropertyName()
+    {
         return $this->camelize($this->getName(), true);
     }
     
-    public function getPluralPropertyName() {
+    public function getPluralPropertyName()
+    {
         return $this->pluralize($this->getPropertyName());
     }
     
-    public function getClassName() {
+    public function getClassName()
+    {
         return $this->camelize($this->getName());
     }
     
-    public function getPluralClassName() {
+    public function getPluralClassName()
+    {
         return $this->pluralize($this->getClassName());
     }
 
-    public function getMethodName(): string {
+    public function getMethodName(): string
+    {
         return $this->camelize($this->getName());
     }
 
-    public function getColumnName(): string {
+    public function getColumnName(): string
+    {
         return $this->underscore($this->getName());
     }
     
-    public function getFrom(): Entity {
+    public function getFrom(): Entity
+    {
         return $this->from;
     }
 
-    public function setFrom(Entity $from) {
+    public function setFrom(Entity $from)
+    {
         $this->from = $from;
         return $this;
     }
 
-    public function getTo(): Entity {
+    public function getTo(): Entity
+    {
         return $this->to;
     }
 
-    public function setTo(Entity $to) {
+    public function setTo(Entity $to)
+    {
         $this->to = $to;
         return $this;
     }
 
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName(string $name) {
+    public function setName(string $name)
+    {
         $this->name = $name;
         return $this;
     }
-    
 }

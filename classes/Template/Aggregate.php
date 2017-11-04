@@ -1,18 +1,21 @@
 <?php
 namespace Rhino\Codegen\Template;
 
-trait Aggregate {
+trait Aggregate
+{
     protected $name;
 
-    public abstract function aggregate();
+    abstract public function aggregate();
 
-    public function generate() {
+    public function generate()
+    {
         foreach ($this->iterateTemplates() as $template) {
             $template->generate();
         }
     }
 
-    public function iterateTemplates() {
+    public function iterateTemplates()
+    {
         foreach ($this->aggregate() as $templateClass) {
             $template = new $templateClass();
             $template->codegen = $this->codegen;

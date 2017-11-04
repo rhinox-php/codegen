@@ -1,14 +1,17 @@
 <?php
 namespace Rhino\Codegen\Database;
 
-class MySql implements DatabaseInterface {
+class MySql implements DatabaseInterface
+{
     public $pdo;
 
-    public function __construct(\PDO $pdo) {
+    public function __construct(\PDO $pdo)
+    {
         $this->pdo = $pdo;
     }
 
-    public function databaseExists(string $databaseName): bool {
+    public function databaseExists(string $databaseName): bool
+    {
         $statement = $this->pdo->prepare('SHOW DATABASES LIKE ?');
         $statement->execute([
             $databaseName,
@@ -16,7 +19,8 @@ class MySql implements DatabaseInterface {
         return $statement->rowCount() == 1;
     }
 
-    public function tableExists(string $tableName): bool {
+    public function tableExists(string $tableName): bool
+    {
         $statement = $this->pdo->prepare('SHOW TABLES LIKE ?');
         $statement->execute([
             $tableName,
@@ -24,7 +28,8 @@ class MySql implements DatabaseInterface {
         return $statement->rowCount() == 1;
     }
 
-    public function getColumn(string $tableName, string $columnName): Column\MySql {
+    public function getColumn(string $tableName, string $columnName): Column\MySql
+    {
         return new Column\MySql($this, $tableName, $columnName);
     }
 }

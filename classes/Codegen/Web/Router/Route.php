@@ -1,45 +1,54 @@
 <?php
 namespace Rhino\Codegen\Codegen\Web\Router;
 
-class Route {
+class Route
+{
     protected $httpMethods = [];
     protected $urlPath;
     protected $controllerClass;
     protected $controllerMethod;
 
     // Attribute accessors
-    public function getHttpMethods(): array {
+    public function getHttpMethods(): array
+    {
         return $this->httpMethods;
     }
 
-    public function setHttpMethods(array $httpMethods): self {
+    public function setHttpMethods(array $httpMethods): self
+    {
         $this->httpMethods = $httpMethods;
         return $this;
     }
 
-    public function getUrlPath(): string {
+    public function getUrlPath(): string
+    {
         return $this->urlPath;
     }
 
-    public function setUrlPath(string $value): self {
+    public function setUrlPath(string $value): self
+    {
         $this->urlPath = $value;
         return $this;
     }
 
-    public function getControllerClass(): string {
+    public function getControllerClass(): string
+    {
         return $this->controllerClass;
     }
 
-    public function setControllerClass(string $value): self {
+    public function setControllerClass(string $value): self
+    {
         $this->controllerClass = $value;
         return $this;
     }
 
-    public function getControllerMethod(): string {
+    public function getControllerMethod(): string
+    {
         return $this->controllerMethod;
     }
 
-    public function setControllerMethod(string $value): self {
+    public function setControllerMethod(string $value): self
+    {
         $this->controllerMethod = $value;
         return $this;
     }

@@ -1,8 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class ControllerApi extends Controller {
-    public function generate() {
+class ControllerApi extends Controller
+{
+    public function generate()
+    {
         $this->codegen->composer->addDependency('rhinox/json-api-list', 'dev-master');
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
@@ -21,7 +23,8 @@ class ControllerApi extends Controller {
         }
     }
 
-    public function iterateRoutes() {
+    public function iterateRoutes()
+    {
         foreach ($this->codegen->getEntities() as $entity) {
             yield ['get', '/api/v1/' . $entity->getRouteName() . '/index', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'index'];
             yield ['get', '/api/v1/' . $entity->getRouteName() . '/get/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'get'];

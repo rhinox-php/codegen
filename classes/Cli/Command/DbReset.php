@@ -6,8 +6,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DbReset extends AbstractCommand {
-    protected function configure() {
+class DbReset extends AbstractCommand
+{
+    protected function configure()
+    {
         $this->setName('db:reset')
             ->setDescription('Reset table')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
@@ -16,7 +18,8 @@ class DbReset extends AbstractCommand {
             ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
             ->dbReset();
     }

@@ -1,9 +1,12 @@
 <?php
 namespace Rhino\Codegen\XmlParser\Entity;
+
 use Rhino\Codegen\Relationship;
 
-class HasManyParser extends AttributeParser {
-    public function parse(\SimpleXMLElement $node) {
+class HasManyParser extends AttributeParser
+{
+    public function parse(\SimpleXMLElement $node)
+    {
         $to = $this->codegen->findEntity((string) $node['entity']);
 
         // $attribute = new Attribute\IntAttribute();

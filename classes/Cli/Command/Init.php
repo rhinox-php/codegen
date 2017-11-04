@@ -6,15 +6,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Init extends AbstractCommand {
-    protected function configure() {
+class Init extends AbstractCommand
+{
+    protected function configure()
+    {
         $this->setName('init')
             ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'Path to initialise codegen files.', '.')
             ->addOption('overwrite', 'o', InputOption::VALUE_NONE, 'Overwrite existing files.')
             ->setDescription('Init codegen files');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $path = $input->getOption('path');
         if (!is_dir($path)) {
             throw new \Exception('Invalid path ' . $path);

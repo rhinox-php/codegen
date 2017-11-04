@@ -6,8 +6,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DbMigrate extends AbstractCommand {
-    protected function configure() {
+class DbMigrate extends AbstractCommand
+{
+    protected function configure()
+    {
         parent::configure();
         $this->setName('db:migrate')
             ->setDescription('Generate migrations')
@@ -15,7 +17,8 @@ class DbMigrate extends AbstractCommand {
             ->addOption('run', 'r', InputOption::VALUE_NONE, 'Run migrations.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
             ->dbMigrate($input->getOption('write'), $input->getOption('run'));
     }

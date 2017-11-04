@@ -1,14 +1,47 @@
 <?php
 namespace Rhino\Codegen\Codegen;
 
-class GitIgnore {
+class GitIgnore
+{
     protected $ignore = [];
 
-    public function __construct(\Rhino\Codegen\Codegen $codegen) {
+    public function __construct(\Rhino\Codegen\Codegen $codegen)
+    {
         $this->codegen = $codegen;
     }
 
-    protected function loadGitIgnoreFile(string $file): array {
+    public function writeGitIgnoreFile(string $file, $ignore): self
+    {
+        $file = $this->codegen->getFile($file);
+        $ignore = array_unique($ignore);
+        natcasesort($ignore);
+        $ignore = implode("\n", $ignore) . "\n";
+        $this->codegen->writeFile($file, $ignore);
+        return $this;
+    }
+
+    public function generate(): self
+    {
+        if (empty($this->ignore)) {
+            $this->codegen->debug('No ignored paths to write.');
+            return $this;
+        }
+        $ignore = $this->loadGitIgnoreFile('.gitignore');
+        foreach ($this->ignore as $path) {
+            $ignore[] = $path;
+        }
+        $this->writeGitIgnoreFile('.gitignore', $ignore);
+        return $this;
+    }
+
+    public function addIgnore(string $path): self
+    {
+        $this->ignore[] = $path;
+        return $this;
+    }
+
+    protected function loadGitIgnoreFile(string $file): array
+    {
         $file = $this->codegen->getFile($file);
         if (!is_file($file)) {
             $this->codegen->log('Could not find file ' . $file);
@@ -28,32 +61,4 @@ class GitIgnore {
         }
         return $ignore;
     }
-
-    public function writeGitIgnoreFile(string $file, $ignore): self {
-        $file = $this->codegen->getFile($file);
-        $ignore = array_unique($ignore);
-        natcasesort($ignore);
-        $ignore = implode("\n", $ignore) . "\n";
-        $this->codegen->writeFile($file, $ignore);
-        return $this;
-    }
-
-    public function generate(): self {
-        if (empty($this->ignore)) {
-            $this->codegen->debug('No ignored paths to write.');
-            return $this;
-        }
-        $ignore = $this->loadGitIgnoreFile('.gitignore');
-        foreach ($this->ignore as $path) {
-            $ignore[] = $path;
-        }
-        $this->writeGitIgnoreFile('.gitignore', $ignore);
-        return $this;
-    }
-
-    public function addIgnore(string $path): self {
-        $this->ignore[] = $path;
-        return $this;
-    }
-
 }

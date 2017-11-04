@@ -11,8 +11,10 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\Process\PhpExecutableFinder;
 
-class Watch extends AbstractCommand {
-    protected function configure() {
+class Watch extends AbstractCommand
+{
+    protected function configure()
+    {
         $this->setName('watch')
             ->setDescription('Watch code for changes and trigger generation automatically')
             ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
@@ -20,9 +22,10 @@ class Watch extends AbstractCommand {
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
-        $watcher = new \Rhino\Codegen\Watch\Watcher(function() use($input, $output) {
+        $watcher = new \Rhino\Codegen\Watch\Watcher(function () use ($input, $output) {
             $executableFinder = new PhpExecutableFinder();
             if (false === $commandLine = $executableFinder->find(false)) {
                 $commandLine = null;
@@ -44,7 +47,7 @@ class Watch extends AbstractCommand {
             $process = new Process($commandLine);
             $process->start();
 
-            $process->wait(function ($type, $buffer) use($output) {
+            $process->wait(function ($type, $buffer) use ($output) {
                 if (Process::ERR === $type) {
                     $output->getErrorOutput()->write($buffer);
                 } else {

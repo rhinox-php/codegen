@@ -1,13 +1,16 @@
 <?php
 namespace Rhino\Codegen\Codegen\Web;
 
-class Npm extends \Rhino\Codegen\Codegen\PackageManager {
-    public function __construct(\Rhino\Codegen\Codegen $codegen) {
+class Npm extends \Rhino\Codegen\Codegen\PackageManager
+{
+    public function __construct(\Rhino\Codegen\Codegen $codegen)
+    {
         parent::__construct($codegen);
         $this->codegen->gitIgnore->addIgnore('node_modules');
     }
 
-    public function generate() {
+    public function generate()
+    {
         $empty = true;
         $json = $this->loadJsonFile('package.json');
         if (!empty($this->dependencies)) {

@@ -1,8 +1,10 @@
 <?php
 namespace Rhino\Codegen;
+
 use Symfony\Component\Console\Helper\Table;
 
-class Codegen {
+class Codegen
+{
     use Inflector;
     use Logger;
 
@@ -35,16 +37,19 @@ class Codegen {
     protected $loggedOnce = [];
     protected $hooks = [];
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public function validate() {
+    public function validate()
+    {
         if (!$this->namespace) {
             throw new \Exception('Codegen base namespace not set.');
         }
     }
 
-    public function codegenInfo() {
+    public function codegenInfo()
+    {
         $this->info('Namespaces:');
         foreach ($this->iterateTemplates() as $template) {
             foreach ($template->getNamespaces() as $key => $namespace) {
@@ -53,7 +58,8 @@ class Codegen {
         }
     }
 
-    public function generate() {
+    public function generate()
+    {
         $this->validate();
         $this->log('Generating templates...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
@@ -64,11 +70,8 @@ class Codegen {
         $this->log('Generating templates complete!');
     }
 
-    protected function getMigrationName($name) {
-        return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
-    }
-
-    public function dbMigrate(bool $write, bool $run) {
+    public function dbMigrate(bool $write, bool $run)
+    {
         $pdo = $this->getPdo(false);
         if (!$this->db->databaseExists($this->getDatabaseName())) {
             $this->log('Database doesn\'t exist: ' . $this->getDatabaseName());
@@ -125,7 +128,8 @@ class Codegen {
         }
     }
 
-    public function dbReset() {
+    public function dbReset()
+    {
         $pdo = $this->getPdo(false);
         $this->log('Dropping and recreating database', $this->getDatabaseName(), $this->getDatabaseCharset(), $this->getDatabaseCollation());
         if (!$this->dryRun) {
@@ -150,7 +154,8 @@ class Codegen {
         }
     }
 
-    public function unindent(string $string) {
+    public function unindent(string $string)
+    {
         $minWhitespace = null;
         foreach (preg_split('/\R/', $string) as $line) {
             if ($line == '') {
@@ -175,7 +180,8 @@ class Codegen {
         return $string;
     }
 
-    public function createDirectory(string $directory, $permissions = 0755): Codegen {
+    public function createDirectory(string $directory, $permissions = 0755): Codegen
+    {
         if (!file_exists($directory)) {
             $this->logOnce('Creating directory ' . $directory);
             if (!$this->isDryRun()) {
@@ -185,7 +191,8 @@ class Codegen {
         return $this;
     }
 
-    public function debug(...$messages) {
+    public function debug(...$messages)
+    {
         if ($this->outputLevel < static::OUTPUT_LEVEL_DEBUG) {
             return;
         }
@@ -193,16 +200,17 @@ class Codegen {
         if (empty($messages)) {
             return;
         }
-        $messages = array_map(function($message) {
+        $messages = array_map(function ($message) {
             if (is_array($message)) {
                 return implode(' ', $message);
             }
             return $message;
         }, $messages);
-        echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
+        echo($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
     }
 
-    public function info(...$messages) {
+    public function info(...$messages)
+    {
         if ($this->outputLevel < static::OUTPUT_LEVEL_INFO) {
             return;
         }
@@ -210,7 +218,7 @@ class Codegen {
         if (empty($messages)) {
             return;
         }
-        $messages = array_map(function($message) {
+        $messages = array_map(function ($message) {
             if (is_array($message)) {
                 return implode(' ', $message);
             }
@@ -219,7 +227,8 @@ class Codegen {
         echo implode(' ', $messages) . PHP_EOL;
     }
 
-    public function log(...$messages) {
+    public function log(...$messages)
+    {
         if ($this->outputLevel < static::OUTPUT_LEVEL_LOG) {
             return;
         }
@@ -227,16 +236,17 @@ class Codegen {
         if (empty($messages)) {
             return;
         }
-        $messages = array_map(function($message) {
+        $messages = array_map(function ($message) {
             if (is_array($message)) {
                 return implode(' ', $message);
             }
             return $message;
         }, $messages);
-        echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
+        echo($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
     }
 
-    public function infoOnce(...$messages) {
+    public function infoOnce(...$messages)
+    {
         $key = md5(implode(' ', $messages));
         if (!isset($this->loggedOnce[$key])) {
             $this->loggedOnce[$key] = true;
@@ -244,7 +254,8 @@ class Codegen {
         }
     }
 
-    public function logOnce(...$messages) {
+    public function logOnce(...$messages)
+    {
         $key = md5(implode(' ', $messages));
         if (!isset($this->loggedOnce[$key])) {
             $this->loggedOnce[$key] = true;
@@ -252,30 +263,36 @@ class Codegen {
         }
     }
 
-    public function getProjectName(): string {
+    public function getProjectName(): string
+    {
         return $this->projectName;
     }
 
-    public function setProjectName(string $projectName): self {
+    public function setProjectName(string $projectName): self
+    {
         $this->projectName = $projectName;
         return $this;
     }
 
-    public function getEntities() {
+    public function getEntities()
+    {
         return $this->entities;
     }
 
-    public function setEntities($entities) {
+    public function setEntities($entities)
+    {
         $this->entities = $entities;
         return $this;
     }
 
-    public function addEntity($entity) {
+    public function addEntity($entity)
+    {
         $this->entities[] = $entity;
         return $this;
     }
 
-    public function findEntity(string $name) {
+    public function findEntity(string $name)
+    {
         if (!$name) {
             throw new \Exception('Entity name missing.');
         }
@@ -287,56 +304,68 @@ class Codegen {
         throw new \Exception('Could not find entity: ' . $name);
     }
 
-    public function getRelationships() {
+    public function getRelationships()
+    {
         return $this->relationships;
     }
 
-    public function setRelationships($relationships) {
+    public function setRelationships($relationships)
+    {
         $this->relationships = $relationships;
         return $this;
     }
 
-    public function addRelationships($relationship) {
+    public function addRelationships($relationship)
+    {
         $this->relationships[] = $relationship;
         return $this;
     }
 
-    public function isDryRun() {
+    public function isDryRun()
+    {
         return $this->dryRun;
     }
 
-    public function setDryRun($dryRun) {
+    public function setDryRun($dryRun)
+    {
         $this->dryRun = $dryRun;
         return $this;
     }
 
-    public function getTemplatePath() {
+    public function getTemplatePath()
+    {
         return $this->templatePath;
     }
 
-    public function setTemplatePath($templatePath) {
+    public function setTemplatePath($templatePath)
+    {
         $this->templatePath = $templatePath;
     }
 
-    public function getViewPathPrefix() {
+    public function getViewPathPrefix()
+    {
         return $this->viewPathPrefix;
     }
 
-    public function setViewPathPrefix($viewPathPrefix) {
+    public function setViewPathPrefix($viewPathPrefix)
+    {
         $this->viewPathPrefix = $viewPathPrefix;
         return $this;
     }
 
-    public function getClassPathPrefix() {
+    public function getClassPathPrefix()
+    {
         return $this->classPathPrefix;
     }
 
-    public function setClassPathPrefix($classPathPrefix) {
+    public function setClassPathPrefix($classPathPrefix)
+    {
         $this->classPathPrefix = $classPathPrefix;
         return $this;
     }
 
-    public function setDatabase($databaseDsn, $databaseName, $databaseUser, $databasePassword) {
+    public function setDatabase($databaseDsn, $databaseName, $databaseUser, $databasePassword)
+    {
         $this->databaseDsn = $databaseDsn;
         $this->databaseName = $databaseName;
         $this->databaseUser = $databaseUser;
@@ -344,61 +373,74 @@ class Codegen {
         return $this;
     }
 
-    public function getDatabaseDsn() {
+    public function getDatabaseDsn()
+    {
         return $this->databaseDsn;
     }
 
-    public function getDatabaseName() {
+    public function getDatabaseName()
+    {
         return $this->databaseName;
     }
 
-    public function getDatabaseUser() {
+    public function getDatabaseUser()
+    {
         return $this->databaseUser;
     }
 
-    public function getDatabasePassword() {
+    public function getDatabasePassword()
+    {
         return $this->databasePassword;
     }
 
-    public function getDatabaseCharset() {
+    public function getDatabaseCharset()
+    {
         return $this->databaseCharset;
     }
 
-    public function getDatabaseCollation() {
+    public function getDatabaseCollation()
+    {
         return $this->databaseCollation;
     }
 
-    public function setDatabaseDsn($databaseDsn) {
+    public function setDatabaseDsn($databaseDsn)
+    {
         $this->databaseDsn = $databaseDsn;
         return $this;
     }
 
-    public function setDatabaseName($databaseName) {
+    public function setDatabaseName($databaseName)
+    {
         $this->databaseName = $databaseName;
         return $this;
     }
 
-    public function setDatabaseUser($databaseUser) {
+    public function setDatabaseUser($databaseUser)
+    {
         $this->databaseUser = $databaseUser;
         return $this;
     }
 
-    public function setDatabasePassword($databasePassword) {
+    public function setDatabasePassword($databasePassword)
+    {
         $this->databasePassword = $databasePassword;
         return $this;
     }
 
-    public function setDatabaseCharset($databaseCharset) {
+    public function setDatabaseCharset($databaseCharset)
+    {
         $this->databaseCharset = $databaseCharset;
         return $this;
     }
 
-    public function setDatabaseCollation($databaseCollation) {
+    public function setDatabaseCollation($databaseCollation)
+    {
         $this->databaseCollation = $databaseCollation;
         return $this;
     }
 
-    public function getPdo($useDatabase = true): \PDO {
+    public function getPdo($useDatabase = true): \PDO
+    {
         if (!$this->pdo) {
             if (!$this->databaseDsn) {
                 throw new \Exception('Database settings not set on Codegen.');
@@ -416,23 +458,27 @@ class Codegen {
         return $this->pdo;
     }
 
-    public function setPdo($dsn, $user, $password) {
+    public function setPdo($dsn, $user, $password)
+    {
         $this->databaseDsn = $dsn;
         $this->databaseUser = $user;
         $this->databasePassword = $password;
         return $this;
     }
 
-    public function getTemplates(): array {
+    public function getTemplates(): array
+    {
         return $this->templates;
     }
 
-    public function setTemplates(array $templates) {
+    public function setTemplates(array $templates)
+    {
         $this->templates = $templates;
         return $this;
     }
 
-    public function iterateTemplates($templates = null) {
+    public function iterateTemplates($templates = null)
+    {
         $templates = $templates ?: $this->getTemplates();
         foreach ($templates as $template) {
             if ($template instanceof Template\AggregateInterface) {
@@ -443,23 +489,27 @@ class Codegen {
         }
     }
 
-    public function addTemplate(Template\Template $template) {
+    public function addTemplate(Template\Template $template)
+    {
         $this->templates[] = $template;
         $template->setCodegen($this);
         return $template;
     }
 
-    public function getPath(string $path = ''): string {
+    public function getPath(string $path = ''): string
+    {
         return $this->path . '/' . $path;
     }
 
-    public function setPath(string $path): self {
+    public function setPath(string $path): self
+    {
         assert(is_dir($path), 'Expected path to be a valid directory: ' . $path);
         $this->path = $path;
         return $this;
     }
 
-    public function getFile(string $file): string {
+    public function getFile(string $file): string
+    {
         $file = $this->getPath($file);
         if (file_exists($file)) {
             $file = realpath($file);
@@ -469,7 +519,8 @@ class Codegen {
         return $file;
     }
 
-    public function writeFile(string $file, string $content): self {
+    public function writeFile(string $file, string $content): self
+    {
         if (!$file) {
             throw new \Exception('Invalid file to write ' . $file);
         }
@@ -486,34 +537,41 @@ class Codegen {
         return $this;
     }
 
-    public function isDebug(): bool {
+    public function isDebug(): bool
+    {
         return $this->debug;
     }
 
-    public function setDebug(bool $debug): self {
+    public function setDebug(bool $debug): self
+    {
         $this->debug = $debug;
         return $this;
     }
 
-    public function getNamespace(): string {
+    public function getNamespace(): string
+    {
         return $this->namespace;
     }
 
-    public function setNamespace(string $namespace): self {
+    public function setNamespace(string $namespace): self
+    {
         $this->namespace = $namespace;
         return $this;
     }
 
-    public function getOutputLevel(): int {
+    public function getOutputLevel(): int
+    {
         return $this->outputLevel;
     }
 
-    public function setOutputLevel(int $outputLevel): self {
+    public function setOutputLevel(int $outputLevel): self
+    {
         $this->outputLevel = $outputLevel;
         return $this;
     }
 
-    public function hook(string $hookName, array $parameters): array {
+    public function hook(string $hookName, array $parameters): array
+    {
         if (isset($this->hooks[$hookName])) {
             foreach ($this->hooks[$hookName] as $hook) {
                 $parameters = $hook->process(...$parameters);
@@ -522,13 +580,20 @@ class Codegen {
         return $parameters;
     }
 
-    public function addHook(Hook\Hook $hook): self {
+    public function addHook(Hook\Hook $hook): self
+    {
         $this->hooks[$hook->getHook()][] = $hook;
         return $this;
     }
 
-    public function addHookCallback(string $hookName, callable $callback): self {
+    public function addHookCallback(string $hookName, callable $callback): self
+    {
         $this->hooks[$hookName][] = new Hook\Callback($hookName, $callback);
         return $this;
+    }
+
+    protected function getMigrationName($name)
+    {
+        return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
     }
 }

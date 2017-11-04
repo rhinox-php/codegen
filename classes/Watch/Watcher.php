@@ -1,7 +1,8 @@
 <?php
 namespace Rhino\Codegen\Watch;
 
-class Watcher {
+class Watcher
+{
     protected $callback;
     protected $directories;
     protected $ignore = [
@@ -10,18 +11,21 @@ class Watcher {
     ];
     protected $lastKey = null;
 
-    public function __construct(callable $callback) {
+    public function __construct(callable $callback)
+    {
         $this->callback = $callback;
     }
 
-    public function start() {
+    public function start()
+    {
         while (true) {
             $this->scan();
             sleep(1);
         }
     }
 
-    public function scan() {
+    public function scan()
+    {
         $files = [];
         $directories = $this->directories;
         while (!empty($directories)) {
@@ -47,7 +51,8 @@ class Watcher {
         $this->lastKey = $key;
     }
 
-    public function isIgnored($file) {
+    public function isIgnored($file)
+    {
         foreach ($this->ignore as $ignore) {
             if (preg_match($ignore, $file)) {
                 return true;
@@ -56,11 +61,13 @@ class Watcher {
         return false;
     }
 
-    public function triggerCallback() {
+    public function triggerCallback()
+    {
         call_user_func($this->callback);
     }
 
-    public function addDirectory(string $directory): self {
+    public function addDirectory(string $directory): self
+    {
         $this->directories[] = realpath($directory);
         return $this;
     }

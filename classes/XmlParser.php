@@ -1,13 +1,14 @@
 <?php
 namespace Rhino\Codegen;
 
-class XmlParser {
-
+class XmlParser
+{
     protected $file;
     protected $codegen;
     protected $parsers = [];
 
-    public function __construct(Codegen $codegen, $file) {
+    public function __construct(Codegen $codegen, $file)
+    {
         assert(is_file($file), 'Expected codegen XML file to be valid: ' . $file);
 
         $this->file = $file;
@@ -18,13 +19,14 @@ class XmlParser {
         $this->addParser('routes', new XmlParser\RoutesParser());
     }
 
-    public function parse(): Codegen {
+    public function parse(): Codegen
+    {
         $errorMode = libxml_use_internal_errors(true);
         try {
             $file = $this->getFile();
             $xml = simplexml_load_file($file);
             if (!$xml) {
-                throw new \Exception('Could not read XML: ' . implode(PHP_EOL, array_map(function($error) {
+                throw new \Exception('Could not read XML: ' . implode(PHP_EOL, array_map(function ($error) {
                     return "$error->line:$error->column $error->message";
                 }, libxml_get_errors())));
             }
@@ -47,7 +49,28 @@ class XmlParser {
         return $this->codegen;
     }
 
-    protected function preparseNode($node) {
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function addParser($nodeName, $parser)
+    {
+        $this->codegen->log('Adding parser', $nodeName, get_class($parser));
+        $this->parsers[$nodeName] = $parser;
+        return $this;
+    }
+
+    public function getParser(string $name)
+    {
+        if (!isset($this->parsers[$name])) {
+            throw new \Exception('Could not find child parser for ' . $name . ' in ' . get_class($this));
+        }
+        return $this->parsers[$name];
+    }
+
+    protected function preparseNode($node)
+    {
         if (!isset($this->parsers[$node->getName()])) {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
@@ -55,28 +78,12 @@ class XmlParser {
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->preparse($node);
     }
 
-    protected function parseNode(\SimpleXMLElement $node) {
+    protected function parseNode(\SimpleXMLElement $node)
+    {
         if (!isset($this->parsers[$node->getName()])) {
             throw new \Exception('Could not find node parser for ' . $node->getName());
         }
         $this->codegen->log('Parsing node', $node->getName(), 'with', get_class($this->parsers[$node->getName()]));
         $this->parsers[$node->getName()]->setCodegen($this->codegen)->parse($node);
-    }
-
-    public function getFile() {
-        return $this->file;
-    }
-
-    public function addParser($nodeName, $parser) {
-        $this->codegen->log('Adding parser', $nodeName, get_class($parser));
-        $this->parsers[$nodeName] = $parser;
-        return $this;
-    }
-
-    public function getParser(string $name) {
-        if (!isset($this->parsers[$name])) {
-            throw new \Exception('Could not find child parser for ' . $name . ' in ' . get_class($this));
-        }
-        return $this->parsers[$name];
     }
 }

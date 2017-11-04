@@ -3,9 +3,10 @@ namespace Rhino\Codegen\Template\SlimPhp;
 
 use Rhino\Codegen\Template\SlimPhp;
 
-class Controller extends SlimPhp {
-
-    public function generate() {
+class Controller extends SlimPhp
+{
+    public function generate()
+    {
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-input-data',
@@ -31,5 +32,4 @@ class Controller extends SlimPhp {
             ]);
         }
     }
-
 }

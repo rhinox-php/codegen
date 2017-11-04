@@ -1,10 +1,12 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class FastRoute extends \Rhino\Codegen\Template\Generic {
+class FastRoute extends \Rhino\Codegen\Template\Generic
+{
     protected $urlPrefix;
 
-    public function generate() {
+    public function generate()
+    {
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-http',
@@ -17,11 +19,13 @@ class FastRoute extends \Rhino\Codegen\Template\Generic {
         ]);
     }
 
-    public function getUrlPrefix() {
+    public function getUrlPrefix()
+    {
         return $this->urlPrefix;
     }
 
-    public function setUrlPrefix($urlPrefix) {
+    public function setUrlPrefix($urlPrefix)
+    {
         $this->urlPrefix = $urlPrefix;
         return $this;
     }

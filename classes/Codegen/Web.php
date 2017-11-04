@@ -1,7 +1,8 @@
 <?php
 namespace Rhino\Codegen\Codegen;
 
-class Web extends \Rhino\Codegen\Codegen {
+class Web extends \Rhino\Codegen\Codegen
+{
     public $gitIgnore;
     public $composer;
     public $npm;
@@ -9,7 +10,8 @@ class Web extends \Rhino\Codegen\Codegen {
     public $gulp;
     public $router;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->gitIgnore = new GitIgnore($this);
         $this->composer = new Web\Composer($this);
@@ -20,7 +22,8 @@ class Web extends \Rhino\Codegen\Codegen {
         $this->router = new Web\Router($this);
     }
 
-    public function generate() {
+    public function generate()
+    {
         parent::generate();
         $this->gitIgnore->generate();
         $this->composer->generate();

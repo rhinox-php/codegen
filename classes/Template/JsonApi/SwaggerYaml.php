@@ -1,8 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\JsonApi;
 
-class SwaggerYaml extends \Rhino\Codegen\Template\Template {
-    public function generate() {
+class SwaggerYaml extends \Rhino\Codegen\Template\Template
+{
+    public function generate()
+    {
         $this->codegen->npm->addDevDependency('bootprint', '^1.0.0');
         $this->codegen->npm->addDevDependency('bootprint-openapi', '^1.0.1');
         $this->codegen->npm->addDevDependency('json-refs', '^3.0.0');

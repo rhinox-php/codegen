@@ -1,30 +1,38 @@
 <?php
 namespace Rhino\Codegen;
 
-use Microsoft\PhpParser\{DiagnosticsProvider, Node, Parser, PositionUtilities};
+use Microsoft\PhpParser\DiagnosticsProvider;
+use Microsoft\PhpParser\Node;
+use Microsoft\PhpParser\Parser;
+use Microsoft\PhpParser\PositionUtilities;
 
-class MergeClass {
+class MergeClass
+{
     protected $classSourceFrom;
     protected $classSourceInto;
     protected $root1;
     protected $root2;
     protected $output;
 
-    public function __construct(Codegen $codegen) {
+    public function __construct(Codegen $codegen)
+    {
         $this->codegen = $codegen;
     }
 
-    public function setClassSourceFrom(string $classSourceFrom): self {
+    public function setClassSourceFrom(string $classSourceFrom): self
+    {
         $this->classSourceFrom = $classSourceFrom;
         return $this;
     }
 
-    public function setClassSourceInto(string $classSourceInto): self {
+    public function setClassSourceInto(string $classSourceInto): self
+    {
         $this->classSourceInto = $classSourceInto;
         return $this;
     }
 
-    public static function merge(Codegen $codegen, string $fromFile, string $intoFile): self {
+    public static function merge(Codegen $codegen, string $fromFile, string $intoFile): self
+    {
         $fromFile = realpath($fromFile);
         if (!$fromFile) {
             throw new \Exception('Could not find file 1: ' . $fromFile);
@@ -47,7 +55,8 @@ class MergeClass {
         return $instance;
     }
 
-    public function parse() {
+    public function parse()
+    {
         $this->parser = new Parser();
 
         $this->codegen->log('Parsing "from" class source...');
@@ -74,7 +83,13 @@ class MergeClass {
         return $this;
     }
 
-    protected function validate($content, $root) {
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    protected function validate($content, $root)
+    {
         assert(is_string($content), new \InvalidArgumentException('Expected source to be a string.'));
         assert(strlen($content) > 0, new \InvalidArgumentException('Expected source string to not be empty.'));
 
@@ -92,14 +107,16 @@ class MergeClass {
         return true;
     }
 
-    protected function parseClass(Node\Statement\ClassDeclaration $class) {
+    protected function parseClass(Node\Statement\ClassDeclaration $class)
+    {
         $className = $class->name->getText($this->root1);
         foreach ($class->classMembers as $member) {
             $this->parseClassMember($className, $member);
         }
     }
 
-    protected function parseClassMember(string $className, $members) {
+    protected function parseClassMember(string $className, $members)
+    {
         if (!is_array($members)) {
             $members = [$members];
         }
@@ -112,7 +129,8 @@ class MergeClass {
         }
     }
 
-    protected function replaceClassMethod(string $className1, string $memberName, string $replacement) {
+    protected function replaceClassMethod(string $className1, string $memberName, string $replacement)
+    {
         $this->codegen->log('Found class method', $className1, $memberName);
         $found = false;
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\MethodDeclaration::class) as $member) {
@@ -136,7 +154,8 @@ class MergeClass {
         // @todo create class if it doesn't exist
     }
 
-    protected function replaceClassProperty(string $className1, string $memberName, string $replacement) {
+    protected function replaceClassProperty(string $className1, string $memberName, string $replacement)
+    {
         $this->codegen->log('Found class property', $className1, $memberName);
         $found = false;
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\PropertyDeclaration::class) as $member) {
@@ -161,7 +180,8 @@ class MergeClass {
         // @todo create class if it doesn't exist
     }
 
-    protected function getClassDeclaration($className1, $root) {
+    protected function getClassDeclaration($className1, $root)
+    {
         foreach ($root->getChildNodes() as $child) {
             if ($child instanceof Node\Statement\ClassDeclaration) {
                 $className2 = $child->name->getText($root);
@@ -173,7 +193,8 @@ class MergeClass {
         return null;
     }
 
-    protected function iterateClassMembers($className1, $root, string $type = null) {
+    protected function iterateClassMembers($className1, $root, string $type = null)
+    {
         $classDeclaration = $this->getClassDeclaration($className1, $root);
         if (!$classDeclaration) {
             return;
@@ -190,13 +211,9 @@ class MergeClass {
         }
     }
 
-    protected function setOutput(string $output) {
+    protected function setOutput(string $output)
+    {
         $this->output = $output;
         $this->root2 = $this->parser->parseSourceFile($this->output);
     }
-
-    public function getOutput() {
-        return $this->output;
-    }
 }
-

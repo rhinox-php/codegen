@@ -1,8 +1,10 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-class ControllerModelForm extends \Rhino\Codegen\Template\Generic {
-    public function generate() {
+class ControllerModelForm extends \Rhino\Codegen\Template\Generic
+{
+    public function generate()
+    {
         foreach ($this->codegen->getEntities() as $entity) {
             $this->codegen->router->addRoute()
                 ->setHttpMethods(['get', 'post'])

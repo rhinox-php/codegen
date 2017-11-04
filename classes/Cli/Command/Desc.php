@@ -7,8 +7,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Desc extends AbstractCommand {
-    protected function configure() {
+class Desc extends AbstractCommand
+{
+    protected function configure()
+    {
         parent::configure();
         $this->setName('desc')
             ->setDescription('Generate migrations')
@@ -16,7 +18,8 @@ class Desc extends AbstractCommand {
             ->addOption('full', 'f', InputOption::VALUE_NONE, 'Output full descriptions.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
 
         if ($input->getOption('full')) {
@@ -28,7 +31,8 @@ class Desc extends AbstractCommand {
         }
     }
 
-    protected function describe(Codegen $codegen, OutputInterface $output) {
+    protected function describe(Codegen $codegen, OutputInterface $output)
+    {
         foreach ($codegen->getEntities() as $entity) {
             $output->writeln('Entity:');
             (new Table($output))
@@ -50,7 +54,8 @@ class Desc extends AbstractCommand {
         }
     }
 
-    protected function list(Codegen $codegen, OutputInterface $output) {
+    protected function list(Codegen $codegen, OutputInterface $output)
+    {
         foreach ($codegen->getEntities() as $entity) {
             $output->writeln($entity->getClassName());
         }

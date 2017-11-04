@@ -1,10 +1,13 @@
 <?php
 namespace Rhino\Codegen\XmlParser\Entity;
+
 use Rhino\Codegen\Relationship;
 use Rhino\Codegen\Attribute;
 
-class BelongsToParser extends AttributeParser {
-    public function parse(\SimpleXMLElement $node) {
+class BelongsToParser extends AttributeParser
+{
+    public function parse(\SimpleXMLElement $node)
+    {
         $to = $this->codegen->findEntity((string) $node['entity']);
 
         $attribute = new Attribute\IntAttribute();

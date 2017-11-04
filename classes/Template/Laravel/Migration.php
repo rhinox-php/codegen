@@ -1,11 +1,13 @@
 <?php
 namespace Rhino\Codegen\Template\Laravel;
 
-class Migration extends \Rhino\Codegen\Template\Template {
+class Migration extends \Rhino\Codegen\Template\Template
+{
     protected $name = 'laravel';
     protected $path = null;
 
-    public function generate() {
+    public function generate()
+    {
         foreach ($this->codegen->getEntities() as $entity) {
             $this->renderTemplate('database/full', $this->path . $entity->getClassName() . '.php', [
                 'entity' => $entity,
@@ -13,11 +15,13 @@ class Migration extends \Rhino\Codegen\Template\Template {
         }
     }
 
-    public function getPath() {
+    public function getPath()
+    {
         return $this->path;
     }
 
-    public function setPath($path) {
+    public function setPath($path)
+    {
         $this->path = $path;
         return $this;
     }

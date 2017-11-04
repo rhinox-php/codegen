@@ -1,8 +1,10 @@
 <?php
 namespace Rhino\Codegen\Cli;
 
-class Application extends \Symfony\Component\Console\Application {
-    public function __construct() {
+class Application extends \Symfony\Component\Console\Application
+{
+    public function __construct()
+    {
         parent::__construct();
         $this->add(new Command\DbMigrate());
         $this->add(new Command\DbReset());

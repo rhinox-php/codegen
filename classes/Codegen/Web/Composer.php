@@ -1,16 +1,19 @@
 <?php
 namespace Rhino\Codegen\Codegen\Web;
 
-class Composer extends \Rhino\Codegen\Codegen\PackageManager {
+class Composer extends \Rhino\Codegen\Codegen\PackageManager
+{
     protected $repositories = [];
     protected $autoload = [];
 
-    public function __construct(\Rhino\Codegen\Codegen $codegen) {
+    public function __construct(\Rhino\Codegen\Codegen $codegen)
+    {
         parent::__construct($codegen);
         $this->codegen->gitIgnore->addIgnore('vendor');
     }
 
-    public function generate() {
+    public function generate()
+    {
         $empty = true;
         $json = $this->loadJsonFile('composer.json');
         $json['minimum-stability'] = 'dev';
@@ -61,12 +64,14 @@ class Composer extends \Rhino\Codegen\Codegen\PackageManager {
         $this->writeJsonFile('composer.json', $json, $empty);
     }
 
-    public function addRepository($repository): self {
+    public function addRepository($repository): self
+    {
         $this->repositories[] = $repository;
         return $this;
     }
 
-    public function addAutoload(string $type, string $namespace, string $path): self {
+    public function addAutoload(string $type, string $namespace, string $path): self
+    {
         $this->autoload[] = [$type, $namespace, $path];
         return $this;
     }
