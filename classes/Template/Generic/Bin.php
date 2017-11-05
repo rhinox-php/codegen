@@ -9,5 +9,6 @@ class Bin extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Temp
     {
         yield BinServer::class;
         yield BinLint::class;
+        yield BinTest::class;
     }
 }

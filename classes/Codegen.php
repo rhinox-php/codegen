@@ -206,7 +206,7 @@ class Codegen
             }
             return $message;
         }, $messages);
-        echo($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
+        echo ($this->dryRun ? '[DRY RUN] ' : '') . '[DEBUG] ' . implode(' ', $messages) . PHP_EOL;
     }
 
     public function info(...$messages)
@@ -242,7 +242,7 @@ class Codegen
             }
             return $message;
         }, $messages);
-        echo($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
+        echo ($this->dryRun ? '[DRY RUN] ' : '') . implode(' ', $messages) . PHP_EOL;
     }
 
     public function infoOnce(...$messages)

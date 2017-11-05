@@ -25,7 +25,9 @@ class Watch extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
-        $watcher = new \Rhino\Codegen\Watch\Watcher(function () use ($input, $output) {
+        $watcher = new \Rhino\Codegen\Watch\Watcher(function ($changed) use ($input, $output, $codegen) {
+            $codegen->log('Files changed', array_slice($changed, 0, 3));
+
             $executableFinder = new PhpExecutableFinder();
             if (false === $commandLine = $executableFinder->find(false)) {
                 $commandLine = null;

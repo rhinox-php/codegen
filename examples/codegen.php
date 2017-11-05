@@ -20,7 +20,7 @@ $codegen->setDatabaseCollation('utf8_unicode_ci');
 
 $codegen->setDatabase('mysql:host=127.0.0.1', 'codegen_example', 'root', 'root');
 
-$codegen->addHook(new Codegen\Hook\PhpCsFixer());
+// $codegen->addHook(new Codegen\Hook\PhpCsFixer());
 
 $codegen->addTemplate(new Template\Generic\Bin());
 

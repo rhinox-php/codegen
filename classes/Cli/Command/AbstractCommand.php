@@ -20,20 +20,10 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
 
     protected function getCodegen(string $schema, bool $dryRun, bool $debug): \Rhino\Codegen\Codegen
     {
-        switch (pathinfo($schema, PATHINFO_EXTENSION)) {
-            case 'php': {
-                if (!is_file($schema)) {
-                    throw new \Exception('Could not find codegen schema file: ' . $schema);
-                }
-                $codegen = require $schema;
-                break;
-            }
-            case 'xml': {
-                $xmlParser = new \Rhino\Codegen\XmlParser($schema);
-                $codegen = $xmlParser->parse();
-                break;
-            }
+        if (!is_file($schema)) {
+            throw new \Exception('Could not find codegen schema file: ' . $schema);
         }
+        $codegen = require $schema;
         $codegen->setDryRun($dryRun);
         if ($debug) {
             $codegen->setOutputLevel(Codegen::OUTPUT_LEVEL_DEBUG);

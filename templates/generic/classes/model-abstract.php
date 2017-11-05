@@ -21,6 +21,8 @@ abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\Mo
     // Columns
     protected static $columns;
 
+    protected static $transactionCount = 0;
+
     // Datatable
     public static function getDataTable() {
         throw new \Exception('Expected child class to implement ' . __FUNCTION__);
@@ -56,10 +58,12 @@ abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\Mo
 
     protected abstract function saveRelated();
 
-    protected static $transactionCount = 0;
-
     public static function getPdo() {
         return PdoModel::getPdo();
+    }
+
+    protected static function fetchObject(\PDOStatement $result) {
+        return $result->fetchObject(static::class);
     }
 
     protected static function query($sql, array $data = []) : \PDOStatement {

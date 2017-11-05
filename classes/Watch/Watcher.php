@@ -3,8 +3,13 @@ namespace Rhino\Codegen\Watch;
 
 class Watcher
 {
+    const METHOD_MODIFIED_TIME = 'modified-time';
+    const METHOD_HASH = 'hash';
+
     protected $callback;
     protected $directories;
+    protected $method = self::METHOD_MODIFIED_TIME;
+    protected $sleepTime = 2;
     protected $ignore = [
         '/^\./',
         '/^vendor$/',
@@ -31,7 +36,7 @@ class Watcher
         while (!empty($directories)) {
             $directory = array_shift($directories);
             foreach (scandir($directory) as $file) {
-                usleep(1);
+                usleep($this->sleepTime);
                 if ($this->isIgnored($file)) {
                     continue;
                 }
@@ -40,15 +45,26 @@ class Watcher
                     $directories[] = $file;
                     continue;
                 }
-                $files[$file] = filemtime($file);
+                $files[$file] = $this->checkFile($file);
             }
         }
         ksort($files);
         $key = md5(implode(':', $files));
         if ($key != $this->lastKey) {
-            $this->triggerCallback();
+            $this->triggerCallback(array_keys($files));
         }
         $this->lastKey = $key;
+    }
+
+    protected function checkFile(string $file) {
+        switch ($this->method) {
+            case static::METHOD_MODIFIED_TIME: {
+                return filemtime($file);
+            }
+            case static::METHOD_HASH: {
+                return md5_file($file);
+            }
+        }
     }
 
     public function isIgnored($file)
@@ -61,9 +77,10 @@ class Watcher
         return false;
     }
 
-    public function triggerCallback()
+    public function triggerCallback(array $changed): self
     {
-        call_user_func($this->callback);
+        call_user_func($this->callback, $changed);
+        return $this;
     }
 
     public function addDirectory(string $directory): self
