@@ -104,7 +104,7 @@ class Entity
     {
         if ($sorted) {
             $sortedAttributes = $this->attributes;
-            uksort($this->sortedAttributes, function ($a, $b) {
+            uksort($sortedAttributes, function ($a, $b) {
                 return strnatcasecmp($a, $b);
             });
             return $sortedAttributes;
