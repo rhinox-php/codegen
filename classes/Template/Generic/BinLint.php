@@ -9,6 +9,7 @@ class BinLint extends \Rhino\Codegen\Template\Generic
         $this->codegen->composer->addDevDependency('friendsofphp/php-cs-fixer', '~2.7');
         $this->renderTemplate('generic/bin/lint-php-syntax-check.sh', 'bin/lint-php-syntax-check.sh')->setExecutable(true);
         $this->renderTemplate('generic/bin/lint-php-fix.sh', 'bin/lint-php-fix.sh')->setExecutable(true);
+        $this->renderTemplate('generic/bin/lint-php-fix.bat', 'bin/lint-php-fix.bat')->setExecutable(true);
         $this->renderTemplate('generic/bin/lint-php-check.sh', 'bin/lint-php-check.sh')->setExecutable(true);
     }
 }
