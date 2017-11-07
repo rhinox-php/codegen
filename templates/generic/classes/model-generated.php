@@ -151,7 +151,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ]);
     }
 
-    public static function hydrateFromPdoStatement($statement) {
+    public static function hydrateFromPdoStatement($statement): \Generator {
         while (($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
             $entity = new static();
             $entity->id = $row['id'];
@@ -165,11 +165,16 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
 <?php endif; ?>
 <?php elseif ($attribute->is(['Date'])): ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+            if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
+                $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
+            }
 <?php elseif ($attribute->is(['DateTime'])): ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+            if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
+                $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
+            }
 <?php endif; ?>
 <?php endforeach; ?>
+
             if (isset($row['created'])) {
                 $entity->setCreated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['created'], new \DateTimezone('UTC')));
             }
@@ -363,11 +368,23 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      *
      * @return Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[]
      */
-    public static function iterateAll() {
+    public static function iterateAll(): \Generator {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`;
         '));
+    }
+
+    /**
+     * Gets the count of the total number of rows in the table.
+     *
+     * WARNING: May be slow depending on database engine and amount of rows.
+     */
+    public static function countAll(): int {
+        return static::query('
+            SELECT COUNT(*) AS count
+            FROM `' . static::$table . '`;
+        ')->fetchColumn();
     }
 
     /**
@@ -389,32 +406,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>|null
      */
     protected static function fetch<?= $entity->getClassName(); ?>(\PDOStatement $result) {
-        $entity = static::fetchObject($result);
-        if (!$entity) {
-            return null;
+        foreach (static::hydrateFromPdoStatement($result) as $entity) {
+            return $entity;
         }
-
-        // Parse date attributes
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Date'])): ?>
-        if ($entity-><?= $attribute->getPropertyName(); ?>) {
-            $entity->set<?= $attribute->getMethodName(); ?>(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $entity-><?= $attribute->getPropertyName(); ?>, new \DateTimezone('UTC')));
-        }
-<?php elseif ($attribute->is(['DateTime'])): ?>
-        if ($entity-><?= $attribute->getPropertyName(); ?>) {
-            $entity->set<?= $attribute->getMethodName(); ?>(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity-><?= $attribute->getPropertyName(); ?>, new \DateTimezone('UTC')));
-        }
-<?php endif; ?>
-<?php endforeach; ?>
-
-        // Parse created/updated dates
-        if ($entity->created) {
-            $entity->setCreated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity->created, new \DateTimezone('UTC')));
-        }
-        if ($entity->updated) {
-            $entity->setUpdated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $entity->updated, new \DateTimezone('UTC')));
-        }
-        return $entity;
+        return null;
     }
 
     /**
@@ -422,10 +417,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      *
      * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[]
      */
-    protected static function fetch<?= $entity->getPluralClassName(); ?>(\PDOStatement $result) {
-        while ($entity = static::fetch<?= $entity->getClassName(); ?>($result)) {
-            yield $entity;
-        }
+    protected static function fetch<?= $entity->getPluralClassName(); ?>(\PDOStatement $result): \Generator {
+        return static::hydrateFromPdoStatement($result);
     }
 
     // Fetch relationships

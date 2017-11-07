@@ -63,7 +63,7 @@ abstract class AbstractModel implements \JsonSerializable, \Rhino\JsonApiList\Mo
     }
 
     protected static function fetchObject(\PDOStatement $result) {
-        return $result->fetchObject(static::class);
+        return static::hydrateFromPdoStatement($result);
     }
 
     protected static function query($sql, array $data = []) : \PDOStatement {
