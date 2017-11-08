@@ -32,7 +32,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     protected static $columns = '
         `<?= $entity->getTableName(); ?>`.`id`,
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-        `<?= $entity->getTableName(); ?>`.`<?= $attribute->getColumnName(); ?>` AS `<?= $attribute->getPropertyName(); ?>`,
+        `<?= $entity->getTableName(); ?>`.`<?= $attribute->getColumnName(); ?>`,
 <?php endforeach; ?>
         `<?= $entity->getTableName(); ?>`.`created`,
         `<?= $entity->getTableName(); ?>`.`updated`

@@ -69,7 +69,8 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
 
         $fetched = <?= $entity->getClassName(); ?>::findFirstBy<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
         $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $fetched);
-        $this->assertSame($fetched->getId(), $id);
+        $this->assertSame($id, $fetched->getId());
+        $this->assertSame($<?= $attribute->getPropertyName(); ?>, $fetched->get<?= $attribute->getMethodName(); ?>());
 
         $count = 0;
         foreach (<?= $entity->getClassName(); ?>::findBy<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>) as $instance) {

@@ -92,7 +92,7 @@ class Entity
 
     public function getLabel(): string
     {
-        return $this->humanize($this->getName());
+        return $this->getName();
     }
 
     public function getPluralLabel(): string

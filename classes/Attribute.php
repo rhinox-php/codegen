@@ -48,7 +48,7 @@ class Attribute
         $this->propertyName = $propertyName;
         return $this;
     }
-    
+
     public function getPluralPropertyName()
     {
         return $this->pluralize($this->getPropertyName());
@@ -64,7 +64,7 @@ class Attribute
         $this->methodName = $methodName;
         return $this;
     }
-    
+
     public function getPluralMethodName()
     {
         return $this->pluralize($this->getMethodName());
@@ -91,9 +91,7 @@ class Attribute
 
     public function getLabel(): string
     {
-        $inflector = $this->getInflector();
-        $label = $inflector->underscore($this->getName());
-        return $inflector->humanize($label, true);
+        return $this->getName();
     }
 
     public function is(array $types): bool

@@ -1,8 +1,6 @@
 <?php
 namespace Rhino\Codegen;
 
-use Symfony\Component\Console\Helper\Table;
-
 class Codegen
 {
     use Inflector;
@@ -81,7 +79,11 @@ class Codegen
         $pdo = $this->getPdo(false);
         if (!$this->db->databaseExists($this->getDatabaseName())) {
             $this->log('Database doesn\'t exist: ' . $this->getDatabaseName());
-            return $this;
+            $pdo->query("
+                CREATE DATABASE `{$this->getDatabaseName()}`
+                DEFAULT CHARACTER SET '{$this->getDatabaseCharset()}'
+                DEFAULT COLLATE '{$this->getDatabaseCollation()}';
+            ");
         }
         $pdo->query("
             USE `{$this->getDatabaseName()}`;

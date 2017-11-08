@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\Table;
 
 class Desc extends AbstractCommand
 {
@@ -44,10 +45,15 @@ class Desc extends AbstractCommand
             $output->writeln('Attributes:');
             $rows = [];
             foreach ($entity->getAttributes() as $attribute) {
-                $rows[] = [$attribute->getName(), $attribute->getPropertyName(), $attribute->getType()];
+                $rows[] = [
+                    $attribute->getName(),
+                    $attribute->getLabel(),
+                    $attribute->getPropertyName(),
+                    $attribute->getType(),
+                ];
             }
             (new Table($output))
-                ->setHeaders(['Class Name', 'Property Name', 'Type'])
+                ->setHeaders(['Name', 'Label', 'Property Name', 'Type'])
                 ->setRows($rows)
                 ->render();
             $output->writeln('');
