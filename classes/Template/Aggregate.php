@@ -16,12 +16,14 @@ trait Aggregate
 
     public function iterateTemplates()
     {
-        foreach ($this->aggregate() as $templateClass) {
-            $template = new $templateClass();
-            $template->codegen = $this->codegen;
-            $template->namespaces = $this->namespaces;
-            $template->paths = $this->paths;
-            yield $template;
-        }
+        yield from $this->aggregate();
+    }
+
+    protected function aggregateClass(string $templateClass, array $parameters = []): Template {
+        $template = new $templateClass(...$parameters);
+        $template->codegen = $this->codegen;
+        $template->namespaces = $this->namespaces;
+        $template->paths = $this->paths;
+        return $template;
     }
 }

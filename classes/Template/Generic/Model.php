@@ -7,11 +7,11 @@ class Model extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Te
 
     public function aggregate()
     {
-        yield ModelAbstract::class;
-        yield ModelGenerated::class;
-        yield ModelInitial::class;
-        yield ModelPdo::class;
-        yield ModelSerializer::class;
-        yield ModelTest::class;
+        yield $this->aggregateClass(ModelAbstract::class);
+        yield $this->aggregateClass(ModelGenerated::class);
+        yield $this->aggregateClass(ModelInitial::class);
+        yield $this->aggregateClass(ModelPdo::class);
+        yield $this->aggregateClass(ModelSerializer::class);
+        yield $this->aggregateClass(ModelTest::class);
     }
 }

@@ -7,10 +7,10 @@ class Sql extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Temp
 
     public function aggregate()
     {
-        yield SqlFull::class;
-        yield SqlMigrate::class;
-        yield SqlAlterChange::class;
-        yield SqlAlterAdd::class;
-        yield SqlAlterIndex::class;
+        yield $this->aggregateClass(SqlFull::class);
+        yield $this->aggregateClass(SqlMigrate::class);
+        yield $this->aggregateClass(SqlAlterChange::class);
+        yield $this->aggregateClass(SqlAlterAdd::class);
+        yield $this->aggregateClass(SqlAlterIndex::class);
     }
 }

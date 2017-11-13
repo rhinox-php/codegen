@@ -7,7 +7,7 @@ class View extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Tem
 
     public function aggregate()
     {
-        yield ViewModelForm::class;
-        yield ViewModelIndex::class;
+        yield $this->aggregateClass(ViewModelForm::class);
+        yield $this->aggregateClass(ViewModelIndex::class);
     }
 }

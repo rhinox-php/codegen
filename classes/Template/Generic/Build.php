@@ -7,6 +7,6 @@ class Build extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Te
 
     public function aggregate()
     {
-        yield Gulp::class;
+        yield $this->aggregateClass(Gulp::class);
     }
 }
