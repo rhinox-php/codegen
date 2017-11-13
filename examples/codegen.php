@@ -35,7 +35,14 @@ $codegen->addTemplate(new Template\Generic\ControllerHome());
 $codegen->addTemplate(new Template\Generic\ControllerApi());
 $codegen->addTemplate(new Template\Generic\ControllerApiInitial());
 
-$codegen->addTemplate(new Template\JsonApi\Swagger());
+$jsonApi = (new Template\JsonApi\JsonApi())
+    ->setTitle('Example')
+    ->setVersion('1.0')
+    ->setEmail('test@example.com')
+    ->setHost('example.com')
+    ->setBasePath('/api/v1');
+$codegen->addTemplate(new Template\JsonApi\Swagger($jsonApi));
+
 $codegen->addTemplate(new Template\Generic\Build());
 $codegen->addTemplate(new Template\Generic\Bootstrap());
 $codegen->addTemplate(new Template\Generic\Composer());

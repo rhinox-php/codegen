@@ -7,7 +7,7 @@ class Model extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codegen\Te
 
     public function aggregate()
     {
-        yield ModelAbstract::class;
-        yield ModelGenerated::class;
+        yield $this->aggregateClass(ModelAbstract::class);
+        yield $this->aggregateClass(ModelGenerated::class);
     }
 }

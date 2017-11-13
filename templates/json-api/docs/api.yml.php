@@ -1,13 +1,18 @@
 swagger: '2.0'
 info:
-  title: ???
-  version: ???
+  title: <?= $jsonApi->getTitle(); ?>
+
+  version: <?= $jsonApi->getVersion(); ?>
+
   contact:
-    email: ???
+    email: <?= $jsonApi->getEmail(); ?>
+
 schemes:
   - https
-host: ???
-basePath: ???
+host: <?= $jsonApi->getHost(); ?>
+
+basePath: <?= $jsonApi->getBasePath(); ?>
+
 produces:
   - application/vnd.api+json
 paths:

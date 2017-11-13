@@ -19,4 +19,12 @@
     <entity name="Output File">
         <string-attribute name="Path" />
     </entity>
+
+    <entity name="Json Api">
+        <string-attribute name="Title" />
+        <string-attribute name="Base Path" />
+        <string-attribute name="Host" />
+        <string-attribute name="Version" />
+        <string-attribute name="Email" />
+    </entity>
 </codegen>
