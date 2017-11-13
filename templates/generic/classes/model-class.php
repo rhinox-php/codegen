@@ -38,7 +38,7 @@ class <?= $entity->getClassName(); ?> {
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): string {
+    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>string {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
@@ -48,7 +48,7 @@ class <?= $entity->getClassName(); ?> {
     }
 
 <?php elseif ($attribute->is(['Int'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): int {
+    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>int {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
@@ -58,7 +58,7 @@ class <?= $entity->getClassName(); ?> {
     }
 
 <?php elseif ($attribute->is(['Decimal'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): float {
+    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>float {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
@@ -69,7 +69,7 @@ class <?= $entity->getClassName(); ?> {
 
 <?php elseif ($attribute->is(['Bool'])): ?>
 
-    public function is<?= $attribute->getMethodName(); ?>(): bool {
+    public function is<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>bool {
 <?php if ($attribute->isNullable()): ?>
         if ($this-><?= $attribute->getPropertyName(); ?> === null) {
             return null;
@@ -85,7 +85,7 @@ class <?= $entity->getClassName(); ?> {
 
 <?php elseif ($attribute->is(['Date', 'DateTime'])): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>(): \DateTimeInterface {
+    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\DateTimeInterface {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
@@ -96,7 +96,7 @@ class <?= $entity->getClassName(); ?> {
 
 <?php elseif ($attribute->is(['Object'])): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>(): \<?= $attribute->getClass(); ?> {
+    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\<?= $attribute->getClass(); ?> {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
 
@@ -107,7 +107,7 @@ class <?= $entity->getClassName(); ?> {
 
 <?php elseif ($attribute->is(['Array'])): ?>
 
-    public function get<?= $attribute->getPluralMethodName(); ?>(): array {
+    public function get<?= $attribute->getPluralMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>array {
         return $this-><?= $attribute->getPluralPropertyName(); ?>;
     }
 

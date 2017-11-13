@@ -132,7 +132,6 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
 
 <?php endif; ?>
 <?php endforeach; ?>
-
 <?php foreach ($entity->iterateRelationshipsByType(['BelongsTo']) as $relationship): ?>
 
     public function test<?= $relationship->getMethodName(); ?>Relationship(): void {
@@ -164,4 +163,48 @@ class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
     }
 
 <?php endforeach; ?>
+<?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
+
+    public function test<?= $relationship->getMethodName(); ?>Relationship(): void {
+        $<?= $relationship->getTo()->getPluralPropertyName(); ?> = [
+            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>(),
+            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>(),
+        ];
+
+        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
+        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>($<?= $relationship->getTo()->getPluralPropertyName(); ?>);
+        $<?= $entity->getPropertyName(); ?>->save();
+
+        $id = $<?= $entity->getPropertyName(); ?>->getId();
+        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
+
+        $count = 0;
+        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+            $count++;
+        }
+        $this->assertSame(count($<?= $relationship->getTo()->getPluralPropertyName(); ?>), $count);
+
+        unset($<?= $relationship->getTo()->getPluralPropertyName(); ?>[1]);
+        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>($<?= $relationship->getTo()->getPluralPropertyName(); ?>);
+        $<?= $entity->getPropertyName(); ?>->save();
+
+        $count = 0;
+        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+            $count++;
+        }
+        $this->assertSame(count($<?= $relationship->getTo()->getPluralPropertyName(); ?>), $count);
+
+        unset($<?= $relationship->getTo()->getPluralPropertyName(); ?>[1]);
+        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>([]);
+        $<?= $entity->getPropertyName(); ?>->save();
+
+        $count = 0;
+        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+            $count++;
+        }
+        $this->assertSame(0, $count);
+    }
+
+<?php endforeach; ?>
+
 }

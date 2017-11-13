@@ -1,5 +1,11 @@
 <?= '<?php'; ?>
 
+if (version_compare(PHP_VERSION, '7.1.0', '<')) {
+    die('PHP 7.1+ is required' . PHP_EOL);
+}
+
+ini_set('html_errors', false);
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $cache = __DIR__ . '/../reports/code-coverage.php';

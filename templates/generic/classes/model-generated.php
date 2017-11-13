@@ -432,7 +432,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      *
      * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
      */
-    public function fetch<?= $relationship->getPluralClassName(); ?>() {
+    public function fetch<?= $relationship->getPluralMethodName(); ?>() {
         return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
 
@@ -442,14 +442,14 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      *
      * @return <?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
      */
-    public function get<?= $relationship->getPluralClassName(); ?>() {
+    public function get<?= $relationship->getPluralMethodName(); ?>() {
         if ($this-><?= $relationship->getPluralPropertyName(); ?> === null) {
-            $this-><?= $relationship->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getPluralClassName(); ?>());
+            $this-><?= $relationship->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getPluralMethodName(); ?>());
         }
         return $this-><?= $relationship->getPluralPropertyName(); ?>;
     }
 
-    public function set<?= $relationship->getPluralClassName(); ?>(array $entities) {
+    public function set<?= $relationship->getPluralMethodName(); ?>(array $entities) {
         $this-><?= $relationship->getPluralPropertyName(); ?> = $entities;
         return $this;
     }
@@ -457,19 +457,19 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
     // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
 
-    public function fetch<?= $relationship->getClassName(); ?>() {
+    public function fetch<?= $relationship->getMethodName(); ?>() {
         return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findFirstBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
 
-    public function get<?= $relationship->getClassName(); ?>() {
+    public function get<?= $relationship->getMethodName(); ?>() {
         if (!$this-><?= $relationship->getPropertyName(); ?>) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getClassName(); ?>();
+            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getMethodName(); ?>();
         }
         return $this-><?= $relationship->getPropertyName(); ?>;
     }
 
-    public function has<?= $relationship->getClassName(); ?>() {
-        return $this->fetch<?= $relationship->getClassName(); ?>() ? true : false;
+    public function has<?= $relationship->getMethodName(); ?>() {
+        return $this->fetch<?= $relationship->getMethodName(); ?>() ? true : false;
     }
 
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
