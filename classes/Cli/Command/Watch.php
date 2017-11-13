@@ -15,11 +15,9 @@ class Watch extends AbstractCommand
 {
     protected function configure()
     {
+        parent::configure();
         $this->setName('watch')
-            ->setDescription('Watch code for changes and trigger generation automatically')
-            ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
-            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
+            ->setDescription('Watch code for changes and trigger generation automatically');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

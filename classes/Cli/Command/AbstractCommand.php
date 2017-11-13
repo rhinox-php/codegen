@@ -14,12 +14,25 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
     protected function configure()
     {
         $this->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
+            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', null)
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
-    protected function getCodegen(string $schema, bool $dryRun, bool $debug): \Rhino\Codegen\Codegen
+    protected function getCodegen(?string $schema, bool $dryRun, bool $debug): \Rhino\Codegen\Codegen
     {
+        if (!$schema) {
+            $currentDirectory = getcwd();
+            while (is_dir($currentDirectory) ) {
+                if (is_file($currentDirectory . '/codegen.php')) {
+                    $schema = $currentDirectory . '/codegen.php';
+                    break;
+                }
+                if (dirname($currentDirectory) == $currentDirectory) {
+                    break;
+                }
+                $currentDirectory = dirname($currentDirectory);
+            }
+        }
         if (!is_file($schema)) {
             throw new \Exception('Could not find codegen schema file: ' . $schema);
         }

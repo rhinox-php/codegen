@@ -10,11 +10,9 @@ class DbReset extends AbstractCommand
 {
     protected function configure()
     {
+        parent::configure();
         $this->setName('db:reset')
             ->setDescription('Reset table')
-            ->addOption('execute', 'x', InputOption::VALUE_NONE, 'Execute code generation (otherwise dry run).')
-            ->addOption('schema', 's', InputOption::VALUE_REQUIRED, 'Codegen schema file to load.', 'codegen.php')
-            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output')
             ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
     }
 
