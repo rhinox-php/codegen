@@ -8,22 +8,22 @@ class Relationship
     protected $from;
     protected $to;
     protected $name;
-    
+
     public function getPropertyName()
     {
         return $this->camelize($this->getName(), true);
     }
-    
+
     public function getPluralPropertyName()
     {
         return $this->pluralize($this->getPropertyName());
     }
-    
+
     public function getClassName()
     {
         return $this->camelize($this->getName());
     }
-    
+
     public function getPluralClassName()
     {
         return $this->pluralize($this->getClassName());
@@ -34,11 +34,16 @@ class Relationship
         return $this->camelize($this->getName());
     }
 
+    public function getPluralMethodName()
+    {
+        return $this->pluralize($this->getMethodName());
+    }
+
     public function getColumnName(): string
     {
         return $this->underscore($this->getName());
     }
-    
+
     public function getFrom(): Entity
     {
         return $this->from;
