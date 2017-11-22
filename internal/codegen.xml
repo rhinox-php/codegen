@@ -27,4 +27,8 @@
         <string-attribute name="Version" />
         <string-attribute name="Email" />
     </entity>
+
+    <entity name="Manifest">
+        <array-attribute name="File" nullable="false" />
+    </entity>
 </codegen>
