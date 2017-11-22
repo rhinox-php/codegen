@@ -216,7 +216,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
      * @param string|null $value Sets the <?= $attribute->getName(); ?> attribute.
      * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
      */
-    public function set<?= $attribute->getMethodName(); ?>($value) {
+    public function set<?= $attribute->getMethodName(); ?>(string $value): self {
         $this-><?= $attribute->getColumnName(); ?> = $value;
         return $this;
     }
