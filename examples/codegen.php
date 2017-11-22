@@ -35,6 +35,8 @@ $codegen->addTemplate(new Template\Generic\ControllerHome());
 $codegen->addTemplate(new Template\Generic\ControllerApi());
 $codegen->addTemplate(new Template\Generic\ControllerApiInitial());
 
+$codegen->addTemplate(new Template\Admin\Controller());
+
 $jsonApi = (new Template\JsonApi\JsonApi())
     ->setTitle('Example')
     ->setVersion('1.0')

@@ -521,6 +521,7 @@ class Codegen
         if (!$file) {
             throw new \Exception('Invalid file to write ' . $file);
         }
+        // $this->manifest->add($file);
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
