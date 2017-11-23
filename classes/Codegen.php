@@ -37,6 +37,7 @@ class Codegen
     protected $outputLevel = self::OUTPUT_LEVEL_LOG;
     protected $loggedOnce = [];
     protected $hooks = [];
+    protected $manifest = [];
 
     public function __construct()
     {
@@ -64,6 +65,7 @@ class Codegen
     public function generate()
     {
         $this->validate();
+        $this->readManifest();
         $this->log('Generating templates...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {
@@ -71,7 +73,47 @@ class Codegen
             $template->generate();
         }
         $this->log('Generating templates complete!');
+        $this->writeManifest();
         return $this;
+    }
+
+    public function clean() {
+        $this->validate();
+        $this->readManifest();
+        $this->manifest->clean();
+    }
+
+    protected function getManifestFile() {
+        return $this->getPath('codegen-manifest.json');
+    }
+
+    protected function readManifest() {
+        $this->log('Reading manifest...');
+        $this->manifest = new Manifest($this);
+        $manifest = $this->getManifestFile();
+        if (!is_file($manifest)) {
+            $this->log('Manifest doesn\'t exist.');
+            return;
+        }
+        $content = file_get_contents($manifest);
+        if (!$content) {
+            $this->log('Manifest is empty.');
+            return;
+        }
+        $files = json_decode($content, true);
+        if (!is_array($files)) {
+            $this->log('Manifest was not a valid JSON array.');
+            return;
+        }
+        $this->manifest->setFiles($files);
+    }
+
+    protected function writeManifest() {
+        if (!$this->dryRun) {
+            $manifest = $this->getManifestFile();
+            $this->log('Writing manifest: ' . $manifest);
+            file_put_contents($manifest, json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ));
+        }
     }
 
     public function dbMigrate(bool $write, bool $run): self
@@ -518,10 +560,8 @@ class Codegen
 
     public function writeFile(string $file, string $content): self
     {
-        if (!$file) {
-            throw new \Exception('Invalid file to write ' . $file);
-        }
-        // $this->manifest->add($file);
+        assert(!!$file, new \Exception('Invalid file to write ' . $file));
+
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
@@ -531,6 +571,7 @@ class Codegen
         $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file);
         if (!$this->isDryRun()) {
             file_put_contents($file, $content);
+            $this->manifest->addFile($file);
         }
         return $this;
     }

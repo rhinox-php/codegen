@@ -10,6 +10,7 @@ class Application extends \Symfony\Component\Console\Application
         $this->add(new Command\DbReset());
         $this->add(new Command\Desc());
         $this->add(new Command\Gen());
+        $this->add(new Command\Clean());
         $this->add(new Command\Init());
         $this->add(new Command\MakeMigration());
         $this->add(new Command\Watch());
