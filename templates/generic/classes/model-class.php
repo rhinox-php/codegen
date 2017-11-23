@@ -7,10 +7,10 @@ class <?= $entity->getClassName(); ?> {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['Array'])): ?>
 <?php if ($attribute->isNullable()): ?>
-    /** @var array|null <?= $attribute->getName(); ?> */
+    /** @var array|null <?= $attribute->getPluralName(); ?> */
     protected $<?= $attribute->getPluralPropertyName(); ?>;
 <?php else: ?>
-    /** @var array <?= $attribute->getName(); ?> */
+    /** @var array <?= $attribute->getPluralName(); ?> */
     protected $<?= $attribute->getPluralPropertyName(); ?> = [];
 <?php endif; ?>
 <?php elseif ($attribute->is(['String', 'Text'])): ?>
@@ -117,7 +117,7 @@ class <?= $entity->getClassName(); ?> {
     }
 
     public function add<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $<?= $attribute->getPropertyName(); ?>;
+        $this-><?= $attribute->getPluralPropertyName(); ?>[] = $<?= $attribute->getPropertyName(); ?>;
         return $this;
     }
 

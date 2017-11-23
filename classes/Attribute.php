@@ -32,6 +32,11 @@ class Attribute
         return $this->name;
     }
 
+    public function getPluralName(): string
+    {
+        return $this->pluralize($this->name);
+    }
+
     public function setName($name)
     {
         $this->name = $name;
