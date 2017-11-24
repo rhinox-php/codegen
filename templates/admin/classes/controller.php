@@ -10,7 +10,7 @@ class <?= $entity->getClassName(); ?>AdminController extends AbstractController 
         // $dataTable = new DataTable\<?= $entity->getClassName(); ?>();
         $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
         if ($dataTable->process($this->request, $this->response)) {
-            return $dataTable->sendResponse();
+            return;
         }
         $this->render('admin/<?= $entity->getFileName(); ?>/index', [
             'dataTable' => $dataTable,

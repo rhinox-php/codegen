@@ -28,6 +28,34 @@ abstract class AbstractController {
      */
     protected $errorMessages = null;
 
+    public function render($view, $data) {
+        $this->response->callback(function() use($view, $data) {
+            $loader = new \Twig_Loader_Filesystem(ROOT . '/src/views');
+            $this->twig = new \Twig_Environment($loader, [
+                // 'cache' => __DIR__ . '/cache',
+            ]);
+            $template = $this->twig->load($view . '.twig');
+            echo $template->render($data);
+        });
+        /*
+        $response->addResponseType('twig', new class {
+            protected $twig;
+
+            public function __construct() {
+                $loader = new \Twig_Loader_Filesystem(__DIR__ . '/templates');
+                $this->twig = new \Twig_Environment($loader, [
+                    // 'cache' => __DIR__ . '/cache',
+                ]);
+            }
+
+            public function process($view, $data) {
+                $template = $this->twig->load($view . '.twig');
+                echo $template->render($data);
+            }
+        });
+        */
+    }
+
     public function getRequest(): Request {
         return $this->request;
     }
