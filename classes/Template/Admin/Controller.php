@@ -10,6 +10,15 @@ class Controller extends \Rhino\Codegen\Template\Admin
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-data-table',
         ]);
+        $this->codegen->gulp->addTask('admin-css', "
+            const files = [
+                'src/assets/scss/admin.scss',
+            ];
+            return gulp.src(files)
+                .pipe(expectFile(files))
+                .pipe(scss())
+                .pipe(gulp.dest('public/assets/build/'));
+        ");
 
         $this->renderTemplate('admin/classes/controller-abstract', 'src/classes/Controller/Admin/Generated/AbstractController.php');
         foreach ($this->codegen->getEntities() as $entity) {
@@ -17,6 +26,9 @@ class Controller extends \Rhino\Codegen\Template\Admin
                 'entity' => $entity,
             ]);
             $this->renderTemplate('admin/classes/controller-initial', 'src/classes/Controller/Admin/' . $entity->getClassName() . 'AdminController.php', [
+                'entity' => $entity,
+            ]);
+            $this->renderTemplate('admin/classes/data-table', 'src/classes/Controller/Admin/DataTable/' . $entity->getClassName() . 'DataTable.php', [
                 'entity' => $entity,
             ]);
             $this->renderTemplate('admin/views/form.twig', 'src/views/admin/' . $entity->getFileName() . '/form.twig', [
@@ -28,6 +40,8 @@ class Controller extends \Rhino\Codegen\Template\Admin
         }
         $this->renderTemplate('admin/views/layout.twig', 'src/views/admin/layout.twig', [
             'entities' => $this->codegen->getEntities(),
+        ]);
+        $this->renderTemplate('admin/assets/admin.scss', 'src/assets/scss/admin.scss', [
         ]);
     }
 

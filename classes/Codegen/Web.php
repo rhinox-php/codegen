@@ -30,6 +30,7 @@ class Web extends \Rhino\Codegen\Codegen
         $this->npm->generate();
         $this->env->generate();
         $this->router->generate();
+        $this->gulp->generate();
         return $this;
     }
 }

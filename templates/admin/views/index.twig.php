@@ -1,7 +1,12 @@
-
 {% extends 'admin/layout.twig' %}
+{% block title %}<?= $entity->getPluralLabel(); ?>{% endblock %}
 {% block content %}
-    <h1><?= $entity->getLabel(); ?></h1>
+    <div class="cga-body-header">
+        <div class="cga-body-header-title"><?= $entity->getPluralLabel(); ?></div>
+        <div class="cga-body-header-bread-crumbs">Bread / Crumbs</div>
+    </div>
 
-    {{ dataTable.render() | raw }}
+    <div class="cga-body-content">
+        {{ dataTable.render() | raw }}
+    </div>
 {% endblock %}

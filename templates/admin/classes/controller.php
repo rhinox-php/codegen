@@ -3,12 +3,13 @@
 namespace <?= $this->getNamespace('controller-admin-generated'); ?>;
 use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>;
 use <?= $this->getNamespace('model-serializer'); ?>\<?= $entity->getClassName(); ?>Serializer;
+use <?= $this->getNamespace('data-table-admin-generated'); ?>\<?= $entity->getClassName(); ?>DataTable;
 
 class <?= $entity->getClassName(); ?>AdminController extends AbstractController {
 
     public function index() {
-        // $dataTable = new DataTable\<?= $entity->getClassName(); ?>();
-        $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
+        $dataTable = new <?= $entity->getClassName(); ?>DataTable();
+        // $dataTable = <?= $entity->getClassName(); ?>::getDataTable();
         if ($dataTable->process($this->request, $this->response)) {
             return;
         }

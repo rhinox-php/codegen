@@ -17,6 +17,7 @@ abstract class Template
         'controller-api-generated' => 'Controller\Api\Generated',
         'controller-admin-implemented' => 'Controller\Admin',
         'controller-admin-generated' => 'Controller\Admin\Generated',
+        'data-table-admin-generated' => 'Controller\Admin\DataTable',
         'test-model' => 'Test\Model',
     ];
     protected $paths = [];
@@ -127,12 +128,15 @@ abstract class Template
 
     protected function bufferTemplateFile(string $templateFile, array $data = [])
     {
-        $codegen = $this->getCodegen();
-        extract(get_object_vars($this), EXTR_SKIP);
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require $templateFile;
-        return ob_get_clean();
+        if (preg_match('/\.php$/', $templateFile)) {
+            $codegen = $this->getCodegen();
+            extract(get_object_vars($this), EXTR_SKIP);
+            extract($data, EXTR_SKIP);
+            ob_start();
+            require $templateFile;
+            return ob_get_clean();
+        }
+        return file_get_contents($templateFile);
     }
 
     protected function renderTemplateFile(string $templateFile, string $outputPath, array $data = [], bool $overwrite = true): ?OutputFile
@@ -156,14 +160,17 @@ abstract class Template
 
     protected function getTemplateFile($name)
     {
-        $standardFile = __DIR__ . '/../../templates/' . $name . '.php';
-        if (!is_file($standardFile)) {
-            if (!is_file($name)) {
-                throw new \Exception('Could not find template file: ' . $name . ' tried ' . $standardFile . ' and ' . $name);
+        $possibilities = [
+            __DIR__ . '/../../templates/' . $name . '.php',
+            __DIR__ . '/../../templates/' . $name,
+            $name,
+        ];
+        foreach ($possibilities as $possibility) {
+            if (is_file($possibility)) {
+                return realpath($possibility);
             }
-            return realpath($name);
         }
-        return realpath($standardFile);
+        throw new \Exception('Could not find template file: ' . $name . ' tried ' . implode(', ', $possibilities));
     }
 
     protected function createFiles(array $files)

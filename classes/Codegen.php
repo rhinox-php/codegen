@@ -206,7 +206,7 @@ class Codegen
         return $this;
     }
 
-    public function unindent(string $string): string
+    public function unindent(string $string, $indentAmount = 0): string
     {
         $minWhitespace = null;
         foreach (preg_split('/\R/', $string) as $line) {
@@ -229,6 +229,7 @@ class Codegen
         $string = preg_replace('/^[ ]{' . $minWhitespace . '}/m', '', $string);
         $string = preg_replace('/^[ ]+$/m', '', $string);
         $string = trim($string);
+        $string = preg_replace('/^/m', str_repeat(' ', $indentAmount), $string);
         return $string;
     }
 

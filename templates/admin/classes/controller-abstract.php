@@ -56,6 +56,11 @@ abstract class AbstractController {
         */
     }
 
+    public function hasInput() {
+        // @todo check file uploads
+        return !$this->input->isEmpty();
+    }
+
     public function getRequest(): Request {
         return $this->request;
     }
