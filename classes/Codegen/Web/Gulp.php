@@ -3,7 +3,7 @@ namespace Rhino\Codegen\Codegen\Web;
 
 class Gulp
 {
-    protected $tasks;
+    protected $tasks = [];
     protected $codegen;
     protected $js = [];
 
