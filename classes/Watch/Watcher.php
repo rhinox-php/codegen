@@ -15,6 +15,7 @@ class Watcher
         '/^vendor$/',
     ];
     protected $lastKey = null;
+    protected $lastFiles = [];
 
     public function __construct(callable $callback)
     {
@@ -48,12 +49,29 @@ class Watcher
                 $files[$file] = $this->checkFile($file);
             }
         }
+        $changed = [];
+        foreach ($files as $file => $check) {
+            if (!isset($this->lastFiles[$file])) {
+                echo '+' . $check . ':' . $file . PHP_EOL;
+                $changed[$file] = $check;
+            } elseif ($this->lastFiles[$file] != $check) {
+                echo '#' . $check . '/' . $this->lastFiles[$file] . ':' . $file . PHP_EOL;
+                $changed[$file] = $check;
+            }
+        }
+        foreach ($this->lastFiles as $file => $check) {
+            if (!isset($files[$file])) {
+                echo '-' . $check . ':' . $file . PHP_EOL;
+                $changed[$file] = $check;
+            }
+        }
         ksort($files);
         $key = md5(implode(':', $files));
         if ($key != $this->lastKey) {
-            $this->triggerCallback(array_keys($files));
+            $this->triggerCallback(array_keys($changed));
         }
         $this->lastKey = $key;
+        $this->lastFiles = $files;
     }
 
     protected function checkFile(string $file) {
