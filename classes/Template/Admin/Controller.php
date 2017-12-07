@@ -6,6 +6,8 @@ class Controller extends \Rhino\Codegen\Template\Admin
     public function generate()
     {
         $this->codegen->composer->addDependency('rhinox/data-table', 'dev-master');
+        $this->codegen->composer->addDependency('symfony/validator', '~3.3');
+
         $this->codegen->composer->addRepository([
             'type' => 'vcs',
             'url' => 'git@bitbucket.org:rhino-php/rhino-data-table',
@@ -50,8 +52,10 @@ class Controller extends \Rhino\Codegen\Template\Admin
         foreach ($this->codegen->getEntities() as $entity) {
             yield ['get', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'index'];
             yield ['post', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'index'];
-            yield ['get', '/admin/' . $entity->getRouteName() . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'edit'];
+            yield ['get', '/admin/' . $entity->getRouteName() . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'create'];
             yield ['post', '/admin/' . $entity->getRouteName() . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'create'];
+            yield ['get', '/admin/' . $entity->getRouteName() . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'edit'];
+            yield ['post', '/admin/' . $entity->getRouteName() . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'edit'];
             // yield ['post', '/admin/' . $entity->getRouteName() . '/delete/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'delete'];
         }
     }
