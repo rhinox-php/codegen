@@ -45,7 +45,6 @@ $jsonApi = (new Template\JsonApi\JsonApi())
     ->setBasePath('/api/v1');
 $codegen->addTemplate(new Template\JsonApi\Swagger($jsonApi));
 
-$codegen->addTemplate(new Template\Generic\Build());
 $codegen->addTemplate(new Template\Generic\Bootstrap());
 $codegen->addTemplate(new Template\Generic\Composer());
 $codegen->addTemplate(new Template\Generic\ApiTest());
@@ -54,5 +53,7 @@ $codegen->addTemplate(new Template\Generic\Sql());
 
 $codegen->addTemplate(new Template\Generic\TestPhpUnit());
 $codegen->addTemplate(new Template\Generic\TestCoverage());
+
+$codegen->addTemplate(new Template\Sync\Controller());
 
 return $codegen;

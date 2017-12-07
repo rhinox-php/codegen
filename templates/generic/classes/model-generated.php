@@ -57,6 +57,19 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return $table;
     }
 
+    // Sync
+    public static function sync(\DateTimeImmutable $since): \Generator {
+        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+            SELECT ' . static::$columns . '
+            FROM `' . static::$table . '`
+            WHERE
+                `updated` >= :since
+                OR `created` >= :since;
+        ', [
+            ':since' => static::formatMySqlDateTime($since),
+        ]));
+    }
+
     // Json
     public function jsonSerialize() {
         return [
