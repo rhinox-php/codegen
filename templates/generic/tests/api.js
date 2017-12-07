@@ -8,6 +8,7 @@ const env = require('dotenv').config({
 module.exports = new class {
     constructor() {
         this.baseUrl = env.parsed.TEST_BASE_URL;
+        this.idNotFound = 1000000;
     }
 
     auth() {
