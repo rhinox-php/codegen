@@ -106,14 +106,21 @@ class Codegen
             return;
         }
         $this->manifest->setFiles($files);
+        return $this;
     }
 
     protected function writeManifest() {
         if (!$this->dryRun) {
             $manifest = $this->getManifestFile();
             $this->log('Writing manifest: ' . $manifest);
-            file_put_contents($manifest, json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ));
+            $content = json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            if (md5($content) === md5_file($manifest)) {
+                $this->debug('No changes to', $manifest);
+                return $this;
+            }
+            file_put_contents($manifest, $content);
         }
+        return $this;
     }
 
     public function dbMigrate(bool $write, bool $run): self
