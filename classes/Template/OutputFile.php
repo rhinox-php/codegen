@@ -15,7 +15,9 @@ class OutputFile
     public function chmod(int $mode): self
     {
         if (is_file($this->path)) {
-            chmod($this->path, $mode);
+            if ((fileperms($this->path) & 0777) !== $mode) {
+                chmod($this->path, $mode);
+            }
         }
         return $this;
     }
