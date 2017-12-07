@@ -59,6 +59,14 @@ abstract class Template
         return $this;
     }
 
+    public function setDefaultNamespace(string $type, string $namespace): self
+    {
+        if (!isset($this->namespaces[$type])) {
+            $this->namespaces[$type] = $namespace;
+        }
+        return $this;
+    }
+
     public function iterateRoutes()
     {
         return [];
