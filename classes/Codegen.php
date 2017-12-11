@@ -507,7 +507,7 @@ class Codegen
             ]);
             $this->db = new Database\MySql($this->pdo);
             if ($useDatabase) {
-                $this->pdo->query("USE DATABASE `{$this->getDatabaseName()}`");
+                $this->pdo->query("USE `{$this->getDatabaseName()}`");
             }
         }
         return $this->pdo;

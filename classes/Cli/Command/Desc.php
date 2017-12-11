@@ -2,6 +2,7 @@
 namespace Rhino\Codegen\Cli\Command;
 
 use Rhino\Codegen\Codegen;
+use Rhino\Codegen\Process\Description;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,48 +23,17 @@ class Desc extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
-
+        $description = new Description($codegen);
         if ($input->getOption('full')) {
-            $this->describe($codegen, $output);
+            foreach ($description->describe() as $line) {
+                $output->writeln($line);
+            }
         }
 
         if ($input->getOption('list')) {
-            $this->list($codegen, $output);
-        }
-    }
-
-    protected function describe(Codegen $codegen, OutputInterface $output)
-    {
-        foreach ($codegen->getEntities() as $entity) {
-            $output->writeln('Entity:');
-            (new Table($output))
-                ->setHeaders(['Class Name', 'Property Name'])
-                ->setRows([
-                    [$entity->getClassName(), $entity->getPropertyName()],
-                ])
-                ->render();
-            $output->writeln('Attributes:');
-            $rows = [];
-            foreach ($entity->getAttributes() as $attribute) {
-                $rows[] = [
-                    $attribute->getName(),
-                    $attribute->getLabel(),
-                    $attribute->getPropertyName(),
-                    $attribute->getType(),
-                ];
+            foreach ($description->list() as $line) {
+                $output->writeln($line);
             }
-            (new Table($output))
-                ->setHeaders(['Name', 'Label', 'Property Name', 'Type'])
-                ->setRows($rows)
-                ->render();
-            $output->writeln('');
-        }
-    }
-
-    protected function list(Codegen $codegen, OutputInterface $output)
-    {
-        foreach ($codegen->getEntities() as $entity) {
-            $output->writeln($entity->getClassName());
         }
     }
 }

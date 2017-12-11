@@ -28,6 +28,15 @@ class MySql implements DatabaseInterface
         return $statement->rowCount() == 1;
     }
 
+    public function iterateTables(): \Generator
+    {
+        $statement = $this->pdo->prepare('SHOW TABLES');
+        $statement->execute();
+        foreach ($statement->fetchAll(\PDO::FETCH_COLUMN) as $tableName) {
+            yield new Table\MySql($this, $tableName);
+        }
+    }
+
     public function getColumn(string $tableName, string $columnName): Column\MySql
     {
         return new Column\MySql($this, $tableName, $columnName);
