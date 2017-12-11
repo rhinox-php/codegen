@@ -57,8 +57,18 @@ abstract class AbstractController {
     }
 
     public function hasInput() {
-        // @todo check file uploads
-        return !$this->input->isEmpty();
+        return !$this->input->isEmpty() || count($this->request->files) > 0;
+    }
+
+    public function validateConstraint(Constraint $constraint) {
+        $validator = \Symfony\Component\Validator\Validation::createValidator();
+        $violations = $validator->validate($this->request->request->all(), $constraint);
+        foreach ($violations as $violation) {
+            $inputName = preg_replace('/[\[\]]/', '', $violation->getPropertyPath(), 2);
+            $this->errorMessages[$inputName][] = $violation->getMessage();
+        }
+
+        return empty($this->errorMessages);
     }
 
     public function getRequest(): Request {

@@ -1,41 +1,63 @@
+$cga-body-header-background: #444444;
 $cga-body-header-color: white;
-$cga-body-header-background: #444;
-$cga-sidebar-item-color: white;
-$cga-sidebar-background: #333;
+$cga-body-header-z-index: 500;
 $cga-header-font-size: 2.5rem;
+$cga-sidebar-background: #333;
+$cga-sidebar-item-color: white;
+$cga-sidebar-item-hover-color: white;
+$cga-sidebar-width: 200px;
+$cga-sidebar-z-index: 500;
+
+body {
+    position: relative;
+}
 
 .cga-container {
-    display: flex;
-    min-height: 100vh;
 }
 
 .cga-sidebar {
-    width: 200px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: $cga-sidebar-width;
     background: $cga-sidebar-background;
-    min-height: 100vh;
+    z-index: $cga-sidebar-z-index;
 
     &-header {
         display: block;
         color: $cga-sidebar-item-color;
         padding: 10px;
         font-size: $cga-header-font-size;
+        &:hover {
+            color: $cga-sidebar-item-hover-color;
+        }
     }
 
     &-item {
         display: block;
         color: $cga-sidebar-item-color;
         padding: 10px;
+        &:hover {
+            color: $cga-sidebar-item-hover-color;
+        }
     }
 }
 
 .cga-body {
-    flex: 1;
+    margin-top: 75px;
+    margin-left: $cga-sidebar-width;
     overflow: auto;
 }
 
 .cga-body-header {
+    position: fixed;
+    left: $cga-sidebar-width;
+    right: 0;
+    top: 0;
     background: $cga-body-header-background;
     color: $cga-body-header-color;
+    z-index: $cga-body-header-z-index;
 
     &-title {
         font-size: $cga-header-font-size;

@@ -1,21 +1,20 @@
 {% extends 'admin/layout.twig' %}
 {% block title %}<?= $entity->getLabel(); ?>{% endblock %}
 {% block content %}
-    <div class="cga-body-header">
-        <div class="clearfix">
-            <div class="pull-left">
-                <h1><?= $entity->getLabel(); ?></h1>
-                <p>Bread / Crumbs</p>
-            </div>
-            <div class="pull-right">
-                <a href="/<?= $entity->getPluralRouteName(); ?>" class="btn btn-link">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save</button>
+    <form action="" method="post" class="form-horizontal">
+        <div class="cga-body-header">
+            <div class="clearfix">
+                <div class="pull-left">
+                    <div class="cga-body-header-title"><?= $entity->getLabel(); ?></div>
+                    <div class="cga-body-header-bread-crumbs">Bread / Crumbs</div>
+                </div>
+                <div class="pull-right">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="cga-body-content">
-        <form action="" method="post" class="form-horizontal">
+        <div class="cga-body-content">
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['Date'])): ?>
             <div class="form-group">
@@ -47,6 +46,6 @@
 
             <div class="form-group">
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 {% endblock %}

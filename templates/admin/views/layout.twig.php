@@ -20,7 +20,7 @@
     </head>
     <body class="cga-container">
         <div class="cga-sidebar">
-            <div class="cga-sidebar-header">Project Name</div>
+            <a href="/" class="cga-sidebar-header">Project Name</a>
 <?php foreach ($entities as $entity): ?>
             <a class="cga-sidebar-item" href="/admin/<?= $entity->getPluralRouteName(); ?>"><?= $entity->getPluralLabel(); ?></a>
 <?php endforeach; ?>

@@ -4,6 +4,7 @@ namespace <?= $this->getNamespace('controller-admin-generated'); ?>;
 use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>;
 use <?= $this->getNamespace('model-serializer'); ?>\<?= $entity->getClassName(); ?>Serializer;
 use <?= $this->getNamespace('data-table-admin-generated'); ?>\<?= $entity->getClassName(); ?>DataTable;
+use Symfony\Component\Validator\Constraints;
 
 class <?= $entity->getClassName(); ?>AdminController extends AbstractController {
 
@@ -64,17 +65,17 @@ class <?= $entity->getClassName(); ?>AdminController extends AbstractController 
     public function updateAttributes(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->is(['String', 'Text'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php elseif ($attribute->is(['Date'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php elseif ($attribute->is(['DateTime'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php elseif ($attribute->is(['Bool'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php elseif ($attribute->is(['Int'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->int('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->int('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php elseif ($attribute->is(['Decimal'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php endif; ?>
 <?php endforeach; ?>
     }
