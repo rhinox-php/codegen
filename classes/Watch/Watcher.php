@@ -13,6 +13,8 @@ class Watcher
     protected $ignore = [
         '/^\./',
         '/^vendor$/',
+        '/^node_modules$/',
+        '/^bower_components$/',
     ];
     protected $lastKey = null;
     protected $lastFiles = [];
@@ -65,6 +67,7 @@ class Watcher
                 $changed[$file] = $check;
             }
         }
+        // echo count($files) . PHP_EOL;
         ksort($files);
         $key = md5(implode(':', $files));
         if ($key != $this->lastKey) {
@@ -103,7 +106,9 @@ class Watcher
 
     public function addDirectory(string $directory): self
     {
-        $this->directories[] = realpath($directory);
+        $directory = realpath($directory);
+        echo 'Watching ' . $directory . PHP_EOL;
+        $this->directories[] = $directory;
         return $this;
     }
 }
