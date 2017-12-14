@@ -100,4 +100,8 @@ class MySql implements ColumnInterface
             return [];
         }
     }
+
+    public function getName() {
+        return $this->columnName;
+    }
 }

@@ -7,6 +7,6 @@ class DateTimeAttribute extends Attribute
 {
     public function getType()
     {
-        return 'date';
+        return 'datetime';
     }
 }
