@@ -37,7 +37,7 @@ class Codegen
     protected $outputLevel = self::OUTPUT_LEVEL_LOG;
     protected $loggedOnce = [];
     protected $hooks = [];
-    protected $manifest = [];
+    protected $manifest;
 
     public function __construct()
     {
@@ -125,6 +125,7 @@ class Codegen
 
     public function dbMigrate(bool $write, bool $run): self
     {
+        $this->readManifest();
         $pdo = $this->getPdo(false);
         if (!$this->db->databaseExists($this->getDatabaseName())) {
             $this->log('Database doesn\'t exist: ' . $this->getDatabaseName());

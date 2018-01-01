@@ -28,6 +28,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     // Table name
     protected static $table = '<?= $entity->getTableName(); ?>';
 
+    public function __construct() {
+        throw new \Exception('Generated models should not be instantiated directly.');
+    }
+
     // Columns
     protected static $columns = '
         `<?= $entity->getTableName(); ?>`.`id`,
@@ -169,8 +173,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             $entity = new static();
             $entity->id = $row['id'];
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->is(['String', 'Text'])): ?>
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php elseif ($attribute->is(['Int'])): ?>
+            $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (int) $row['<?= $attribute->getColumnName(); ?>'] : null;
+<?php elseif ($attribute->is(['Decimal'])): ?>
+$entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (float) $row['<?= $attribute->getColumnName(); ?>'] : null;
 <?php elseif ($attribute->is(['Bool'])): ?>
 <?php if ($attribute->isNullable()): ?>
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
@@ -203,6 +211,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 <?php if ($entity == $relationship->getFrom()): ?>
 <?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
         $this->save<?= $relationship->getPluralClassName(); ?>();
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
+        $this->save<?= $relationship->getClassName(); ?>();
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
@@ -239,6 +249,25 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         }
     }
 
+<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
+    protected function save<?= $relationship->getClassName(); ?>() {
+        if ($this-><?= $relationship->getPropertyName(); ?> !== null) {
+            $relatedEntity = $this-><?= $relationship->getPropertyName(); ?>;
+            $relatedEntity->set<?= $relationship->getFrom()->getClassName(); ?>Id($this->getId());
+            $relatedEntity->save();
+            $this->query("
+                DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
+
+                WHERE
+                    id != ?
+                    AND <?= $relationship->getFrom()->getTableName(); ?>_id = ?;
+            ", [
+                $relatedEntity->getId(),
+                $this->getId(),
+            ]);
+        }
+    }
+
 <?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
@@ -258,7 +287,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         ]));
     }
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Int'])): ?>
+<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
 
     // Find by attribute <?= $attribute->getName(); ?>
 
@@ -445,7 +474,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
      *
      * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
      */
-    public function fetch<?= $relationship->getPluralMethodName(); ?>() {
+    public function fetch<?= $relationship->getPluralMethodName(); ?>(): \Generator {
         return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
     }
 
@@ -482,7 +511,12 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     }
 
     public function has<?= $relationship->getMethodName(); ?>() {
-        return $this->fetch<?= $relationship->getMethodName(); ?>() ? true : false;
+        return $this->get<?= $relationship->getMethodName(); ?>() ? true : false;
+    }
+
+    public function set<?= $relationship->getMethodName(); ?>($entity) {
+        $this-><?= $relationship->getPropertyName(); ?> = $entity;
+        return $this;
     }
 
 <?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
@@ -575,10 +609,11 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             FROM <?= $entity->getTableName(); ?>_sessions
             WHERE
                 token = :token
-                AND expire > UTC_TIMESTAMP()
+                AND expire > :time
             LIMIT 1;
         ', [
             ':token' => $token,
+            ':time' => (new \DateTime())->setTimezone(new \DateTimeZone('UTC'))->format(static::MYSQL_DATE_TIME_FORMAT),
         ]);
         $entityId = $result->fetch(\PDO::FETCH_COLUMN);
         if ($entityId) {
