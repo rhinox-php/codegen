@@ -12,7 +12,7 @@ class Gulp
         $this->codegen = $codegen;
         $this->codegen->npm->addDevDependency('gulp', '^3.9');
         $this->codegen->npm->addDevDependency('gulp-expect-file', '^0.0.7');
-        $this->codegen->npm->addDevDependency('gulp-scss', '^1.4');
+        $this->codegen->npm->addDevDependency('gulp-sass', '^3.1.0');
     }
 
     public function generate()
@@ -25,7 +25,7 @@ class Gulp
             const gulp = require('gulp');
 
             const expectFile = require('gulp-expect-file');
-            const scss = require('gulp-scss');
+            const sass = require('gulp-sass');
 
             gulp.task('watch', ['default'], () => {
                 gulp.watch('src/**', ['default']);

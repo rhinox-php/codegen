@@ -18,7 +18,7 @@ class Controller extends \Rhino\Codegen\Template\Admin
             ];
             return gulp.src(files)
                 .pipe(expectFile(files))
-                .pipe(scss())
+                .pipe(sass())
                 .pipe(gulp.dest('public/assets/build/'));
         ");
 

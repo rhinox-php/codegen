@@ -31,7 +31,7 @@ $codegen->addTemplate(new Template\Generic\ModelSerializer());
 
 $codegen->addTemplate(new Template\Generic\Controller());
 $codegen->addTemplate(new Template\Generic\ControllerInitial());
-$codegen->addTemplate(new Template\Generic\ControllerHome());
+// $codegen->addTemplate(new Template\Generic\ControllerHome());
 $codegen->addTemplate(new Template\Generic\ControllerApi());
 $codegen->addTemplate(new Template\Generic\ControllerApiInitial());
 
@@ -55,5 +55,7 @@ $codegen->addTemplate(new Template\Generic\TestPhpUnit());
 $codegen->addTemplate(new Template\Generic\TestCoverage());
 
 $codegen->addTemplate(new Template\Sync\Controller());
+
+$codegen->addTemplate(new Template\Advertise\Controller());
 
 return $codegen;

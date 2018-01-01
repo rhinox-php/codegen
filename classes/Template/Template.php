@@ -181,6 +181,16 @@ abstract class Template
         throw new \Exception('Could not find template file: ' . $name . ' tried ' . implode(', ', $possibilities));
     }
 
+    protected function copy(string $from, string $to) {
+        $from = __DIR__ . '/../../templates/' . $from;
+        $to = $this->getFilePath(null, $to);
+        $this->codegen->createDirectory($to);
+        foreach (glob($from) as $fromFile) {
+            $toFile = $to . '/' . basename($fromFile);
+            $this->codegen->writeFile($toFile, file_get_contents($fromFile));
+        }
+    }
+
     protected function createFiles(array $files)
     {
         foreach ($files as $file) {
@@ -195,7 +205,7 @@ abstract class Template
         }
     }
 
-    protected function getFilePath(string $template, string $file, array $data): string
+    protected function getFilePath(?string $template, string $file, array $data = []): string
     {
         if (!isset($this->paths[$template])) {
             $path = $this->codegen->getPath() . '/' . $file;

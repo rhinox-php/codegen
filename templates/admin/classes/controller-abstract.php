@@ -28,7 +28,7 @@ abstract class AbstractController {
      */
     protected $errorMessages = null;
 
-    public function render($view, $data) {
+    public function render(string $view, array $data = []) {
         $this->response->callback(function() use($view, $data) {
             $loader = new \Twig_Loader_Filesystem(ROOT . '/src/views');
             $this->twig = new \Twig_Environment($loader, [
