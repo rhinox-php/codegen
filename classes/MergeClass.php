@@ -33,24 +33,24 @@ class MergeClass
 
     public static function merge(Codegen $codegen, string $fromFile, string $intoFile): self
     {
-        $fromFile = realpath($fromFile);
-        if (!$fromFile) {
+        $realFromFile = realpath($fromFile);
+        if (!$realFromFile) {
             throw new \Exception('Could not find file 1: ' . $fromFile);
         }
-        $intoFile = realpath($intoFile);
-        if (!$intoFile) {
+        $realIntoFile = realpath($intoFile);
+        if (!$realIntoFile) {
             throw new \Exception('Could not find file 2: ' . $intoFile);
         }
 
         $instance = new static($codegen);
-        $codegen->log('Loading ' . $fromFile);
-        $instance->setClassSourceFrom(file_get_contents($fromFile));
-        $codegen->log('Loading ' . $intoFile);
-        $instance->setClassSourceInto(file_get_contents($intoFile));
+        $codegen->log('Loading ' . $realFromFile);
+        $instance->setClassSourceFrom(file_get_contents($realFromFile));
+        $codegen->log('Loading ' . $realIntoFile);
+        $instance->setClassSourceInto(file_get_contents($realIntoFile));
         $instance->parse();
 
-        $codegen->writeFile($intoFile, $instance->getOutput());
-        FormatPhp::formatFile($intoFile);
+        $codegen->writeFile($realIntoFile, $instance->getOutput());
+        FormatPhp::formatFile($realIntoFile);
 
         return $instance;
     }
@@ -124,7 +124,7 @@ class MergeClass
             if ($member instanceof Node\MethodDeclaration) {
                 $this->replaceClassMethod($className, $member->name->getText($this->root1), $member->getFullText());
             } elseif ($member instanceof Node\PropertyDeclaration) {
-                $this->replaceClassProperty($className, $member->propertyElements->getText($this->root1), $member->getFullText());
+                $this->replaceClassProperty($className, $this->getPropertyName($member, $this->root1), $member->getFullText());
             }
         }
     }
@@ -136,7 +136,7 @@ class MergeClass
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\MethodDeclaration::class) as $member) {
             if ($member->name->getText($this->root2) == $memberName) {
                 $found = true;
-                if ($member->getFullText() != $replacement) {
+                if ($this->checkDiff($member->getFullText(), $replacement)) {
                     $this->codegen->log('Replacing class method', $className1, $memberName);
                     $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
                 }
@@ -159,9 +159,9 @@ class MergeClass
         $this->codegen->log('Found class property', $className1, $memberName);
         $found = false;
         foreach ($this->iterateClassMembers($className1, $this->root2, Node\PropertyDeclaration::class) as $member) {
-            if ($member->propertyElements->getText($this->root2) == $memberName) {
+            if ($this->getPropertyName($member, $this->root2) == $memberName) {
                 $found = true;
-                if ($member->getFullText() != $replacement) {
+                if ($this->checkDiff($member->getFullText(), $replacement)) {
                     $this->codegen->log('Replacing class property', $className1, $memberName);
                     $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
                     $found = true;
@@ -178,6 +178,30 @@ class MergeClass
             $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
         }
         // @todo create class if it doesn't exist
+    }
+
+    protected function checkDiff($a, $b) {
+        $a = $this->removeEmptyLines($a);
+        $b = $this->removeEmptyLines($b);
+        if (preg_replace('/\s+/', '', $a) != preg_replace('/\s+/', '', $b)) {
+            $this->logDiff($a, $b);
+            return true;
+        }
+        return false;
+    }
+
+    protected function removeEmptyLines(string $text): string {
+        $text = explode(PHP_EOL, $text);
+        $text = array_filter($text, function($line) {
+            return trim($line) != '';
+        });
+        return implode(PHP_EOL, $text);
+    }
+
+    protected function getPropertyName($member, $root) {
+        $text = $member->propertyElements->getText($root);
+        preg_match('/\$([a-z0-9_]+)/i', $text, $matches);
+        return $matches[1];
     }
 
     protected function getClassDeclaration($className1, $root)
@@ -215,5 +239,19 @@ class MergeClass
     {
         $this->output = $output;
         $this->root2 = $this->parser->parseSourceFile($this->output);
+    }
+
+    protected function logDiff($a, $b) {
+        $a = explode(PHP_EOL, $a);
+        $b = explode(PHP_EOL, $b);
+        $cols = exec('tput cols');
+        $cols = $cols / 2 - 4;
+        echo str_repeat('-', $cols * 2 + 4) . PHP_EOL;
+        for ($i = 0; $i < count($a) || $i < count($b); $i++) {
+            $a1 = substr(str_pad($a[$i] ?? '', $cols, ' ', STR_PAD_RIGHT), 0, $cols);
+            $b1 = substr(str_pad($b[$i] ?? '', $cols, ' ', STR_PAD_RIGHT), 0, $cols);
+            echo $a1 . ' | ' . $b1 . PHP_EOL;
+        }
+        echo str_repeat('-', $cols * 2 + 4) . PHP_EOL;
     }
 }

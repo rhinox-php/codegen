@@ -16,6 +16,7 @@ class Application extends \Symfony\Component\Console\Application
         $this->add(new Command\MakeMigration());
         $this->add(new Command\Watch());
         $this->add(new Command\Info());
+        $this->add(new Command\Merge());
         $this->add(new Command\MergeClass());
     }
 }

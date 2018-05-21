@@ -24,13 +24,19 @@ class Desc extends AbstractCommand
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
         $description = new Description($codegen);
-        if ($input->getOption('full')) {
+
+        $type = 'full';
+        if ($input->getOption('list')) {
+            $type = 'list';
+        }
+
+        if ($type == 'full') {
             foreach ($description->describe() as $line) {
                 $output->writeln($line);
             }
         }
 
-        if ($input->getOption('list')) {
+        if ($type == 'list') {
             foreach ($description->list() as $line) {
                 $output->writeln($line);
             }

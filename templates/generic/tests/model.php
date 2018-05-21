@@ -3,7 +3,7 @@
 namespace <?= $this->getNamespace('test-model'); ?>;
 use <?= $this->getNamespace('model-generated'); ?>\<?= $entity->getClassName(); ?>;
 
-class <?= $entity->getClassName(); ?>Test extends \PHPUnit\Framework\TestCase {
+class <?= $entity->getClassName(); ?>Test extends <?= $this->getTestBaseClass(); ?> {
     public function testConstructor(): void {
         $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
         $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $<?= $entity->getPropertyName(); ?>);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e63324897ebffc01db7321b2533795ba",
+    "content-hash": "6de5aa31e4edd063ddcccad03c0ec0d0",
     "packages": [
         {
             "name": "composer/semver",
@@ -507,6 +507,58 @@
                 "diff"
             ],
             "time": "2017-10-19T09:58:18+00:00"
+        },
+        {
+            "name": "phpfmt-next/fmt",
+            "version": "19.6.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpfmt-next/fmt.git",
+                "reference": "166a5bad785871dd8c01bc0a8b366bab449eb1a4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpfmt-next/fmt/zipball/166a5bad785871dd8c01bc0a8b366bab449eb1a4",
+                "reference": "166a5bad785871dd8c01bc0a8b366bab449eb1a4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "dericofilho/csp": "2.0.*",
+                "phpunit/php-code-coverage": "2.0.*",
+                "satooshi/php-coveralls": "0.7.*",
+                "symfony/console": "2.7.*"
+            },
+            "bin": [
+                "bin/fmt.phar",
+                "bin/refactor.phar"
+            ],
+            "type": "application",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Carlos C",
+                    "email": "carlos@cirello.eu"
+                }
+            ],
+            "description": "A script to automatically fix K&R and PSR-1/2 Coding Standard.",
+            "homepage": "https://github.com/phpfmt-next/fmt",
+            "keywords": [
+                "coding",
+                "formatter",
+                "formatting",
+                "language syntax",
+                "psr1",
+                "psr2",
+                "style"
+            ],
+            "time": "2018-01-28T10:15:00+00:00"
         },
         {
             "name": "psr/log",

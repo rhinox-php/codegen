@@ -159,6 +159,14 @@ class Entity
         }
     }
 
+    public function hasRelationshipsByType(array $types): boolean
+    {
+        foreach ($this->iterateRelationshipsByType($types) as $relationship) {
+            return true;
+        }
+        return false;
+    }
+
     public function addRelationship(Relationship $relationship)
     {
         $this->relationships[$relationship->getName()] = $relationship;

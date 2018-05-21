@@ -70,8 +70,8 @@ class ReverseMySql
                         $entity->addAttribute($attribute);
                         if (preg_match('/^([a-z0-9_]+)_id$/i', $column->getName(), $matches)) {
                             $toName = $this->humanize($matches[1]);
-                            $to = $this->codegen->findEntity($toName);
-                            if ($to) {
+                            try {
+                                $to = $this->codegen->findEntity($toName);
                                 $attribute->setHasAccessors(false);
                                 $attribute->setIsForeignKey(true);
                                 $attribute->setIsIndexed(true);
@@ -89,6 +89,8 @@ class ReverseMySql
                                 $relationship->setName($entity->getName());
                                 $to->addRelationship($relationship);
                                 $entity->addRelationship($relationship);
+                            } catch (\Exception $e) {
+                                $this->codegen->log($e->getMessage());
                             }
                             break;
                         }

@@ -10,5 +10,6 @@ $codegen->setNamespace('Rhino\Codegen');
 
 $codegen->addTemplate(new Template\Generic\BinLint());
 $codegen->addTemplate(new Template\Generic\ModelClass());
+$codegen->addTemplate(new Template\Generic\ModelTest());
 
 return $codegen;

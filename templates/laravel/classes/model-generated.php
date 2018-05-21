@@ -4,6 +4,7 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 
 class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSerializable {
 
+<?php if ($entity->hasRelationshipsByType(['HasMany'])): ?>
     // Has many related entities
 
 <?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
@@ -13,6 +14,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
 
 <?php endforeach; ?>
+<?php endif; ?>
 
     // Has one related entities
 

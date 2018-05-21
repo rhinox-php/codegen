@@ -3,6 +3,8 @@ namespace Rhino\Codegen\Template\Generic;
 
 class ModelTest extends \Rhino\Codegen\Template\Generic
 {
+    protected $testBaseClass = '\PHPUnit\Framework\TestCase';
+
     public function generate()
     {
         foreach ($this->codegen->getEntities() as $entity) {
@@ -25,7 +27,20 @@ class ModelTest extends \Rhino\Codegen\Template\Generic
             return 'mt_rand() < 0.5';
         } elseif ($attribute->is(['Date', 'DateTime'])) {
             return 'new \DateTimeImmutable()';
+        } elseif ($attribute->is(['Object'])) {
+            return 'new \\' . $attribute->getClass();
+        } elseif ($attribute->is(['Array'])) {
+            return '[]';
         }
-        assert(false, new \Exception('Unknown type for test attribute generation'));
+        assert(false, new \Exception('Unknown type for test attribute generation: ' . get_class($attribute)));
+    }
+
+    public function setTestBaseClass(string $testBaseClass): self {
+        $this->testBaseClass = $testBaseClass;
+        return $this;
+    }
+
+    public function getTestBaseClass(): string {
+        return $this->testBaseClass;
     }
 }

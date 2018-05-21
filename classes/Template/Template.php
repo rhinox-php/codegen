@@ -20,6 +20,7 @@ abstract class Template
         'data-table-admin-generated' => 'Controller\Admin\DataTable',
         'test-model' => 'Test\Model',
     ];
+    protected $templateOverrides = [];
     protected $paths = [];
     protected $hooks = [
         'gen:pre' => [],
@@ -161,13 +162,17 @@ abstract class Template
         $directory = dirname($outputPath);
         $this->codegen->createDirectory($directory);
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
-        $this->codegen->writeFile($outputPath, $output);
-        $this->hook('gen:write', [$outputFile]);
+        if ($this->codegen->writeFile($outputPath, $output)) {
+            $this->hook('gen:write', [$outputFile]);
+        }
         return $outputFile;
     }
 
-    protected function getTemplateFile($name)
+    protected function getTemplateFile(string $name): string
     {
+        if (isset($this->templateOverrides[$name])) {
+            return $this->templateOverrides[$name];
+        }
         $possibilities = [
             __DIR__ . '/../../templates/' . $name . '.php',
             __DIR__ . '/../../templates/' . $name,
@@ -179,6 +184,14 @@ abstract class Template
             }
         }
         throw new \Exception('Could not find template file: ' . $name . ' tried ' . implode(', ', $possibilities));
+    }
+
+    public function setTemplateFile(string $name, string $path): self {
+        if (!is_file($path)) {
+            throw new \Exception('Template override path is not a valid file: ' . $path);
+        }
+        $this->templateOverrides[$name] = $path;
+        return $this;
     }
 
     protected function copy(string $from, string $to) {

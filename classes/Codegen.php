@@ -38,6 +38,7 @@ class Codegen
     protected $loggedOnce = [];
     protected $hooks = [];
     protected $manifest;
+    protected $mergeFileMapper = null;
 
     public function __construct()
     {
@@ -83,11 +84,15 @@ class Codegen
         $this->manifest->clean();
     }
 
+    public function getManifest() {
+        return $this->manifest;
+    }
+
     protected function getManifestFile() {
         return $this->getPath('codegen-manifest.json');
     }
 
-    protected function readManifest() {
+    public function readManifest() {
         $this->log('Reading manifest...');
         $this->manifest = new Manifest($this);
         $manifest = $this->getManifestFile();
@@ -109,12 +114,12 @@ class Codegen
         return $this;
     }
 
-    protected function writeManifest() {
+    public function writeManifest() {
         if (!$this->dryRun) {
             $manifest = $this->getManifestFile();
             $this->log('Writing manifest: ' . $manifest);
             $content = json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            if (md5($content) === md5_file($manifest)) {
+            if (is_file($manifest) && md5($content) === md5_file($manifest)) {
                 $this->debug('No changes to', $manifest);
                 return $this;
             }
@@ -567,22 +572,43 @@ class Codegen
         return $file;
     }
 
-    public function writeFile(string $file, string $content): self
+    public function writeFile(string $file, string $content): bool
     {
         assert(!!$file, new \Exception('Invalid file to write ' . $file));
 
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
-                return $this;
+                return false;
             }
         }
         $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file);
         if (!$this->isDryRun()) {
             file_put_contents($file, $content);
             $this->manifest->addFile($file);
+            return true;
         }
-        return $this;
+        return false;
+    }
+
+    public function copyFile(string $from, string $to): bool
+    {
+        assert(is_file($from), new \Exception('Invalid file to copy from ' . $from));
+        assert(!!$to, new \Exception('Invalid file to copy to ' . $to));
+
+        if (is_file($to)) {
+            if (md5_file($from) === md5_file($to)) {
+                $this->debug('No changes to', $to);
+                return false;
+            }
+        }
+        $this->log(is_file($to) ? 'Copy overwriting' : 'Copying', $from, 'to', $to);
+        if (!$this->isDryRun()) {
+            copy($from, $to);
+            $this->manifest->addFile($to);
+            return true;
+        }
+        return false;
     }
 
     public function isDebug(): bool
@@ -621,6 +647,7 @@ class Codegen
     public function hook(string $hookName, array $parameters): array
     {
         if (isset($this->hooks[$hookName])) {
+            $this->log('Running hook', $hookName);
             foreach ($this->hooks[$hookName] as $hook) {
                 $parameters = $hook->process(...$parameters);
             }
@@ -643,5 +670,16 @@ class Codegen
     protected function getMigrationName($name)
     {
         return date('Y_m_d_His_') . $this->underscore($name) . '.sql';
+    }
+
+    public function getMergeFileMapper(): ?callable
+    {
+        return $this->mergeFileMapper;
+    }
+
+    public function setMergeFileMapper(callable $mergeFileMapper): self
+    {
+        $this->mergeFileMapper = $mergeFileMapper;
+        return $this;
     }
 }
