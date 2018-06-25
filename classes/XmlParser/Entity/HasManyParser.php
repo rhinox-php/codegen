@@ -17,6 +17,7 @@ class HasManyParser extends AttributeParser
         $relationship->setFrom($this->entity);
         $relationship->setTo($to);
         $relationship->setName((string) $node['name'] ?: $to->getName());
+        $relationship->setPluralName((string) $node['plural-name']);
         $this->entity->addRelationship($relationship);
         $to->addRelationship($relationship);
     }

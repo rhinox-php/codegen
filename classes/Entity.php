@@ -159,7 +159,7 @@ class Entity
         }
     }
 
-    public function hasRelationshipsByType(array $types): boolean
+    public function hasRelationshipsByType(array $types): bool
     {
         foreach ($this->iterateRelationshipsByType($types) as $relationship) {
             return true;

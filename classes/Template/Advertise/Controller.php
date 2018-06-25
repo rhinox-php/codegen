@@ -5,6 +5,7 @@ class Controller extends \Rhino\Codegen\Template\Generic
 {
     public function generate()
     {
+        $this->codegen->composer->addDependency('twig/twig', '^2.4');
         $this->renderTemplate('advertise/controller', 'src/classes/Controller/HomeController.php', [
         ]);
         $this->renderTemplate('advertise/views/home.twig', 'src/views/home.twig', [

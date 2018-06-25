@@ -8,10 +8,8 @@
 
     <title>Creative - Start Bootstrap Theme</title>
 
-    <!-- Bootstrap core CSS -->
     <?= $this->css('bootstrap'); ?>
 
-    <!-- Custom styles for this template -->
     <link href="/assets/build/advertise.css" rel="stylesheet" />
   </head>
 
@@ -249,17 +247,6 @@
       </div>
     </section>
 
-    <!-- Bootstrap core JavaScript -->
     <?= $this->js('jquery', 'bootstrap'); ?>
-
-    <!-- Plugin JavaScript -->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="vendor/scrollreveal/scrollreveal.min.js"></script>
-    <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
-
-    <!-- Custom scripts for this template -->
-    <script src="js/creative.min.js"></script>
-
   </body>
-
 </html>

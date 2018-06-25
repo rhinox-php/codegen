@@ -202,7 +202,12 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
             if (isset($row['updated'])) {
                 $entity->setUpdated(\DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['updated'], new \DateTimezone('UTC')));
             }
-            yield $entity;
+
+            $entity = static::processFetchedEntity($entity);
+
+            if ($entity) {
+                yield $entity;
+            }
         }
     }
 

@@ -15,7 +15,7 @@ class Desc extends AbstractCommand
     {
         parent::configure();
         $this->setName('desc')
-            ->setDescription('Generate migrations')
+            ->setDescription('Describe entities')
             ->addOption('list', 'l', InputOption::VALUE_NONE, 'List entities.')
             ->addOption('full', 'f', InputOption::VALUE_NONE, 'Output full descriptions.');
     }

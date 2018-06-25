@@ -14,20 +14,25 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
     public function iterateDatabaseMigrateSql(\PDO $pdo, string $date): iterable
     {
         $date = date('Y_m_d_His');
-        $migrationNumber = 1;
+        $migrationNumber = count(glob($this->codegen->getPath('database/migrations/*.php')));
         foreach ($this->codegen->getEntities() as $entity) {
-            $path = $this->getFilePath('generic/sql/migrate', 'src/sql/up/' . $date . '.sql', [
+            $path = $this->getFilePath('generic/sql/migrate', 'database/migrations/' . $date . '_' . $entity->getTableName() . '_' . $migrationNumber . '.php', [
                 'date' => $date,
                 'entity' => $entity,
             ]);
+            $createMigration = '';
+            $dropMigration = '';
             if (!$this->codegen->db->tableExists($entity->getPluralTableName())) {
                 $this->codegen->log('Creating table', $entity->getPluralTableName());
-                yield $path => "
-                    Schema::create('{$entity->getPluralTableName()}', function (Blueprint \$table) {
-                        \$table->increments('id');
-                        \$table->dateTime('created_at')->nullable()->default(null);
-                        \$table->dateTime('updated_at')->nullable()->default(null);
-                    });
+                $createMigration = "
+                            Schema::create('{$entity->getPluralTableName()}', function (Blueprint \$table) {
+                                \$table->increments('id');
+                                \$table->dateTime('created_at')->nullable()->default(null);
+                                \$table->dateTime('updated_at')->nullable()->default(null);
+                            });
+                ";
+                $dropMigration = "
+                            Schema::drop('{$entity->getPluralTableName()}');
                 ";
             }
             $columnMigrations = [];
@@ -40,10 +45,11 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
                     <?php
                     use Illuminate\Database\Schema\Blueprint;
 
-                    class Migration_{$date}_{$migrationNumber} extends \Illuminate\Database\Migrations\Migration
+                    class {$entity->getClassName()}{$migrationNumber} extends \Illuminate\Database\Migrations\Migration
                     {
                         public function up()
                         {
+                            $createMigration
                             Schema::table('{$entity->getPluralTableName()}', function (Blueprint \$table) {
                                 $columnMigrations
                             });
@@ -53,6 +59,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
                         {
                             Schema::table('{$entity->getPluralTableName()}', function (Blueprint \$table) {
                             });
+                            $dropMigration
                         }
                     }
                 ";

@@ -8,6 +8,7 @@ class Relationship
     protected $from;
     protected $to;
     protected $name;
+    protected $pluralName;
 
     public function getPropertyName()
     {
@@ -16,7 +17,7 @@ class Relationship
 
     public function getPluralPropertyName()
     {
-        return $this->pluralize($this->getPropertyName());
+        return $this->camelize($this->getPluralName(), true);
     }
 
     public function getClassName()
@@ -26,7 +27,7 @@ class Relationship
 
     public function getPluralClassName()
     {
-        return $this->pluralize($this->getClassName());
+        return $this->camelize($this->getPluralName());
     }
 
     public function getMethodName(): string
@@ -36,7 +37,7 @@ class Relationship
 
     public function getPluralMethodName()
     {
-        return $this->pluralize($this->getMethodName());
+        return $this->camelize($this->getPluralName());
     }
 
     public function getColumnName(): string
@@ -74,6 +75,17 @@ class Relationship
     public function setName(string $name)
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getPluralName()
+    {
+        return $this->pluralName ?: $this->pluralize($this->getName());
+    }
+
+    public function setPluralName($pluralName)
+    {
+        $this->pluralName = $pluralName;
         return $this;
     }
 }
