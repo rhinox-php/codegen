@@ -20,23 +20,24 @@ class Description
     public function describe()
     {
         $output = new BufferedOutput();
-        foreach ($this->codegen->getEntities() as $entity) {
+        foreach ($this->codegen->node->children as $entity) {
             yield 'Entity:';
             (new Table($output))
                 ->setHeaders(['Name', 'Class Name', 'Property Name'])
                 ->setRows([
-                    [$entity->getName(), $entity->getClassName(), $entity->getPropertyName()],
+                    [$entity->name, $entity->class, $entity->property],
                 ])
                 ->render();
             yield $output->fetch();
             yield 'Attributes:';
             $rows = [];
-            foreach ($entity->getAttributes() as $attribute) {
+            foreach ($entity->children as $attribute) {
                 $rows[] = [
-                    $attribute->getName(),
-                    $attribute->getLabel(),
-                    $attribute->getPropertyName(),
-                    $attribute->getType(),
+                    $attribute->name,
+                    $attribute->label,
+                    $attribute->property,
+                    $attribute->type,
+                    // json_encode($attribute->meta->properties),
                 ];
             }
             (new Table($output))
@@ -50,7 +51,7 @@ class Description
     public function list()
     {
         foreach ($this->codegen->getEntities() as $entity) {
-            yield $entity->getClassName();
+            yield $entity->class;
         }
     }
 }

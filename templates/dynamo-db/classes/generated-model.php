@@ -76,7 +76,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if (!$attribute->getJsonSerialize()) continue; ?>
 <?php if ($attribute->isForeignKey()) continue; ?>
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
                 '<?= $attribute->getPropertyName(); ?>' => $this-><?= $attribute->getGetterName(); ?>() ? $this-><?= $attribute->getGetterName(); ?>()->format(DATE_ISO8601) : null,
 <?php else: ?>
                 '<?= $attribute->getPropertyName(); ?>' => $this-><?= $attribute->getGetterName(); ?>(),
@@ -103,7 +103,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         $instance->setId($item['id']['N']);
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
         if (isset($item['<?= $attribute->getPropertyName(); ?>']['<?= $this->getAttributeType($attribute); ?>'])) {
             $instance->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($item['<?= $attribute->getPropertyName(); ?>']['<?= $this->getAttributeType($attribute); ?>']));
         }
@@ -195,11 +195,11 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         ];
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
         if ($this-><?= $attribute->getGetterName(); ?>() !== null) {
             $attributes['<?= $attribute->getPropertyName(); ?>'] = ['<?= $this->getAttributeType($attribute); ?>' => $this-><?= $attribute->getGetterName(); ?>()->format(DATE_ISO8601)];
         }
-<?php elseif ($attribute->is(['String', 'Text'])): ?>
+<?php elseif ($attribute->isType(['String', 'Text'])): ?>
         if ($this-><?= $attribute->getGetterName(); ?>()) {
             $attributes['<?= $attribute->getPropertyName(); ?>'] = ['<?= $this->getAttributeType($attribute); ?>' => $this-><?= $attribute->getGetterName(); ?>()];
         }
@@ -228,10 +228,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         $expressionAttributeNames = [];
 <?php foreach ($entity->getAttributes() as $i => $attribute): ?>
         if ($this-><?= $attribute->getGetterName(); ?>() !== null) {
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
             $expressionAttributeValues[':<?= $attribute->getPropertyName(); ?>'] = ['<?= $this->getAttributeType($attribute); ?>' => $this-><?= $attribute->getGetterName(); ?>()->format(DATE_ISO8601)];
             $setExpressions[] = '#<?= $attribute->getPropertyName(); ?> = :<?= $attribute->getPropertyName(); ?>';
-<?php elseif ($attribute->is(['String', 'Text'])): ?>
+<?php elseif ($attribute->isType(['String', 'Text'])): ?>
             if ($this-><?= $attribute->getGetterName(); ?>()) {
                 $expressionAttributeValues[':<?= $attribute->getPropertyName(); ?>'] = ['<?= $this->getAttributeType($attribute); ?>' => $this-><?= $attribute->getGetterName(); ?>()];
                 $setExpressions[] = '#<?= $attribute->getPropertyName(); ?> = :<?= $attribute->getPropertyName(); ?>';

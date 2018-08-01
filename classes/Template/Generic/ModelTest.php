@@ -15,21 +15,21 @@ class ModelTest extends \Rhino\Codegen\Template\Generic
     }
 
     public function generateTestAttribute(\Rhino\Codegen\Attribute $attribute) {
-        if ($attribute->is(['String'])) {
+        if ($attribute->isType(['String'])) {
             return 'bin2hex(openssl_random_pseudo_bytes(127))';
-        } elseif ($attribute->is(['Text'])) {
+        } elseif ($attribute->isType(['Text'])) {
             return 'bin2hex(openssl_random_pseudo_bytes(1024))';
-        } elseif ($attribute->is(['Int'])) {
+        } elseif ($attribute->isType(['Int'])) {
             return 'mt_rand()';
-        } elseif ($attribute->is(['Decimal'])) {
+        } elseif ($attribute->isType(['Decimal'])) {
             return 'mt_rand() / mt_getrandmax()';
-        } elseif ($attribute->is(['Bool'])) {
+        } elseif ($attribute->isType(['Bool'])) {
             return 'mt_rand() < 0.5';
-        } elseif ($attribute->is(['Date', 'DateTime'])) {
+        } elseif ($attribute->isType(['Date', 'DateTime'])) {
             return 'new \DateTimeImmutable()';
-        } elseif ($attribute->is(['Object'])) {
+        } elseif ($attribute->isType(['Object'])) {
             return 'new \\' . $attribute->getClass();
-        } elseif ($attribute->is(['Array'])) {
+        } elseif ($attribute->isType(['Array'])) {
             return '[]';
         }
         assert(false, new \Exception('Unknown type for test attribute generation: ' . get_class($attribute)));

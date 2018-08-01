@@ -3,25 +3,14 @@ namespace Rhino\Codegen;
 
 class Entity
 {
+    use StandardNames;
     use Inflector;
 
     protected $type;
-    protected $name;
-    protected $pluralName;
     protected $authentication = false;
     protected $attributes = [];
     protected $relationships = [];
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name)
-    {
-        $this->name = $name;
-        return $this;
-    }
+    protected $nodes = [];
 
     public function getType(): string
     {
@@ -32,72 +21,6 @@ class Entity
     {
         $this->type = $type;
         return $this;
-    }
-
-    public function getPluralName()
-    {
-        return $this->pluralName ?: $this->pluralize($this->getName());
-    }
-
-    public function setPluralName($pluralName)
-    {
-        $this->pluralName = $pluralName;
-        return $this;
-    }
-
-    public function getClassName(): string
-    {
-        return $this->camelize($this->getName());
-    }
-
-    public function getPluralClassName(): string
-    {
-        return $this->pluralize($this->camelize($this->getPluralName()));
-    }
-
-    public function getTableName(): string
-    {
-        return $this->underscore($this->getName());
-    }
-
-    public function getPluralTableName(): string
-    {
-        return $this->pluralize($this->underscore($this->getPluralName()));
-    }
-
-    public function getPropertyName(): string
-    {
-        return $this->camelize($this->getName(), true);
-    }
-
-    public function getPluralPropertyName(): string
-    {
-        return $this->pluralize($this->camelize($this->getPluralName(), true));
-    }
-
-    public function getFileName(): string
-    {
-        return $this->hyphenate($this->getName());
-    }
-
-    public function getRouteName(): string
-    {
-        return $this->hyphenate($this->getName());
-    }
-
-    public function getPluralRouteName(): string
-    {
-        return $this->pluralize($this->hyphenate($this->getPluralName()));
-    }
-
-    public function getLabel(): string
-    {
-        return $this->getName();
-    }
-
-    public function getPluralLabel(): string
-    {
-        return $this->pluralize($this->humanize($this->getPluralName()));
     }
 
     public function getAttributes(bool $sorted = false): array
@@ -192,5 +115,18 @@ class Entity
     {
         $this->authentication = $authentication;
         return $this;
+    }
+
+    public function addNode(Node $node) {
+        $this->nodes[] = $node;
+        return $this;
+    }
+
+    public function get($name) {
+        return $this->nodes[$name] ?? null;
+    }
+
+    public function children() {
+        return $this->nodes;
     }
 }

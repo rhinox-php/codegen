@@ -56,17 +56,17 @@ class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
 
     private function updateAttributes(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text'])): ?>
+<?php if ($attribute->isType(['String', 'Text'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->int('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('data.attributes.<?= $attribute->getPropertyName(); ?>'));
 <?php endif; ?>
 <?php endforeach; ?>

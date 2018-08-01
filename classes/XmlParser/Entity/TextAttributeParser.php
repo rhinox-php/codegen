@@ -7,7 +7,7 @@ class TextAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\TextAttribute();
+        $attribute = parent::parseAttribute(new Attribute\TextAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

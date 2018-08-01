@@ -22,10 +22,10 @@ class Model extends \Rhino\Codegen\Template\Template
 
     public function getAttributeType(Attribute $attribute)
     {
-        if ($attribute->is(['String', 'Text', 'Date', 'DateTime'])) {
+        if ($attribute->isType(['String', 'Text', 'Date', 'DateTime'])) {
             return 'S';
         }
-        if ($attribute->is(['Int', 'Decimal', 'Bool'])) {
+        if ($attribute->isType(['Int', 'Decimal', 'Bool'])) {
             return 'N';
         }
         throw new \Exception('Unknown DynamoDB attribute type.');

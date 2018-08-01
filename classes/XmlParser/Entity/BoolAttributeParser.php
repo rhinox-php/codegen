@@ -7,7 +7,7 @@ class BoolAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\BoolAttribute();
+        $attribute = parent::parseAttribute(new Attribute\BoolAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

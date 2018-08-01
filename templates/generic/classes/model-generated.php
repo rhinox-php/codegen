@@ -79,13 +79,13 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         return [
             'id' => $this->getId(),
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_FORMAT) : null,
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_TIME_FORMAT) : null,
 <?php endif; ?>
 <?php endforeach; ?>
@@ -140,17 +140,17 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     protected function getQueryParams() {
        return [
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
 <?php if ($attribute->isNullable()): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() === null ? null : (int) $this->is<?= $attribute->getMethodName(); ?>(),
 <?php else: ?>
             ':<?= $attribute->getColumnName(); ?>' => (int) $this->is<?= $attribute->getMethodName(); ?>(),
 <?php endif; ?>
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
 <?php endif; ?>
 <?php endforeach; ?>
@@ -173,23 +173,23 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
             $entity = new static();
             $entity->id = $row['id'];
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text'])): ?>
+<?php if ($attribute->isType(['String', 'Text'])): ?>
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
             $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (int) $row['<?= $attribute->getColumnName(); ?>'] : null;
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
 $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (float) $row['<?= $attribute->getColumnName(); ?>'] : null;
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
 <?php if ($attribute->isNullable()): ?>
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
 <?php else: ?>
             $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
 <?php endif; ?>
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
                 $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
             }
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
                 $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
             }
@@ -292,7 +292,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         ]));
     }
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
 
     // Find by attribute <?= $attribute->getName(); ?>
 
@@ -333,7 +333,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         ])->fetchColumn();
     }
 <?php endif; ?>
-<?php if ($attribute->is(['Bool'])): ?>
+<?php if ($attribute->isType(['Bool'])): ?>
 
     // Find by attribute <?= $attribute->getName(); ?>
 
@@ -380,7 +380,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         ])->fetchColumn();
     }
 <?php endif; ?>
-<?php if ($attribute->is(['Date', 'DateTime'])): ?>
+<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
 
     public static function findBy<?= $attribute->getMethodName(); ?>Before($value) {
         return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
@@ -651,7 +651,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
 
     // Attribute accessors
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
 
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?>;
@@ -661,7 +661,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
 
     public function is<?= $attribute->getMethodName(); ?>() {
 <?php if ($attribute->isNullable()): ?>
@@ -676,7 +676,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         $this-><?= $attribute->getPropertyName(); ?> = $value;
         return $this;
     }
-<?php elseif ($attribute->is(['Date', 'DateTime'])): ?>
+<?php elseif ($attribute->isType(['Date', 'DateTime'])): ?>
 
     public function get<?= $attribute->getMethodName(); ?>() {
         return $this-><?= $attribute->getPropertyName(); ?>;

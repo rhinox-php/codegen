@@ -9,17 +9,17 @@ let <?= $entity->getPropertyName(); ?> = {
         attributes: {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->isForeignKey()) continue; ?>
-<?php if ($attribute->is(['String'])): ?>
+<?php if ($attribute->isType(['String'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.random.word(),
-<?php elseif ($attribute->is(['Text'])): ?>
+<?php elseif ($attribute->isType(['Text'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.random.words(),
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.random.number(),
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.random.number(),
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.date.recent(),
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             <?= $attribute->getPropertyName(); ?>: faker.date.recent(),
 <?php endif; ?>
 <?php endforeach;?>
@@ -66,17 +66,17 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
         api.auth().then(function() {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->isForeignKey()) continue; ?>
-<?php if ($attribute->is(['String'])): ?>
+<?php if ($attribute->isType(['String'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.random.word();
-<?php elseif ($attribute->is(['Text'])): ?>
+<?php elseif ($attribute->isType(['Text'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.random.words();
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.random.number();
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.random.number();
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.date.recent();
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?> = faker.date.recent();
 <?php endif; ?>
 <?php endforeach;?>
@@ -84,17 +84,17 @@ describe('/api/v1/<?= $entity->getRouteName(); ?>', function () {
         }).then(function(response) {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
 <?php if ($attribute->isForeignKey()) continue; ?>
-<?php if ($attribute->is(['String'])): ?>
+<?php if ($attribute->isType(['String'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
-<?php elseif ($attribute->is(['Text'])): ?>
+<?php elseif ($attribute->isType(['Text'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
             assert.equal(response.data.attributes.<?= $attribute->getPropertyName(); ?>, <?= $entity->getPropertyName(); ?>.data.attributes.<?= $attribute->getPropertyName(); ?>, 'Expected <?= $attribute->getPropertyName(); ?> to be updated');
 <?php endif; ?>
 <?php endforeach;?>

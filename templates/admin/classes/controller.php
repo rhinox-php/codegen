@@ -64,17 +64,17 @@ class <?= $entity->getClassName(); ?>AdminController extends AbstractController 
 
     public function updateAttributes(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text'])): ?>
+<?php if ($attribute->isType(['String', 'Text'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->int('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
         $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('<?= $attribute->getPropertyName(); ?>'<?= $attribute->isNullable() ? ', null' : ''; ?>));
 <?php endif; ?>
 <?php endforeach; ?>

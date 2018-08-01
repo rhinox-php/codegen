@@ -16,14 +16,14 @@
 
         <div class="cga-body-content">
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Date'])): ?>
+<?php if ($attribute->isType(['Date'])): ?>
             <div class="form-group">
                 <label class="col-md-2"><?= $attribute->getLabel(); ?></label>
                 <div class="col-md-10">
                     <input type="date" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="{{ <?= $entity->getPropertyName(); ?>.get<?= $attribute->getMethodName(); ?>() }}" placeholder="<?= $attribute->getLabel(); ?>" />
                 </div>
             </div>
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
                     <div class="checkbox">

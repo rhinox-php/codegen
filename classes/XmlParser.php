@@ -5,7 +5,7 @@ class XmlParser
 {
     protected $file;
     protected $codegen;
-    protected $parsers = [];
+    protected $names = [];
 
     public function __construct(Codegen $codegen, $file)
     {
@@ -13,10 +13,6 @@ class XmlParser
 
         $this->file = $file;
         $this->codegen = $codegen;
-
-        $this->addParser('codegen', new XmlParser\CodegenParser());
-        $this->addParser('entity', new XmlParser\EntityParser());
-        $this->addParser('routes', new XmlParser\RoutesParser());
     }
 
     public function parse(): Codegen
@@ -30,15 +26,7 @@ class XmlParser
                     return "$error->line:$error->column $error->message";
                 }, libxml_get_errors())));
             }
-            $this->preparseNode($xml);
-            $this->parseNode($xml);
-            // var_dump($xml->getName());die();
-            // foreach ($xml as $child) {
-            //     $this->preparseNode($child);
-            // }
-            // foreach ($xml as $child) {
-            //     $this->parseNode($child);
-            // }
+            $this->codegen->node = new Node($xml, $this);
         } catch (\Exception $exception) {
             throw new \Exception('Error parsing XML in ' . $file, 1, $exception);
         } finally {
@@ -49,41 +37,18 @@ class XmlParser
         return $this->codegen;
     }
 
+    public function name(Node $node) {
+        $method = $this->names;
+        return $method($node);
+    }
+
     public function getFile()
     {
         return $this->file;
     }
 
-    public function addParser($nodeName, $parser)
-    {
-        $this->codegen->log('Adding parser', $nodeName, get_class($parser));
-        $this->parsers[$nodeName] = $parser;
+    public function setNames(callable $names) {
+        $this->names = $names;
         return $this;
-    }
-
-    public function getParser(string $name)
-    {
-        if (!isset($this->parsers[$name])) {
-            throw new \Exception('Could not find child parser for ' . $name . ' in ' . get_class($this));
-        }
-        return $this->parsers[$name];
-    }
-
-    protected function preparseNode($node)
-    {
-        if (!isset($this->parsers[$node->getName()])) {
-            throw new \Exception('Could not find node parser for ' . $node->getName());
-        }
-        $this->codegen->log('Pre-parsing node', $node->getName(), 'with', get_class($this->parsers[$node->getName()]));
-        $this->parsers[$node->getName()]->setCodegen($this->codegen)->preparse($node);
-    }
-
-    protected function parseNode(\SimpleXMLElement $node)
-    {
-        if (!isset($this->parsers[$node->getName()])) {
-            throw new \Exception('Could not find node parser for ' . $node->getName());
-        }
-        $this->codegen->log('Parsing node', $node->getName(), 'with', get_class($this->parsers[$node->getName()]));
-        $this->parsers[$node->getName()]->setCodegen($this->codegen)->parse($node);
     }
 }

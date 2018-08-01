@@ -7,7 +7,7 @@ class IntAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\IntAttribute();
+        $attribute = parent::parseAttribute(new Attribute\IntAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

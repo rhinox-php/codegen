@@ -7,7 +7,7 @@ class DecimalAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\DecimalAttribute();
+        $attribute = parent::parseAttribute(new Attribute\DecimalAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

@@ -16,11 +16,10 @@ class Codegen
 
     public $pdo;
     public $db;
+    public $node;
 
     protected $namespace;
     protected $projectName;
-    protected $entities = [];
-    protected $relationships = [];
     protected $dryRun = self::DRY_RUN_INITIALIZING;
     protected $xmlParser;
     protected $templatePath;
@@ -342,53 +341,6 @@ class Codegen
     public function setProjectName(string $projectName): self
     {
         $this->projectName = $projectName;
-        return $this;
-    }
-
-    public function getEntities(): array
-    {
-        return $this->entities;
-    }
-
-    public function setEntities(array $entities): self
-    {
-        $this->entities = $entities;
-        return $this;
-    }
-
-    public function addEntity(Entity $entity): self
-    {
-        $this->entities[] = $entity;
-        return $this;
-    }
-
-    public function findEntity(string $name): Entity
-    {
-        if (!$name) {
-            throw new \Exception('Entity name missing.');
-        }
-        foreach ($this->getEntities() as $entity) {
-            if ($entity->getName() === $name) {
-                return $entity;
-            }
-        }
-        throw new \Exception('Could not find entity: ' . $name);
-    }
-
-    public function getRelationships(): array
-    {
-        return $this->relationships;
-    }
-
-    public function setRelationships($relationships): self
-    {
-        $this->relationships = $relationships;
-        return $this;
-    }
-
-    public function addRelationships($relationship): self
-    {
-        $this->relationships[] = $relationship;
         return $this;
     }
 

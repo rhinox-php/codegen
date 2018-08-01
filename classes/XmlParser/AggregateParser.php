@@ -53,7 +53,7 @@ abstract class AggregateParser extends NodeParser
     public function getParser(string $name)
     {
         if (!isset($this->parsers[$name])) {
-            throw new \Exception('Could not find child parser for ' . $name . ' in ' . get_class($this));
+            return new DynamicParser($name);
         }
         return $this->parsers[$name];
     }

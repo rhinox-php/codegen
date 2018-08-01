@@ -5,7 +5,7 @@ namespace <?= $this->getNamespace('model-generated'); ?>;
 class <?= $entity->getClassName(); ?> {
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['Array'])): ?>
+<?php if ($attribute->isType(['Array'])): ?>
 <?php if ($attribute->isNullable()): ?>
     /** @var array|null <?= $attribute->getPluralName(); ?> */
     protected $<?= $attribute->getPluralPropertyName(); ?>;
@@ -13,19 +13,19 @@ class <?= $entity->getClassName(); ?> {
     /** @var array <?= $attribute->getPluralName(); ?> */
     protected $<?= $attribute->getPluralPropertyName(); ?> = [];
 <?php endif; ?>
-<?php elseif ($attribute->is(['String', 'Text'])): ?>
+<?php elseif ($attribute->isType(['String', 'Text'])): ?>
     /** @var string|null <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
 
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
     /** @var int|null <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
 
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
     /** @var float|null <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
 
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
     /** @var bool|null <?= $attribute->getName(); ?> */
     protected $<?= $attribute->getPropertyName(); ?>;
 
@@ -37,7 +37,7 @@ class <?= $entity->getClassName(); ?> {
 <?php endforeach; ?>
 
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text'])): ?>
+<?php if ($attribute->isType(['String', 'Text'])): ?>
     public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>string {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
@@ -47,7 +47,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Int'])): ?>
+<?php elseif ($attribute->isType(['Int'])): ?>
     public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>int {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
@@ -57,7 +57,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Decimal'])): ?>
+<?php elseif ($attribute->isType(['Decimal'])): ?>
     public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>float {
         return $this-><?= $attribute->getPropertyName(); ?>;
     }
@@ -67,7 +67,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
 
     public function is<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>bool {
 <?php if ($attribute->isNullable()): ?>
@@ -83,7 +83,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Date', 'DateTime'])): ?>
+<?php elseif ($attribute->isType(['Date', 'DateTime'])): ?>
 
     public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\DateTimeInterface {
         return $this-><?= $attribute->getPropertyName(); ?>;
@@ -94,7 +94,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Object'])): ?>
+<?php elseif ($attribute->isType(['Object'])): ?>
 
     public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\<?= $attribute->getClass(); ?> {
         return $this-><?= $attribute->getPropertyName(); ?>;
@@ -105,7 +105,7 @@ class <?= $entity->getClassName(); ?> {
         return $this;
     }
 
-<?php elseif ($attribute->is(['Array'])): ?>
+<?php elseif ($attribute->isType(['Array'])): ?>
 
     public function get<?= $attribute->getPluralMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>array {
         return $this-><?= $attribute->getPluralPropertyName(); ?>;

@@ -1,8 +1,7 @@
 <?php
 namespace Rhino\Codegen\Template\Generic;
 
-use Rhino\Codegen\Attribute;
-use Rhino\Codegen\Entity;
+use Rhino\Codegen\Node;
 use Rhino\Codegen\Database\Column\MySql as MySqlColumn;
 
 class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codegen\Template\Interfaces\DatabaseMigrate
@@ -13,18 +12,16 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
 
     public function iterateDatabaseMigrateSql(\PDO $pdo, string $date): iterable
     {
-        foreach ($this->codegen->getEntities() as $entity) {
+        foreach ($this->codegen->node->children('entity') as $entity) {
             $path = $this->getFilePath('generic/sql/migrate', 'src/sql/up/' . $date . '.sql', [
                 'date' => $date,
                 'entity' => $entity,
             ]);
-            if (!$this->codegen->db->tableExists($entity->getTableName())) {
-                $this->codegen->log('Creating table', $entity->getTableName());
+            if (!$this->codegen->db->tableExists($entity->table)) {
+                $this->codegen->log('Creating table', $entity->table);
                 yield $path => "
-                    CREATE TABLE IF NOT EXISTS `{$entity->getTableName()}` (
-                        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                        `created` DATETIME NOT NULL,
-                        `updated` DATETIME NULL
+                    CREATE TABLE IF NOT EXISTS `{$entity->table}` (
+                        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
                     )
                     ENGINE = InnoDB
                     DEFAULT CHARSET = {$this->codegen->getDatabaseCharset()}
@@ -35,72 +32,81 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
         }
     }
 
-    private function migrateColumns(Entity $entity, string $path): iterable
+    private function migrateColumns(Node $entity, string $path): iterable
     {
         $previous = 'id';
-        foreach ($entity->getAttributes() as $attribute) {
-            $column = $this->codegen->db->getColumn($entity->getTableName(), $attribute->getColumnName());
+        foreach ($entity->children as $attribute) {
+            $column = $this->codegen->db->getColumn($entity->table, $attribute->column);
             if (!$column->exists()) {
-                if ($attribute instanceof Attribute\IntAttribute) {
+                if ($attribute->is('int')) {
                     $type = 'INT(11) SIGNED NULL';
-                } elseif ($attribute instanceof Attribute\DecimalAttribute) {
+                } elseif ($attribute->is('decimal')) {
                     $type = 'DECIMAL(10, 2) NULL';
-                } elseif ($attribute instanceof Attribute\BoolAttribute) {
+                } elseif ($attribute->is('bool')) {
                     $type = 'TINYINT(1) UNSIGNED NULL';
-                } elseif ($attribute instanceof Attribute\TextAttribute) {
+                } elseif ($attribute->is('text', 'json')) {
                     $type = 'MEDIUMTEXT NULL';
-                } elseif ($attribute instanceof Attribute\StringAttribute) {
+                } elseif ($attribute->is('string', 'password')) {
                     $type = 'VARCHAR(255) NULL';
-                } elseif ($attribute instanceof Attribute\DateAttribute) {
+                } elseif ($attribute->is('date')) {
                     $type = 'DATE NULL';
-                } elseif ($attribute instanceof Attribute\DateTimeAttribute) {
+                } elseif ($attribute->is('date-time')) {
                     $type = 'DATETIME NULL';
+                } elseif ($attribute->is('uuid')) {
+                    $type = 'BINARY(16) NULL';
+                } else {
+                    continue;
                 }
-                $this->codegen->log('Creating column', $attribute->getColumnName(), $type, 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` ADD `{$attribute->getColumnName()}` $type AFTER `$previous`;";
+                $this->codegen->log('Creating column', $attribute->column, $type, 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` ADD `{$attribute->column}` $type AFTER `$previous`;";
             } else {
                 yield from $this->migrateColumn($entity, $attribute, $column, $previous, $path);
             }
-            $previous = $attribute->getColumnName();
+            $previous = $attribute->column;
         }
     }
 
-    private function migrateColumn(Entity $entity, Attribute $attribute, MySqlColumn $column, string $previous, string $path): iterable
+    private function migrateColumn(Node $entity, Node $attribute, MySqlColumn $column, string $previous, string $path): iterable
     {
-        if ($attribute instanceof Attribute\IntAttribute) {
+        if ($attribute->is('int')) {
             if (!$column->isType(MySqlColumn::TYPE_INT) || !$column->isSize(11) || !$column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` INT(11) SIGNED NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` INT(11) SIGNED NULL AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\DecimalAttribute) {
+        } elseif ($attribute->is('decimal')) {
             if (!$column->isType(MySqlColumn::TYPE_DECIMAL) || !$column->isDecimalSize(10, 2) || !$column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` DECIMAL(10, 2) AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DECIMAL(10, 2) AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\BoolAttribute) {
+        } elseif ($attribute->is('bool')) {
             if (!$column->isType(MySqlColumn::TYPE_TINY_INT) || !$column->isSize(1) || $column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to TINYINT(1) UNSIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` TINYINT(1) UNSIGNED NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to TINYINT(1) UNSIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` TINYINT(1) UNSIGNED NULL AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\TextAttribute) {
+        } elseif ($attribute->is('text', 'json')) {
             if (!$column->isType(MySqlColumn::TYPE_MEDIUM_TEXT)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to MEDIUMTEXT from', $column->getType(), 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` MEDIUMTEXT NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to MEDIUMTEXT from', $column->getType(), 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` MEDIUMTEXT NULL AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\StringAttribute) {
+        } elseif ($attribute->is('string', 'password')) {
             if (!$column->isType(MySqlColumn::TYPE_VARCHAR) || !$column->isSize(255)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` VARCHAR(255) NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` VARCHAR(255) NULL AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\DateAttribute) {
+        } elseif ($attribute->is('date')) {
             if (!$column->isType(MySqlColumn::TYPE_DATE)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DATE from', $column->getType(), $column->getSize(), 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` DATE NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to DATE from', $column->getType(), $column->getSize(), 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DATE NULL AFTER `$previous`;";
             }
-        } elseif ($attribute instanceof Attribute\DateTimeAttribute) {
+        } elseif ($attribute->is('date-time')) {
             if (!$column->isType(MySqlColumn::TYPE_DATE_TIME)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DATETIME from', $column->getType(), $column->getSize(), 'in', $entity->getTableName());
-                yield $path => "ALTER TABLE `{$entity->getTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` DATETIME NULL AFTER `$previous`;";
+                $this->codegen->log('Changing column', $attribute->column, 'to DATETIME from', $column->getType(), $column->getSize(), 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DATETIME NULL AFTER `$previous`;";
+            }
+        } elseif ($attribute->is('uuid')) {
+            if (!$column->isType(MySqlColumn::TYPE_DATE_TIME)) {
+                $this->codegen->log('Changing column', $attribute->column, 'to BINARY(16) from', $column->getType(), $column->getSize(), 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` BINARY(16) NULL AFTER `$previous`;";
             }
         }
 

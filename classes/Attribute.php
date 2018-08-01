@@ -12,6 +12,13 @@ class Attribute
     protected $nullable = true;
     protected $indexed = false;
 
+    public $meta;
+
+    public function __construct()
+    {
+        $this->meta = new MetaData();
+    }
+
     /**
      * @var bool If true accessors will be generated.
      */
@@ -88,7 +95,7 @@ class Attribute
 
     public function getGetterName()
     {
-        if ($this->is(['Bool'])) {
+        if ($this->isType(['Bool'])) {
             return 'is' . $this->getMethodName();
         }
         return 'get' . $this->getMethodName();
@@ -99,7 +106,12 @@ class Attribute
         return $this->getName();
     }
 
-    public function is(array $types): bool
+    public function is(string $attribute): bool
+    {
+        return $this->meta->bool($attribute);
+    }
+
+    public function isType(array $types): bool
     {
         foreach ($types as $type) {
             $type = 'Rhino\\Codegen\\Attribute\\' . $type . 'Attribute';

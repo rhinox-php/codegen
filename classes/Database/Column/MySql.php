@@ -11,6 +11,7 @@ class MySql implements ColumnInterface
     const TYPE_MEDIUM_TEXT = 'mediumtext';
     const TYPE_DATE = 'date';
     const TYPE_DATE_TIME = 'datetime';
+    const TYPE_BINARY = 'binary';
 
     public $mysql;
     public $tableName;
@@ -78,6 +79,7 @@ class MySql implements ColumnInterface
 
     public function isNullable()
     {
+        return $this->getDescription()['Null'] === 'Yes';
     }
 
     public function isIndexed()

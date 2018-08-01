@@ -7,7 +7,7 @@ class DateTimeAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\DateTimeAttribute();
+        $attribute = parent::parseAttribute(new Attribute\DateTimeAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

@@ -7,7 +7,7 @@ class ArrayAttributeParser extends AttributeParser
 {
     public function parse(\SimpleXMLElement $node)
     {
-        $attribute = new Attribute\ArrayAttribute();
+        $attribute = parent::parseAttribute(new Attribute\ArrayAttribute(), $node);
         $attribute->setName((string) $node['name']);
         $attribute->setPropertyName((string) $node['property']);
         $attribute->setMethodName((string) $node['method']);

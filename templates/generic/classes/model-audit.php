@@ -29,16 +29,16 @@ class <?= $entity->getClassName(); ?> {
             'relationships' => [],
         ];
 <?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->is(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
         $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
-<?php elseif ($attribute->is(['Bool'])): ?>
+<?php elseif ($attribute->isType(['Bool'])): ?>
         $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->is<?= $attribute->getMethodName(); ?>();
-<?php elseif ($attribute->is(['Date'])): ?>
+<?php elseif ($attribute->isType(['Date'])): ?>
         $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
         if ($snapshot['entity']['<?= $attribute->getPropertyName(); ?>']) {
             $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $snapshot['entity']['<?= $attribute->getPropertyName(); ?>']->format('Y-m-d');
         }
-<?php elseif ($attribute->is(['DateTime'])): ?>
+<?php elseif ($attribute->isType(['DateTime'])): ?>
         $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
         if ($snapshot['entity']['<?= $attribute->getPropertyName(); ?>']) {
             $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $snapshot['entity']['<?= $attribute->getPropertyName(); ?>']->format(DATE_ISO8601);
