@@ -27,10 +27,10 @@ class Web extends \Rhino\Codegen\Codegen
         parent::generate();
         $this->gitIgnore->generate();
         $this->composer->generate();
-        $this->npm->generate();
+        // $this->npm->generate();
         $this->env->generate();
         $this->router->generate();
-        $this->gulp->generate();
+        // $this->gulp->generate();
         return $this;
     }
 }
