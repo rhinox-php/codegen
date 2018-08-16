@@ -12,7 +12,7 @@ class Clean extends AbstractCommand
     {
         parent::configure();
         $this->setName('clean')
-            ->setDescription('Delete all generated file (that are recorded in the manifest)');
+            ->setDescription('Delete all generated files (that are recorded in the manifest)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
