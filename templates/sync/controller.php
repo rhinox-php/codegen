@@ -16,7 +16,7 @@ class SyncController extends \<?= $this->getNamespace('controller-admin-generate
             echo '{"data":[' . PHP_EOL;
             foreach ([
 <?php foreach ($entities as $entity): ?>
-                        \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>::class,
+                        \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>::class,
 <?php endforeach; ?>
                     ] as $modelClass) {
                 foreach ($modelClass::sync($since) as $i => $entity) {

@@ -2,5 +2,5 @@
 
 namespace <?= $this->getNamespace('controller-admin-implemented'); ?>;
 
-class <?= $entity->getClassName(); ?>AdminController extends \<?= $this->getNamespace('controller-admin-generated'); ?>\<?= $entity->getClassName(); ?>AdminController {
+class <?= $entity->class; ?>AdminController extends \<?= $this->getNamespace('controller-admin-generated'); ?>\<?= $entity->class; ?>AdminController {
 }

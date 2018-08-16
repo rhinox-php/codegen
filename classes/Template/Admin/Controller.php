@@ -23,14 +23,14 @@ class Controller extends \Rhino\Codegen\Template\Admin
         ");
 
         $this->renderTemplate('admin/classes/controller-abstract', 'src/classes/Controller/Admin/Generated/AbstractController.php');
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('admin/classes/controller', 'src/classes/Controller/Admin/Generated/' . $entity->getClassName() . 'AdminController.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate('admin/classes/controller', 'src/classes/Controller/Admin/Generated/' . $entity->class . 'AdminController.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('admin/classes/controller-initial', 'src/classes/Controller/Admin/' . $entity->getClassName() . 'AdminController.php', [
+            $this->renderTemplate('admin/classes/controller-initial', 'src/classes/Controller/Admin/' . $entity->class . 'AdminController.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('admin/classes/data-table', 'src/classes/Controller/Admin/DataTable/' . $entity->getClassName() . 'DataTable.php', [
+            $this->renderTemplate('admin/classes/data-table', 'src/classes/Controller/Admin/DataTable/' . $entity->class . 'DataTable.php', [
                 'entity' => $entity,
             ]);
             $this->renderTemplate('admin/views/form.twig', 'src/views/admin/' . $entity->getFileName() . '/form.twig', [
@@ -41,7 +41,7 @@ class Controller extends \Rhino\Codegen\Template\Admin
             ]);
         }
         $this->renderTemplate('admin/views/layout.twig', 'src/views/admin/layout.twig', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
         $this->renderTemplate('admin/assets/admin.scss', 'src/assets/scss/admin.scss', [
         ]);
@@ -49,14 +49,14 @@ class Controller extends \Rhino\Codegen\Template\Admin
 
     public function iterateRoutes()
     {
-        foreach ($this->codegen->getEntities() as $entity) {
-            yield ['get', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'index'];
-            yield ['post', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'index'];
-            yield ['get', '/admin/' . $entity->getRouteName() . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'create'];
-            yield ['post', '/admin/' . $entity->getRouteName() . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'create'];
-            yield ['get', '/admin/' . $entity->getRouteName() . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'edit'];
-            yield ['post', '/admin/' . $entity->getRouteName() . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'edit'];
-            // yield ['post', '/admin/' . $entity->getRouteName() . '/delete/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->getClassName() . 'AdminController', 'delete'];
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            yield ['get', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'index'];
+            yield ['post', '/admin/' . $entity->getPluralRouteName(), $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'index'];
+            yield ['get', '/admin/' . $entity->route . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'create'];
+            yield ['post', '/admin/' . $entity->route . '/create', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'create'];
+            yield ['get', '/admin/' . $entity->route . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'edit'];
+            yield ['post', '/admin/' . $entity->route . '/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'edit'];
+            // yield ['post', '/admin/' . $entity->route . '/delete/{id}', $this->getNamespace('controller-admin-implemented') . '\\' . $entity->class . 'AdminController', 'delete'];
         }
     }
 }

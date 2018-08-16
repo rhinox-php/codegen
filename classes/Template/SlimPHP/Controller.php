@@ -27,7 +27,7 @@ class Controller extends SlimPhp
 
         // Render entity controllers
         foreach ($this->getCodegen()->getEntities() as $entity) {
-            $this->renderTemplate('classes/controller/controller-generated', 'src/classes/Controller/' . $entity->getClassName() . '.php', [
+            $this->renderTemplate('classes/controller/controller-generated', 'src/classes/Controller/' . $entity->class . '.php', [
                 'entity' => $entity,
             ]);
         }

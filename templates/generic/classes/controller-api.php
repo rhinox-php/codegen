@@ -1,73 +1,73 @@
 <?= '<?php'; ?>
 
 namespace <?= $this->getNamespace('controller-api-generated'); ?>;
-use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>;
-use <?= $this->getNamespace('model-serializer'); ?>\<?= $entity->getClassName(); ?>Serializer;
+use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>;
+use <?= $this->getNamespace('model-serializer'); ?>\<?= $entity->class; ?>Serializer;
 
-class <?= $entity->getClassName(); ?>ApiController extends AbstractController {
+class <?= $entity->class; ?>ApiController extends AbstractController {
 
     public function index() {
-        $list = new \Rhino\JsonApiList\JsonApiList(<?= $entity->getClassName(); ?>::class, $this->input);
+        $list = new \Rhino\JsonApiList\JsonApiList(<?= $entity->class; ?>::class, $this->input);
         $list->setSortColumns([
         ]);
         $list->setSearchColumns([
         ]);
         $list->process();
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($list->getResults(), $list->getMeta()));
+        $this->response->json(new <?= $entity->class; ?>Serializer($list->getResults(), $list->getMeta()));
     }
 
     public function get($id) {
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
-        if (!$<?= $entity->getPropertyName(); ?>) {
+        $<?= $entity->property; ?> = <?= $entity->class; ?>::findById($id);
+        if (!$<?= $entity->property; ?>) {
             $this->response->notFound();
             return;
         }
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+        $this->response->json(new <?= $entity->class; ?>Serializer($<?= $entity->property; ?>));
     }
 
     public function create() {
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $this->updateAttributes($<?= $entity->getPropertyName(); ?>);
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $this->updateAttributes($<?= $entity->property; ?>);
+        $<?= $entity->property; ?>->save();
 
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+        $this->response->json(new <?= $entity->class; ?>Serializer($<?= $entity->property; ?>));
     }
 
     public function update($id) {
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
-        if (!$<?= $entity->getPropertyName(); ?>) {
+        $<?= $entity->property; ?> = <?= $entity->class; ?>::findById($id);
+        if (!$<?= $entity->property; ?>) {
             $this->response->notFound();
             return;
         }
-        $this->updateAttributes($<?= $entity->getPropertyName(); ?>);
-        $<?= $entity->getPropertyName(); ?>->save();
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+        $this->updateAttributes($<?= $entity->property; ?>);
+        $<?= $entity->property; ?>->save();
+        $this->response->json(new <?= $entity->class; ?>Serializer($<?= $entity->property; ?>));
     }
 
     public function delete($id) {
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
-        if (!$<?= $entity->getPropertyName(); ?>) {
+        $<?= $entity->property; ?> = <?= $entity->class; ?>::findById($id);
+        if (!$<?= $entity->property; ?>) {
             $this->response->notFound();
             return;
         }
-        $<?= $entity->getPropertyName(); ?>->delete();
-        $this->response->json(new <?= $entity->getClassName(); ?>Serializer($<?= $entity->getPropertyName(); ?>));
+        $<?= $entity->property; ?>->delete();
+        $this->response->json(new <?= $entity->class; ?>Serializer($<?= $entity->property; ?>));
     }
 
-    private function updateAttributes(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->isType(['Date'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->isType(['DateTime'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->dateTime('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->isType(['Bool'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->isType(['Int'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->int('data.attributes.<?= $attribute->getPropertyName(); ?>'));
-<?php elseif ($attribute->isType(['Decimal'])): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->decimal('data.attributes.<?= $attribute->getPropertyName(); ?>'));
+    private function updateAttributes(<?= $entity->class; ?> $<?= $entity->property; ?>) {
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->string('data.attributes.<?= $attribute->property; ?>'));
+<?php elseif ($attribute->is('date')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->dateTime('data.attributes.<?= $attribute->property; ?>'));
+<?php elseif ($attribute->is('date-time')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->dateTime('data.attributes.<?= $attribute->property; ?>'));
+<?php elseif ($attribute->is('bool')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->bool('data.attributes.<?= $attribute->property; ?>'));
+<?php elseif ($attribute->is('int')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->int('data.attributes.<?= $attribute->property; ?>'));
+<?php elseif ($attribute->is('decimal')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->decimal('data.attributes.<?= $attribute->property; ?>'));
 <?php endif; ?>
 <?php endforeach; ?>
     }

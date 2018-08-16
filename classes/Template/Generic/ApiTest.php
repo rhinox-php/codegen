@@ -7,7 +7,7 @@ class ApiTest extends \Rhino\Codegen\Template\Generic
     {
         $this->renderTemplate('generic/tests/api.js', 'tests/api.js');
         $this->renderTemplate('generic/tests/index.js', 'tests/index.js', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
 
         $this->codegen->npm->addDevDependency('mocha', '^3.4.2');
@@ -20,7 +20,7 @@ class ApiTest extends \Rhino\Codegen\Template\Generic
 
         $this->renderTemplate('generic/bin/test-api.sh', 'bin/test-api.sh')->setExecutable(true);
 
-        foreach ($this->codegen->getEntities() as $entity) {
+        foreach ($this->codegen->node->children('entity') as $entity) {
             $this->renderTemplate('generic/tests/api/model.js', 'tests/api/' . $entity->getFileName() . '.js', [
                 'entity' => $entity,
             ]);

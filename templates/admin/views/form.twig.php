@@ -1,11 +1,11 @@
 {% extends 'admin/layout.twig' %}
-{% block title %}<?= $entity->getLabel(); ?>{% endblock %}
+{% block title %}<?= $entity->label; ?>{% endblock %}
 {% block content %}
     <form action="" method="post" class="form-horizontal">
         <div class="cga-body-header">
             <div class="clearfix">
                 <div class="pull-left">
-                    <div class="cga-body-header-title"><?= $entity->getLabel(); ?></div>
+                    <div class="cga-body-header-title"><?= $entity->label; ?></div>
                     <div class="cga-body-header-bread-crumbs">Bread / Crumbs</div>
                 </div>
                 <div class="pull-right">
@@ -15,30 +15,30 @@
         </div>
 
         <div class="cga-body-content">
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['Date'])): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('date')): ?>
             <div class="form-group">
-                <label class="col-md-2"><?= $attribute->getLabel(); ?></label>
+                <label class="col-md-2"><?= $attribute->label; ?></label>
                 <div class="col-md-10">
-                    <input type="date" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="{{ <?= $entity->getPropertyName(); ?>.get<?= $attribute->getMethodName(); ?>() }}" placeholder="<?= $attribute->getLabel(); ?>" />
+                    <input type="date" class="form-control" name="<?= $attribute->property; ?>" value="{{ <?= $entity->property; ?>.get<?= $attribute->method; ?>() }}" placeholder="<?= $attribute->label; ?>" />
                 </div>
             </div>
-<?php elseif ($attribute->isType(['Bool'])): ?>
+<?php elseif ($attribute->is('bool')): ?>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" name="<?= $attribute->getPropertyName(); ?>" {{ <?= $entity->getPropertyName(); ?>.get<?= $attribute->getMethodName(); ?>() ? 'checked' : '' }} placeholder="<?= $attribute->getLabel(); ?>" />
-                            <?= $attribute->getLabel(); ?>
+                            <input type="checkbox" name="<?= $attribute->property; ?>" {{ <?= $entity->property; ?>.get<?= $attribute->method; ?>() ? 'checked' : '' }} placeholder="<?= $attribute->label; ?>" />
+                            <?= $attribute->label; ?>
                         </label>
                     </div>
                 </div>
             </div>
 <?php else: ?>
             <div class="form-group">
-                <label class="col-md-2"><?= $attribute->getLabel(); ?></label>
+                <label class="col-md-2"><?= $attribute->label; ?></label>
                 <div class="col-md-10">
-                    <input type="text" class="form-control" name="<?= $attribute->getPropertyName(); ?>" value="{{ <?= $entity->getPropertyName(); ?>.get<?= $attribute->getMethodName(); ?>() }}" placeholder="<?= $attribute->getLabel(); ?>" />
+                    <input type="text" class="form-control" name="<?= $attribute->property; ?>" value="{{ <?= $entity->property; ?>.get<?= $attribute->method; ?>() }}" placeholder="<?= $attribute->label; ?>" />
                 </div>
             </div>
 <?php endif; ?>

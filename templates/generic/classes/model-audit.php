@@ -2,7 +2,7 @@
 
 namespace <?= $this->getNamespace('model-audit'); ?>;
 
-class <?= $entity->getClassName(); ?> {
+class <?= $entity->class; ?> {
 
     public $snapshot;
     public $diff;
@@ -12,59 +12,57 @@ class <?= $entity->getClassName(); ?> {
         $this->mapper = $mapper;
     }
 
-    public function snapshot(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
-        $this->snapshot = static::getSnapshot($<?= $entity->getPropertyName(); ?>, $this->mapper);
+    public function snapshot(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> $<?= $entity->property; ?>) {
+        $this->snapshot = static::getSnapshot($<?= $entity->property; ?>, $this->mapper);
     }
 
-    public function diff(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> $with) {
+    public function diff(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> $with) {
         $withSnapshot = static::getSnapshot($with, $this->mapper);
         $this->diff = static::getDiff($this->snapshot, $withSnapshot, $this->mapper);
         return $this;
     }
 
-    public static function getSnapshot(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>, $mapper) {
+    public static function getSnapshot(\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> $<?= $entity->property; ?>, $mapper) {
         $snapshot = [
-            'id' => $<?= $entity->getPropertyName(); ?>->getId(),
+            'id' => $<?= $entity->property; ?>->getId(),
             'entity' => [],
             'relationships' => [],
         ];
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
-        $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
-<?php elseif ($attribute->isType(['Bool'])): ?>
-        $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->is<?= $attribute->getMethodName(); ?>();
-<?php elseif ($attribute->isType(['Date'])): ?>
-        $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
-        if ($snapshot['entity']['<?= $attribute->getPropertyName(); ?>']) {
-            $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $snapshot['entity']['<?= $attribute->getPropertyName(); ?>']->format('Y-m-d');
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text', 'int', 'decimal')): ?>
+        $snapshot['entity']['<?= $attribute->property; ?>'] = $<?= $entity->property; ?>->get<?= $attribute->method; ?>();
+<?php elseif ($attribute->is('bool')): ?>
+        $snapshot['entity']['<?= $attribute->property; ?>'] = $<?= $entity->property; ?>->is<?= $attribute->method; ?>();
+<?php elseif ($attribute->is('date')): ?>
+        $snapshot['entity']['<?= $attribute->property; ?>'] = $<?= $entity->property; ?>->get<?= $attribute->method; ?>();
+        if ($snapshot['entity']['<?= $attribute->property; ?>']) {
+            $snapshot['entity']['<?= $attribute->property; ?>'] = $snapshot['entity']['<?= $attribute->property; ?>']->format('Y-m-d');
         }
-<?php elseif ($attribute->isType(['DateTime'])): ?>
-        $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>();
-        if ($snapshot['entity']['<?= $attribute->getPropertyName(); ?>']) {
-            $snapshot['entity']['<?= $attribute->getPropertyName(); ?>'] = $snapshot['entity']['<?= $attribute->getPropertyName(); ?>']->format(DATE_ISO8601);
+<?php elseif ($attribute->is('date-time')): ?>
+        $snapshot['entity']['<?= $attribute->property; ?>'] = $<?= $entity->property; ?>->get<?= $attribute->method; ?>();
+        if ($snapshot['entity']['<?= $attribute->property; ?>']) {
+            $snapshot['entity']['<?= $attribute->property; ?>'] = $snapshot['entity']['<?= $attribute->property; ?>']->format(DATE_ISO8601);
         }
 <?php endif; ?>
 <?php endforeach; ?>
 
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        $snapshot['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] = [];
-        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $i => $<?= $relationship->getPropertyName(); ?>) {
-            $relationshipSnapshot = <?= $relationship->getTo()->getClassName(); ?>::getSnapshot($<?= $relationship->getPropertyName(); ?>, $mapper);
-            $index = $mapper->mapRelationshipKey($relationshipSnapshot, $i, '<?= $relationship->getTo()->getClassName(); ?>');
-            $snapshot['relationships']['<?= $relationship->getPluralPropertyName(); ?>'][$index] = $relationshipSnapshot;
+<?php foreach ($entity->children('has-many', 'has-one') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+        $snapshot['relationships']['<?= $relationship->pluralProperty; ?>'] = [];
+        foreach ($<?= $entity->property; ?>->get<?= $relationship->pluralMethod; ?>() as $i => $<?= $relationship->property; ?>) {
+            $relationshipSnapshot = <?= $relationship->class; ?>::getSnapshot($<?= $relationship->property; ?>, $mapper);
+            $index = $mapper->mapRelationshipKey($relationshipSnapshot, $i, '<?= $relationship->class; ?>');
+            $snapshot['relationships']['<?= $relationship->pluralProperty; ?>'][$index] = $relationshipSnapshot;
         }
 
 <?php endif; ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-        $<?= $relationship->getPropertyName(); ?> = $<?= $entity->getPropertyName(); ?>->get<?= $relationship->getMethodName(); ?>();
-        if ($<?= $relationship->getPropertyName(); ?>) {
-            $relationshipSnapshot = <?= $relationship->getTo()->getClassName(); ?>::getSnapshot($<?= $relationship->getPropertyName(); ?>, $mapper);
-            $snapshot['relationships']['<?= $relationship->getPropertyName(); ?>'] = $relationshipSnapshot;
+<?php if ($relationship->is('has-one')): ?>
+        $<?= $relationship->property; ?> = $<?= $entity->property; ?>->get<?= $relationship->method; ?>();
+        if ($<?= $relationship->property; ?>) {
+            $relationshipSnapshot = <?= $relationship->class; ?>::getSnapshot($<?= $relationship->property; ?>, $mapper);
+            $snapshot['relationships']['<?= $relationship->property; ?>'] = $relationshipSnapshot;
         }
 
-<?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
         if (count($snapshot['relationships']) === 0) {
@@ -113,47 +111,45 @@ class <?= $entity->getClassName(); ?> {
             unset($diff['entity']);
         }
 
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        $diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] = [];
+<?php foreach ($entity->children('has-many', 'has-one') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+        $diff['relationships']['<?= $relationship->pluralProperty; ?>'] = [];
 
-        // Check existing and removed <?= $relationship->getName(); ?>
+        // Check existing and removed <?= $relationship->name; ?>
 
-        foreach ($entityA['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] as $i => $<?= $relationship->getPropertyName(); ?>) {
-            $index = $mapper->mapRelationshipKey($<?= $relationship->getPropertyName(); ?>, $i, '<?= $relationship->getTo()->getClassName(); ?>');
-            $relationshipDiff = <?= $relationship->getTo()->getClassName(); ?>::getDiff($<?= $relationship->getPropertyName(); ?>, $entityB['relationships']['<?= $relationship->getPluralPropertyName(); ?>'][$index] ?? [], $mapper);
-            $diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'][$index] = $relationshipDiff;
+        foreach ($entityA['relationships']['<?= $relationship->pluralProperty; ?>'] as $i => $<?= $relationship->property; ?>) {
+            $index = $mapper->mapRelationshipKey($<?= $relationship->property; ?>, $i, '<?= $relationship->class; ?>');
+            $relationshipDiff = <?= $relationship->class; ?>::getDiff($<?= $relationship->property; ?>, $entityB['relationships']['<?= $relationship->pluralProperty; ?>'][$index] ?? [], $mapper);
+            $diff['relationships']['<?= $relationship->pluralProperty; ?>'][$index] = $relationshipDiff;
         }
 
-        // Check for new <?= $relationship->getName(); ?>
+        // Check for new <?= $relationship->name; ?>
 
-        foreach ($entityB['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] as $i => $<?= $relationship->getPropertyName(); ?>) {
-            $index = $mapper->mapRelationshipKey($<?= $relationship->getPropertyName(); ?>, $i, '<?= $relationship->getTo()->getClassName(); ?>');
-            if (!isset($diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'][$index])) {
-                $relationshipDiff = <?= $relationship->getTo()->getClassName(); ?>::getDiff([], $<?= $relationship->getPropertyName(); ?>, $mapper);
-                $diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'][$index] = $relationshipDiff;
+        foreach ($entityB['relationships']['<?= $relationship->pluralProperty; ?>'] as $i => $<?= $relationship->property; ?>) {
+            $index = $mapper->mapRelationshipKey($<?= $relationship->property; ?>, $i, '<?= $relationship->class; ?>');
+            if (!isset($diff['relationships']['<?= $relationship->pluralProperty; ?>'][$index])) {
+                $relationshipDiff = <?= $relationship->class; ?>::getDiff([], $<?= $relationship->property; ?>, $mapper);
+                $diff['relationships']['<?= $relationship->pluralProperty; ?>'][$index] = $relationshipDiff;
             }
         }
 
-        $diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] = array_filter($diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'], function($relationshipDiff) {
+        $diff['relationships']['<?= $relationship->pluralProperty; ?>'] = array_filter($diff['relationships']['<?= $relationship->pluralProperty; ?>'], function($relationshipDiff) {
             return !empty($relationshipDiff['entity']) || !empty($relationshipDiff['relationships']);
         });
-        if (count($diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>']) === 0) {
-            unset($diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>']);
+        if (count($diff['relationships']['<?= $relationship->pluralProperty; ?>']) === 0) {
+            unset($diff['relationships']['<?= $relationship->pluralProperty; ?>']);
         }
 
 <?php endif; ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-        $<?= $relationship->getPropertyName(); ?> = $entityA['relationships']['<?= $relationship->getPropertyName(); ?>'] ?? null;
-        if ($<?= $relationship->getPropertyName(); ?>) {
-            $relationshipDiff = <?= $relationship->getTo()->getClassName(); ?>::getDiff($<?= $relationship->getPropertyName(); ?>, $entityB['relationships']['<?= $relationship->getPropertyName(); ?>'], $mapper);
+<?php if ($relationship->is('has-one')): ?>
+        $<?= $relationship->property; ?> = $entityA['relationships']['<?= $relationship->property; ?>'] ?? null;
+        if ($<?= $relationship->property; ?>) {
+            $relationshipDiff = <?= $relationship->class; ?>::getDiff($<?= $relationship->property; ?>, $entityB['relationships']['<?= $relationship->property; ?>'], $mapper);
             if (!empty($relationshipDiff['entity']) || !empty($relationshipDiff['relationships'])) {
-                $diff['relationships']['<?= $relationship->getPropertyName(); ?>'] = $relationshipDiff;
+                $diff['relationships']['<?= $relationship->property; ?>'] = $relationshipDiff;
             }
         }
 
-<?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
 
@@ -202,29 +198,27 @@ class <?= $entity->getClassName(); ?> {
         }
 
         if (isset($diff['entity'])) {
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-            if (!$mapper->filterAttribute('<?= $entity->getClassName(); ?>', '<?= $attribute->getPropertyName(); ?>')) {
-                $result .= static::diffAttribute($diff['entity'], '<?= $attribute->getPropertyName(); ?>', '<?= $attribute->getLabel(); ?>', $mapper, '<?= $entity->getClassName(); ?>');
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+            if (!$mapper->filterAttribute('<?= $entity->class; ?>', '<?= $attribute->property; ?>')) {
+                $result .= static::diffAttribute($diff['entity'], '<?= $attribute->property; ?>', '<?= $attribute->label; ?>', $mapper, '<?= $entity->class; ?>');
             }
 <?php endforeach; ?>
         }
 
         if (trim($result)) {
-            $result = '<?= $entity->getName(); ?> ' . $index . PHP_EOL . $result;
+            $result = '<?= $entity->name; ?> ' . $index . PHP_EOL . $result;
         }
 
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        foreach ($diff['relationships']['<?= $relationship->getPluralPropertyName(); ?>'] ?? [] as $i => $<?= $relationship->getPropertyName(); ?>) {
-            $result .= <?= $relationship->getTo()->getClassName(); ?>::diffToString($<?= $relationship->getPropertyName(); ?>, $mapper, $i);
+<?php foreach ($entity->children('has-many', 'has-one') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+        foreach ($diff['relationships']['<?= $relationship->pluralProperty; ?>'] ?? [] as $i => $<?= $relationship->property; ?>) {
+            $result .= <?= $relationship->class; ?>::diffToString($<?= $relationship->property; ?>, $mapper, $i);
         }
 <?php endif; ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-        if (isset($diff['relationships']['<?= $relationship->getPropertyName(); ?>'])) {
-            $result .= <?= $relationship->getTo()->getClassName(); ?>::diffToString($diff['relationships']['<?= $relationship->getPropertyName(); ?>'], $mapper);
+<?php if ($relationship->is('has-one')): ?>
+        if (isset($diff['relationships']['<?= $relationship->property; ?>'])) {
+            $result .= <?= $relationship->class; ?>::diffToString($diff['relationships']['<?= $relationship->property; ?>'], $mapper);
         }
-<?php endif; ?>
 <?php endif; ?>
 <?php endforeach; ?>
         return $result;

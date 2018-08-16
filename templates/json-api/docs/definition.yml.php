@@ -5,25 +5,25 @@ properties:
     description: Not used when creating.
   type:
     type: string
-    description: Must be <?= $entity->getClassName(); ?>.
+    description: Must be <?= $entity->class; ?>.
     enum:
-      - <?= $entity->getClassName(); ?>
+      - <?= $entity->class; ?>
 
   attributes:
     type: object
     properties:
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-      <?= $attribute->getPropertyName(); ?>:
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+      <?= $attribute->property; ?>:
         type: <?= $attribute->getType(); ?>
 
 <?php endforeach; ?>
   relationships:
     type: object
     properties:
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-      <?= $relationship->getPropertyName(); ?>:
+<?php foreach ($entity->children('has-many', 'has-one', 'belongs-to') as $relationship): ?>
+      <?= $relationship->property; ?>:
         type: object
         properties:
           data:
-            $ref: '#/definitions/<?= $relationship->getTo()->getClassName(); ?>Relationship'
+            $ref: '#/definitions/<?= $relationship->getTo()->class; ?>Relationship'
 <?php endforeach; ?>

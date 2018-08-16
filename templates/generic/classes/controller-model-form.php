@@ -2,14 +2,14 @@
 
 namespace <?= $this->getNamespace('controller-implemented'); ?>;
 
-class <?= $entity->getClassName(); ?>Controller extends AbstractController {
+class <?= $entity->class; ?>Controller extends AbstractController {
 
     public function create() {
-        $this->form(new <?= $entity->getClassName(); ?>());
+        $this->form(new <?= $entity->class; ?>());
     }
 
     public function edit($id) {
-        $entity = <?= $entity->getClassName(); ?>::findById($id);
+        $entity = <?= $entity->class; ?>::findById($id);
         if (!$entity) {
             $this->response->notFound();
             return;
@@ -17,18 +17,18 @@ class <?= $entity->getClassName(); ?>Controller extends AbstractController {
         $this->form($entity);
     }
 
-    protected function form(<?= $entity->getClassName(); ?> $entity) {
+    protected function form(<?= $entity->class; ?> $entity) {
         if ($this->hasInput()) {
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string')
+    || $attribute->is('text')): ?>
+            $entity->set<?= $attribute->method; ?>($this->input->string('<?= $attribute->property; ?>'));
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->getPropertyName(); ?>')));
+<?php if ($attribute->is('date')): ?>
+            $entity->set<?= $attribute->method; ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->property; ?>')));
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-            $entity->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
+<?php if ($attribute->is('bool')): ?>
+            $entity->set<?= $attribute->method; ?>($this->input->bool('<?= $attribute->property; ?>') ? true : false);
 <?php endif; ?>
 <?php endforeach; ?>
 

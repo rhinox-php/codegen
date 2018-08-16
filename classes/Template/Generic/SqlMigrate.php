@@ -21,7 +21,9 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                 $this->codegen->log('Creating table', $entity->table);
                 yield $path => "
                     CREATE TABLE IF NOT EXISTS `{$entity->table}` (
-                        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
+                        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        `created_at` DATETIME NOT NULL,
+                        `updated_at` DATETIME NULL
                     )
                     ENGINE = InnoDB
                     DEFAULT CHARSET = {$this->codegen->getDatabaseCharset()}
@@ -44,9 +46,9 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                     $type = 'DECIMAL(10, 2) NULL';
                 } elseif ($attribute->is('bool')) {
                     $type = 'TINYINT(1) UNSIGNED NULL';
-                } elseif ($attribute->is('text', 'json')) {
+                } elseif ($attribute->is('text', 'json', 'html')) {
                     $type = 'MEDIUMTEXT NULL';
-                } elseif ($attribute->is('string', 'password')) {
+                } elseif ($attribute->is('string', 'password', 'enum')) {
                     $type = 'VARCHAR(255) NULL';
                 } elseif ($attribute->is('date')) {
                     $type = 'DATE NULL';
@@ -83,12 +85,12 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                 $this->codegen->log('Changing column', $attribute->column, 'to TINYINT(1) UNSIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` TINYINT(1) UNSIGNED NULL AFTER `$previous`;";
             }
-        } elseif ($attribute->is('text', 'json')) {
+        } elseif ($attribute->is('text', 'json', 'html')) {
             if (!$column->isType(MySqlColumn::TYPE_MEDIUM_TEXT)) {
                 $this->codegen->log('Changing column', $attribute->column, 'to MEDIUMTEXT from', $column->getType(), 'in', $entity->table);
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` MEDIUMTEXT NULL AFTER `$previous`;";
             }
-        } elseif ($attribute->is('string', 'password')) {
+        } elseif ($attribute->is('string', 'password', 'enum')) {
             if (!$column->isType(MySqlColumn::TYPE_VARCHAR) || !$column->isSize(255)) {
                 $this->codegen->log('Changing column', $attribute->column, 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->table);
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` VARCHAR(255) NULL AFTER `$previous`;";
@@ -104,7 +106,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DATETIME NULL AFTER `$previous`;";
             }
         } elseif ($attribute->is('uuid')) {
-            if (!$column->isType(MySqlColumn::TYPE_DATE_TIME)) {
+            if (!$column->isType(MySqlColumn::TYPE_BINARY)) {
                 $this->codegen->log('Changing column', $attribute->column, 'to BINARY(16) from', $column->getType(), $column->getSize(), 'in', $entity->table);
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` BINARY(16) NULL AFTER `$previous`;";
             }

@@ -2,5 +2,5 @@
 
 namespace <?= $this->getNamespace(); ?>\Controller;
 
-class <?= $entity->getClassName(); ?> extends Controller {
+class <?= $entity->class; ?> extends Controller {
 }

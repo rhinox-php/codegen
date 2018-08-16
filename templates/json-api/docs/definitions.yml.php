@@ -1,4 +1,4 @@
 <?php foreach ($entities as $entity): ?>
-<?= $entity->getClassName(); ?>:
+<?= $entity->class; ?>:
   $ref: ./definitions/<?= $entity->getFileName(); ?>.yml
 <?php endforeach; ?>

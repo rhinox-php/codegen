@@ -1,8 +1,8 @@
-CREATE TABLE IF NOT EXISTS <?= $relationship->getFrom()->getTableName(); ?>_<?= $relationship->getTo()->getTableName(); ?> (
-    <?= $relationship->getFrom()->getTableName(); ?>_id INT UNSIGNED NOT NULL,
-    <?= $relationship->getTo()->getTableName(); ?>_id INT UNSIGNED NOT NULL,
+CREATE TABLE IF NOT EXISTS <?= $relationship->getFrom()table; ?>_<?= $relationship->getTo()table; ?> (
+    <?= $relationship->getFrom()table; ?>_id INT UNSIGNED NOT NULL,
+    <?= $relationship->getTo()table; ?>_id INT UNSIGNED NOT NULL,
     created DATETIME NOT NULL,
-    UNIQUE uid (<?= $relationship->getFrom()->getTableName(); ?>_id, <?= $relationship->getTo()->getTableName(); ?>_id)
+    UNIQUE uid (<?= $relationship->getFrom()table; ?>_id, <?= $relationship->getTo()table; ?>_id)
 )
 ENGINE = InnoDB
 DEFAULT CHARSET = <?= $codegen->getDatabaseCharset(); ?>

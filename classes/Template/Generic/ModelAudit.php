@@ -9,8 +9,8 @@ class ModelAudit extends \Rhino\Codegen\Template\Generic
 
     public function generate()
     {
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('generic/classes/model-audit', 'src/classes/Model/Generated/Audit/' . $entity->getClassName() . '.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate('generic/classes/model-audit', 'src/classes/Model/Generated/Audit/' . $entity->class . '.php', [
                 'entity' => $entity,
             ]);
         }

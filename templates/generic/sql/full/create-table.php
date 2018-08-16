@@ -1,19 +1,19 @@
-DROP TABLE IF EXISTS `<?= $entity->getTableName(); ?>`;
-<?php if ($entity->hasAuthentication()): ?>
-DROP TABLE IF EXISTS `<?= $entity->getTableName(); ?>_sessions`;
+DROP TABLE IF EXISTS `<?= $entity->table; ?>`;
+<?php if ($entity->get('authentication')): ?>
+DROP TABLE IF EXISTS `<?= $entity->table; ?>_sessions`;
 <?php endif; ?>
 
-CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>` (
+CREATE TABLE IF NOT EXISTS `<?= $entity->table; ?>` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
-    `<?= $attribute->getColumnName(); ?>` INT NULL,
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-    `<?= $attribute->getColumnName(); ?>` TINYINT(1) UNSIGNED NULL,
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-    `<?= $attribute->getColumnName(); ?>` MEDIUMTEXT NULL,
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('int')): ?>
+    `<?= $attribute->column; ?>` INT NULL,
+<?php elseif ($attribute->is('bool')): ?>
+    `<?= $attribute->column; ?>` TINYINT(1) UNSIGNED NULL,
+<?php elseif ($attribute->is('text')): ?>
+    `<?= $attribute->column; ?>` MEDIUMTEXT NULL,
 <?php else: ?>
-    `<?= $attribute->getColumnName(); ?>` VARCHAR(255) NULL,
+    `<?= $attribute->column; ?>` VARCHAR(255) NULL,
 <?php endif; ?>
 <?php endforeach; ?>
     `created` DATETIME NOT NULL,
@@ -24,10 +24,10 @@ DEFAULT CHARSET = <?= $codegen->getDatabaseCharset(); ?>
 
 COLLATE = <?= $codegen->getDatabaseCollation(); ?>;
 
-<?php if ($entity->hasAuthentication()): ?>
-CREATE TABLE IF NOT EXISTS `<?= $entity->getTableName(); ?>_sessions` (
+<?php if ($entity->get('authentication')): ?>
+CREATE TABLE IF NOT EXISTS `<?= $entity->table; ?>_sessions` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `<?= $entity->getTableName(); ?>_id` INT UNSIGNED NOT NULL,
+    `<?= $entity->table; ?>_id` INT UNSIGNED NOT NULL,
     `token` VARCHAR(255) NOT NULL,
     `expire` DATETIME NOT NULL,
     `created` DATETIME NOT NULL,

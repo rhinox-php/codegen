@@ -2,5 +2,5 @@
 
 namespace <?= $this->getNamespace('controller-api-implemented'); ?>;
 
-class <?= $entity->getClassName(); ?>ApiController extends \<?= $this->getNamespace('controller-api-generated'); ?>\<?= $entity->getClassName(); ?>ApiController {
+class <?= $entity->class; ?>ApiController extends \<?= $this->getNamespace('controller-api-generated'); ?>\<?= $entity->class; ?>ApiController {
 }

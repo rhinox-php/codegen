@@ -2,31 +2,30 @@
 
 namespace <?= $this->getNamespace('model-generated'); ?>;
 
-class <?= $entity->getClassName(); ?> extends AbstractModel {
+class <?= $entity->class; ?> extends AbstractModel {
 
     protected $id;
 
     // Properties
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-    protected $<?= $attribute->getPropertyName(); ?>;
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+    protected $<?= $attribute->property; ?>;
 <?php endforeach; ?>
 
     protected $created;
     protected $updated;
 
     //Related entities
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    protected $<?= $relationship->getPluralPropertyName(); ?> = null;
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne || $relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
-    protected $<?= $relationship->getPropertyName(); ?> = null;
+<?php foreach ($entity->children('has-many', 'has-one', 'belongs-to') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+    protected $<?= $relationship->pluralProperty; ?> = null;
 <?php endif; ?>
+<?php if ($relationship->is('has-one', 'belongs-to')): ?>
+    protected $<?= $relationship->property; ?> = null;
 <?php endif; ?>
 <?php endforeach; ?>
 
     // Table name
-    protected static $table = '<?= $entity->getTableName(); ?>';
+    protected static $table = '<?= $entity->table; ?>';
 
     public function __construct() {
         throw new \Exception('Generated models should not be instantiated directly.');
@@ -34,27 +33,27 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     // Columns
     protected static $columns = '
-        `<?= $entity->getTableName(); ?>`.`id`,
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-        `<?= $entity->getTableName(); ?>`.`<?= $attribute->getColumnName(); ?>`,
+        `<?= $entity->table; ?>`.`id`,
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+        `<?= $entity->table; ?>`.`<?= $attribute->column; ?>`,
 <?php endforeach; ?>
-        `<?= $entity->getTableName(); ?>`.`created`,
-        `<?= $entity->getTableName(); ?>`.`updated`
+        `<?= $entity->table; ?>`.`created`,
+        `<?= $entity->table; ?>`.`updated`
     ';
 
     // Datatable
     public static function getDataTable() {
-        $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), '<?= $entity->getTableName(); ?>');
+        $table = new \Rhino\DataTable\MySqlDataTable(static::getPdo(), '<?= $entity->table; ?>');
         $table->insertColumn('actions', function($column, $row) {
             // @todo fix delete button, make post, confirm
             return '
-                <a href="/<?= $entity->getRouteName(); ?>/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
-                <a href="/<?= $entity->getRouteName(); ?>/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
+                <a href="/<?= $entity->route; ?>/edit/' . $row['id'] . '" class="btn btn-xs btn-default">Edit</a>
+                <a href="/<?= $entity->route; ?>/delete/' . $row['id'] . '" class="btn btn-xs btn-link text-danger">Delete</a>
             ';
         })->setLabel('Actions');
         $table->addColumn('id')->setLabel('ID');
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-        $table->addColumn('<?= $attribute->getColumnName(); ?>')->setLabel('<?= $attribute->getLabel(); ?>');
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+        $table->addColumn('<?= $attribute->column; ?>')->setLabel('<?= $attribute->label; ?>');
 <?php endforeach; ?>
         $table->addColumn('created')->setLabel('Created');
         $table->addColumn('updated')->setLabel('Updated');
@@ -63,7 +62,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     // Sync
     public static function sync(\DateTimeImmutable $since): \Generator {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE
@@ -78,15 +77,15 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
     public function jsonSerialize() {
         return [
             'id' => $this->getId(),
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->isType(['Bool'])): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->isType(['Date'])): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_FORMAT) : null,
-<?php elseif ($attribute->isType(['DateTime'])): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->get<?= $attribute->getMethodName(); ?>()->format(static::DATE_TIME_FORMAT) : null,
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text', 'int', 'decimal')): ?>
+            '<?= $attribute->property; ?>' => $this->get<?= $attribute->method; ?>(),
+<?php elseif ($attribute->is('bool')): ?>
+            '<?= $attribute->property; ?>' => $this->is<?= $attribute->method; ?>(),
+<?php elseif ($attribute->is('date')): ?>
+            '<?= $attribute->property; ?>' => $this->get<?= $attribute->method; ?>() ? $this->get<?= $attribute->method; ?>()->format(static::DATE_FORMAT) : null,
+<?php elseif ($attribute->is('date-time')): ?>
+            '<?= $attribute->property; ?>' => $this->get<?= $attribute->method; ?>() ? $this->get<?= $attribute->method; ?>()->format(static::DATE_TIME_FORMAT) : null,
 <?php endif; ?>
 <?php endforeach; ?>
             'created' => $this->getCreated() ? $this->getCreated()->format(static::DATE_TIME_FORMAT) : null,
@@ -100,15 +99,15 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         $this->setUpdated($date);
         $this->setCreated($date);
         $this->query('
-            INSERT INTO `<?= $entity->getTableName(); ?>` (
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-                `<?= $attribute->getColumnName(); ?>`,
+            INSERT INTO `<?= $entity->table; ?>` (
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+                `<?= $attribute->column; ?>`,
 <?php endforeach; ?>
                 `updated`,
                 `created`
             ) VALUES (
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-                :<?= $attribute->getColumnName(); ?>,
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+                :<?= $attribute->column; ?>,
 <?php endforeach; ?>
                 :updated,
                 :created
@@ -124,10 +123,10 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         $params = $this->getQueryParams();
         $params[':id'] = $this->getId();
         $this->query('
-            UPDATE `<?= $entity->getTableName(); ?>`
+            UPDATE `<?= $entity->table; ?>`
             SET
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-                `<?= $attribute->getColumnName(); ?>` = :<?= $attribute->getColumnName(); ?>,
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+                `<?= $attribute->column; ?>` = :<?= $attribute->column; ?>,
 <?php endforeach; ?>
                 `updated` = :updated,
                 `created` = :created
@@ -139,19 +138,19 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     protected function getQueryParams() {
        return [
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>(),
-<?php elseif ($attribute->isType(['Bool'])): ?>
-<?php if ($attribute->isNullable()): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->is<?= $attribute->getMethodName(); ?>() === null ? null : (int) $this->is<?= $attribute->getMethodName(); ?>(),
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text', 'int', 'decimal')): ?>
+            ':<?= $attribute->column; ?>' => $this->get<?= $attribute->method; ?>(),
+<?php elseif ($attribute->is('bool')): ?>
+<?php if ($attribute->nullable): ?>
+            ':<?= $attribute->column; ?>' => $this->is<?= $attribute->method; ?>() === null ? null : (int) $this->is<?= $attribute->method; ?>(),
 <?php else: ?>
-            ':<?= $attribute->getColumnName(); ?>' => (int) $this->is<?= $attribute->getMethodName(); ?>(),
+            ':<?= $attribute->column; ?>' => (int) $this->is<?= $attribute->method; ?>(),
 <?php endif; ?>
-<?php elseif ($attribute->isType(['Date'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDate($this->get<?= $attribute->getMethodName(); ?>()) : null,
-<?php elseif ($attribute->isType(['DateTime'])): ?>
-            ':<?= $attribute->getColumnName(); ?>' => $this->get<?= $attribute->getMethodName(); ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->getMethodName(); ?>()) : null,
+<?php elseif ($attribute->is('date')): ?>
+            ':<?= $attribute->column; ?>' => $this->get<?= $attribute->method; ?>() ? $this->formatMySqlDate($this->get<?= $attribute->method; ?>()) : null,
+<?php elseif ($attribute->is('date-time')): ?>
+            ':<?= $attribute->column; ?>' => $this->get<?= $attribute->method; ?>() ? $this->formatMySqlDateTime($this->get<?= $attribute->method; ?>()) : null,
 <?php endif; ?>
 <?php endforeach; ?>
 			':created' => $this->formatMySqlDateTime($this->getCreated()),
@@ -161,7 +160,7 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
 
     public function delete() {
         $this->query('
-            DELETE FROM `<?= $entity->getTableName(); ?>`
+            DELETE FROM `<?= $entity->table; ?>`
             WHERE `id` = :id;
         ', [
             ':id' => $this->getId(),
@@ -172,26 +171,26 @@ class <?= $entity->getClassName(); ?> extends AbstractModel {
         while (($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
             $entity = new static();
             $entity->id = $row['id'];
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text'])): ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
-<?php elseif ($attribute->isType(['Int'])): ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (int) $row['<?= $attribute->getColumnName(); ?>'] : null;
-<?php elseif ($attribute->isType(['Decimal'])): ?>
-$entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->getColumnName(); ?>']) ? (float) $row['<?= $attribute->getColumnName(); ?>'] : null;
-<?php elseif ($attribute->isType(['Bool'])): ?>
-<?php if ($attribute->isNullable()): ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text')): ?>
+            $entity-><?= $attribute->property; ?> = $row['<?= $attribute->column; ?>'] ?? null;
+<?php elseif ($attribute->is('int')): ?>
+            $entity-><?= $attribute->property; ?> = isset($row['<?= $attribute->column; ?>']) ? (int) $row['<?= $attribute->column; ?>'] : null;
+<?php elseif ($attribute->is('decimal')): ?>
+$entity-><?= $attribute->property; ?> = isset($row['<?= $attribute->column; ?>']) ? (float) $row['<?= $attribute->column; ?>'] : null;
+<?php elseif ($attribute->is('bool')): ?>
+<?php if ($attribute->nullable): ?>
+            $entity-><?= $attribute->property; ?> = $row['<?= $attribute->column; ?>'] ?? null;
 <?php else: ?>
-            $entity-><?= $attribute->getPropertyName(); ?> = $row['<?= $attribute->getColumnName(); ?>'] ?? null;
+            $entity-><?= $attribute->property; ?> = $row['<?= $attribute->column; ?>'] ?? null;
 <?php endif; ?>
-<?php elseif ($attribute->isType(['Date'])): ?>
-            if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
-                $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
+<?php elseif ($attribute->is('date')): ?>
+            if (isset($row['<?= $attribute->column; ?>'])) {
+                $entity-><?= $attribute->property; ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_FORMAT, $row['<?= $attribute->column; ?>'], new \DateTimezone('UTC'));
             }
-<?php elseif ($attribute->isType(['DateTime'])): ?>
-            if (isset($row['<?= $attribute->getColumnName(); ?>'])) {
-                $entity-><?= $attribute->getPropertyName(); ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['<?= $attribute->getColumnName(); ?>'], new \DateTimezone('UTC'));
+<?php elseif ($attribute->is('date-time')): ?>
+            if (isset($row['<?= $attribute->column; ?>'])) {
+                $entity-><?= $attribute->property; ?> = \DateTimeImmutable::createFromFormat(static::MYSQL_DATE_TIME_FORMAT, $row['<?= $attribute->column; ?>'], new \DateTimezone('UTC'));
             }
 <?php endif; ?>
 <?php endforeach; ?>
@@ -212,60 +211,59 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
     }
 
     protected function saveRelated() {
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-        $this->save<?= $relationship->getPluralClassName(); ?>();
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-        $this->save<?= $relationship->getClassName(); ?>();
+<?php foreach ($entity->children('has-many', 'has-one', 'belongs-to') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+        $this->save<?= $relationship->pluralMethod; ?>();
 <?php endif; ?>
+<?php if ($relationship->is('has-one')): ?>
+        $this->save<?= $relationship->method; ?>();
 <?php endif; ?>
 <?php endforeach; ?>
     }
 
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    protected function save<?= $relationship->getPluralClassName(); ?>() {
-        if ($this-><?= $relationship->getPluralPropertyName(); ?> !== null) {
-            if (empty($this-><?= $relationship->getPluralPropertyName(); ?>)) {
+<?php foreach ($entity->children('has-many', 'has-one', 'belongs-to') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+    protected function save<?= $relationship->pluralMethod; ?>() {
+        if ($this-><?= $relationship->pluralProperty; ?> !== null) {
+            if (empty($this-><?= $relationship->pluralProperty; ?>)) {
                 $this->query('
-                    DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
+                    DELETE FROM <?= $relationship->table; ?>
 
-                    WHERE <?= $relationship->getFrom()->getTableName(); ?>_id = ?;
+                    WHERE <?= $entity->table; ?>_id = ?;
                 ', [$this->getId()]);
             } else {
                 $deleteBindings = [];
-                foreach ($this-><?= $relationship->getPluralPropertyName(); ?> as $relatedEntity) {
-                    $relatedEntity->set<?= $relationship->getFrom()->getClassName(); ?>Id($this->getId());
+                foreach ($this-><?= $relationship->pluralProperty; ?> as $relatedEntity) {
+                    $relatedEntity->set<?= $entity->class; ?>Id($this->getId());
                     $relatedEntity->save();
                     $deleteBindings[] = $relatedEntity->getId();
                 }
                 $in = implode(', ', array_fill(0, count($deleteBindings), '?'));
                 $deleteBindings[] = $this->getId();
                 $this->query("
-                    DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
+                    DELETE FROM <?= $relationship->table; ?>
 
                     WHERE
                         id NOT IN ($in)
-                        AND <?= $relationship->getFrom()->getTableName(); ?>_id = ?;
+                        AND <?= $entity->table; ?>_id = ?;
                 ", $deleteBindings);
             }
         }
     }
 
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-    protected function save<?= $relationship->getClassName(); ?>() {
-        if ($this-><?= $relationship->getPropertyName(); ?> !== null) {
-            $relatedEntity = $this-><?= $relationship->getPropertyName(); ?>;
-            $relatedEntity->set<?= $relationship->getFrom()->getClassName(); ?>Id($this->getId());
+<?php endif; ?>
+<?php if ($relationship->is('has-one')): ?>
+    protected function save<?= $relationship->class; ?>() {
+        if ($this-><?= $relationship->property; ?> !== null) {
+            $relatedEntity = $this-><?= $relationship->property; ?>;
+            $relatedEntity->set<?= $entity->class; ?>Id($this->getId());
             $relatedEntity->save();
             $this->query("
-                DELETE FROM <?= $relationship->getTo()->getTableName(); ?>
+                DELETE FROM <?= $relationship->table; ?>
 
                 WHERE
                     id != ?
-                    AND <?= $relationship->getFrom()->getTableName(); ?>_id = ?;
+                    AND <?= $entity->table; ?>_id = ?;
             ", [
                 $relatedEntity->getId(),
                 $this->getId(),
@@ -274,16 +272,15 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
     }
 
 <?php endif; ?>
-<?php endif; ?>
 <?php endforeach; ?>
 
     // Find methods
 
     /**
-     * @return <?= $entity->getClassName(); ?> The instance matching the ID, or null.
+     * @return <?= $entity->class; ?> The instance matching the ID, or null.
      */
     public static function findById($id) {
-        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+        return static::fetch<?= $entity->class; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE id = :id;
@@ -291,115 +288,115 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
             ':id' => $id,
         ]));
     }
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text', 'int', 'decimal')): ?>
 
-    // Find by attribute <?= $attribute->getName(); ?>
+    // Find by attribute <?= $attribute->name; ?>
 
-    public static function findBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+    public static function findBy<?= $attribute->method; ?>($value) {
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
-            WHERE `<?= $attribute->getColumnName(); ?>` = :value;
+            WHERE `<?= $attribute->column; ?>` = :value;
         ', [
             ':value' => $value,
         ]));
     }
 
     /**
-     * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
+     * Find the first instance matching the supplied <?= $attribute->name; ?> or
      * `null` if there was no results.
      *
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>|null
      */
-    public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+    public static function findFirstBy<?= $attribute->method; ?>($value) {
+        return static::fetch<?= $entity->class; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
-            WHERE `<?= $attribute->getColumnName(); ?>` = :value
+            WHERE `<?= $attribute->column; ?>` = :value
             LIMIT 1;
         ', [
             ':value' => $value,
         ]));
     }
 
-    public static function countBy<?= $attribute->getMethodName(); ?>($value) {
+    public static function countBy<?= $attribute->method; ?>($value) {
         return (int) static::query('
             SELECT COUNT(`id`)
             FROM `' . static::$table . '`
-            WHERE `<?= $attribute->getColumnName(); ?>` = :value;
+            WHERE `<?= $attribute->column; ?>` = :value;
         ', [
             ':value' => $value,
         ])->fetchColumn();
     }
 <?php endif; ?>
-<?php if ($attribute->isType(['Bool'])): ?>
+<?php if ($attribute->is('bool')): ?>
 
-    // Find by attribute <?= $attribute->getName(); ?>
+    // Find by attribute <?= $attribute->name; ?>
 
-    public static function findBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+    public static function findBy<?= $attribute->method; ?>($value) {
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE
-                <?= $attribute->getColumnName(); ?> = :value
-                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
+                <?= $attribute->column; ?> = :value
+                OR (:value = 0 AND <?= $attribute->column; ?> IS NULL);
         ', [
             ':value' => $value ? 1 : 0,
         ]));
     }
 
     /**
-     * Find the first instance matching the supplied <?= $attribute->getName(); ?> or
+     * Find the first instance matching the supplied <?= $attribute->name; ?> or
      * `null` if there was no results.
      *
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>|null
      */
-    public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::fetch<?= $entity->getClassName(); ?>(static::query('
+    public static function findFirstBy<?= $attribute->method; ?>($value) {
+        return static::fetch<?= $entity->class; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE
-                <?= $attribute->getColumnName(); ?> = :value
-                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL)
+                <?= $attribute->column; ?> = :value
+                OR (:value = 0 AND <?= $attribute->column; ?> IS NULL)
             LIMIT 1;
         ', [
             ':value' => $value,
         ]));
     }
 
-    public static function countBy<?= $attribute->getMethodName(); ?>($value) {
+    public static function countBy<?= $attribute->method; ?>($value) {
         return (int) static::query('
             SELECT COUNT(id)
             FROM `' . static::$table . '`
             WHERE
-                <?= $attribute->getColumnName(); ?> = :value
-                OR (:value = 0 AND <?= $attribute->getColumnName(); ?> IS NULL);
+                <?= $attribute->column; ?> = :value
+                OR (:value = 0 AND <?= $attribute->column; ?> IS NULL);
         ', [
             ':value' => $value,
         ])->fetchColumn();
     }
 <?php endif; ?>
-<?php if ($attribute->isType(['Date', 'DateTime'])): ?>
+<?php if ($attribute->is('date', 'date-time')): ?>
 
-    public static function findBy<?= $attribute->getMethodName(); ?>Before($value) {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+    public static function findBy<?= $attribute->method; ?>Before($value) {
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE
-                <?= $attribute->getColumnName(); ?> < :value
-                OR <?= $attribute->getColumnName(); ?> IS NULL
+                <?= $attribute->column; ?> < :value
+                OR <?= $attribute->column; ?> IS NULL
         ', [
             ':value' => static::formatMySqlDateTime($value),
         ]));
     }
 
-    public static function findBy<?= $attribute->getMethodName(); ?>After($value) {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+    public static function findBy<?= $attribute->method; ?>After($value) {
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`
             WHERE
-                <?= $attribute->getColumnName(); ?> > :value
+                <?= $attribute->column; ?> > :value
         ', [
             ':value' => static::formatMySqlDateTime($value),
         ]));
@@ -413,10 +410,10 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
      * WARNING: It is not advisable to use this method on tables with many rows
      * as it will likely be quite slow.
      *
-     * @return Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[]
+     * @return Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>[]
      */
     public static function iterateAll(): \Generator {
-        return static::fetch<?= $entity->getPluralClassName(); ?>(static::query('
+        return static::fetch<?= $entity->pluralClass; ?>(static::query('
             SELECT ' . static::$columns . '
             FROM `' . static::$table . '`;
         '));
@@ -440,19 +437,19 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
      * WARNING: This method can quickly cause a out of memory error if there are
      * many rows in the database.
      *
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[]
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>[]
      */
     public static function getAll() {
         return iterator_to_array(static::iterateAll());
     }
 
     /**
-     * Fetch a single instance of <?= $entity->getClassName(); ?> from a PDO result,
+     * Fetch a single instance of <?= $entity->class; ?> from a PDO result,
      * or `null` if there was no results.
      *
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>|null
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>|null
      */
-    protected static function fetch<?= $entity->getClassName(); ?>(\PDOStatement $result) {
+    protected static function fetch<?= $entity->class; ?>(\PDOStatement $result) {
         foreach (static::hydrateFromPdoStatement($result) as $entity) {
             return $entity;
         }
@@ -460,96 +457,95 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
     }
 
     /**
-     * Yield multiple instances of <?= $entity->getClassName(); ?> from a PDO result.
+     * Yield multiple instances of <?= $entity->class; ?> from a PDO result.
      *
-     * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[]
+     * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>[]
      */
-    protected static function fetch<?= $entity->getPluralClassName(); ?>(\PDOStatement $result): \Generator {
+    protected static function fetch<?= $entity->pluralClass; ?>(\PDOStatement $result): \Generator {
         return static::hydrateFromPdoStatement($result);
     }
 
     // Fetch relationships
-<?php foreach ($entity->getRelationships() as $relationship): ?>
-<?php if ($entity == $relationship->getFrom()): ?>
-<?php if ($relationship instanceof \Rhino\Codegen\Relationship\HasMany): ?>
-    // Fetch has many <?= $relationship->getTo()->getName(); ?> relationships as <?= $relationship->getClassName(); ?>
+<?php foreach ($entity->children('has-many', 'has-one', 'belongs-to') as $relationship): ?>
+<?php if ($relationship->is('has-many')): ?>
+    // Fetch has many <?= $relationship->entity; ?> relationships as <?= $relationship->method; ?>
 
     /**
-     * Yields all related <?= $relationship->getTo()->getClassName(); ?>.
+     * Yields all related <?= $relationship->class; ?>.
      *
-     * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     * @return \Generator|\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>[]
      */
-    public function fetch<?= $relationship->getPluralMethodName(); ?>(): \Generator {
-        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findBy<?= $entity->getClassName(); ?>Id($this->getId());
+    public function fetch<?= $relationship->pluralMethod; ?>(): \Generator {
+        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>::findBy<?= $entity->class; ?>Id($this->getId());
     }
 
     /**
-     * Returns an array of all related <?= $relationship->getTo()->getClassName(); ?>,
+     * Returns an array of all related <?= $relationship->class; ?>,
      * and caches the fetch call into a property.
      *
-     * @return <?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]
+     * @return <?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>[]
      */
-    public function get<?= $relationship->getPluralMethodName(); ?>() {
-        if ($this-><?= $relationship->getPluralPropertyName(); ?> === null) {
-            $this-><?= $relationship->getPluralPropertyName(); ?> = iterator_to_array($this->fetch<?= $relationship->getPluralMethodName(); ?>());
+    public function get<?= $relationship->pluralMethod; ?>() {
+        if ($this-><?= $relationship->pluralProperty; ?> === null) {
+            $this-><?= $relationship->pluralProperty; ?> = iterator_to_array($this->fetch<?= $relationship->pluralMethod; ?>());
         }
-        return $this-><?= $relationship->getPluralPropertyName(); ?>;
+        return $this-><?= $relationship->pluralProperty; ?>;
     }
 
-    public function set<?= $relationship->getPluralMethodName(); ?>(array $entities) {
-        $this-><?= $relationship->getPluralPropertyName(); ?> = $entities;
+    public function set<?= $relationship->pluralMethod; ?>(array $entities) {
+        $this-><?= $relationship->pluralProperty; ?> = $entities;
         return $this;
     }
 
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\HasOne): ?>
-    // Fetch has one <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
+<?php endif; ?>
+<?php if ($relationship->is('has-one')): ?>
+    // Fetch has one <?= $relationship->name; ?> relationship as <?= $relationship->class; ?>
 
-    public function fetch<?= $relationship->getMethodName(); ?>() {
-        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findFirstBy<?= $entity->getClassName(); ?>Id($this->getId());
+    public function fetch<?= $relationship->method; ?>() {
+        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>::findFirstBy<?= $entity->class; ?>Id($this->getId());
     }
 
-    public function get<?= $relationship->getMethodName(); ?>() {
-        if (!$this-><?= $relationship->getPropertyName(); ?>) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getMethodName(); ?>();
+    public function get<?= $relationship->method; ?>() {
+        if (!$this-><?= $relationship->property; ?>) {
+            $this-><?= $relationship->property; ?> = $this->fetch<?= $relationship->method; ?>();
         }
-        return $this-><?= $relationship->getPropertyName(); ?>;
+        return $this-><?= $relationship->property; ?>;
     }
 
-    public function has<?= $relationship->getMethodName(); ?>() {
-        return $this->get<?= $relationship->getMethodName(); ?>() ? true : false;
+    public function has<?= $relationship->method; ?>() {
+        return $this->get<?= $relationship->method; ?>() ? true : false;
     }
 
-    public function set<?= $relationship->getMethodName(); ?>($entity) {
-        $this-><?= $relationship->getPropertyName(); ?> = $entity;
+    public function set<?= $relationship->method; ?>($entity) {
+        $this-><?= $relationship->property; ?> = $entity;
         return $this;
     }
 
-<?php elseif ($relationship instanceof \Rhino\Codegen\Relationship\BelongsTo): ?>
-    // Fetch belongs to <?= $relationship->getTo()->getName(); ?> relationship as <?= $relationship->getClassName(); ?>
+<?php endif; ?>
+<?php if ($relationship->is('belongs-to')): ?>
+    // Fetch belongs to <?= $relationship->entity; ?> relationship as <?= $relationship->method; ?>
 
-    public function fetch<?= $relationship->getClassName(); ?>() {
-        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::findById($this->get<?= $relationship->getClassName(); ?>Id());
+    public function fetch<?= $relationship->method; ?>() {
+        return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>::findById($this->get<?= $relationship->method; ?>Id());
     }
 
-    public function get<?= $relationship->getClassName(); ?>() {
-        if (!$this-><?= $relationship->getPropertyName(); ?>) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this->fetch<?= $relationship->getClassName(); ?>();
+    public function get<?= $relationship->method; ?>() {
+        if (!$this-><?= $relationship->property; ?>) {
+            $this-><?= $relationship->property; ?> = $this->fetch<?= $relationship->method; ?>();
         }
-        return $this-><?= $relationship->getPropertyName(); ?>;
+        return $this-><?= $relationship->property; ?>;
     }
 
-    public function has<?= $relationship->getClassName(); ?>() {
-        if (!$this->get<?= $relationship->getClassName(); ?>Id()) {
+    public function has<?= $relationship->method; ?>() {
+        if (!$this->get<?= $relationship->method; ?>Id()) {
             return false;
         }
-        return $this->fetch<?= $relationship->getClassName(); ?>() ? true : false;
+        return $this->fetch<?= $relationship->method; ?>() ? true : false;
     }
 
 <?php endif; ?>
-<?php else: ?>
-<?php endif; ?>
 <?php endforeach; ?>
-<?php if ($entity->hasAuthentication()): ?>
+<?php if ($entity->get('authentication')): ?>
 
     // Authentication methods
     public function hashPassword($password) {
@@ -580,7 +576,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
     public function login(\DateTimeInterface $expire) {
         try {
             $this->query('
-                DELETE FROM <?= $entity->getTableName(); ?>_sessions
+                DELETE FROM <?= $entity->table; ?>_sessions
                 WHERE expire < UTC_TIMESTAMP();
             ');
         } catch (\Exception $exception) {
@@ -589,8 +585,8 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
 
         $token = base64_encode(openssl_random_pseudo_bytes(128));
         $this->query('
-            INSERT INTO <?= $entity->getTableName(); ?>_sessions (
-                <?= $entity->getTableName(); ?>_id,
+            INSERT INTO <?= $entity->table; ?>_sessions (
+                <?= $entity->table; ?>_id,
                 token,
                 expire,
                 created
@@ -610,8 +606,8 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
 
     public static function resume($token, \DateTimeInterface $expire) {
         $result = static::query('
-            SELECT <?= $entity->getTableName(); ?>_id
-            FROM <?= $entity->getTableName(); ?>_sessions
+            SELECT <?= $entity->table; ?>_id
+            FROM <?= $entity->table; ?>_sessions
             WHERE
                 token = :token
                 AND expire > :time
@@ -624,7 +620,7 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
         if ($entityId) {
             try {
                 static::query('
-                    UPDATE <?= $entity->getTableName(); ?>_sessions
+                    UPDATE <?= $entity->table; ?>_sessions
                     SET expire = :expire
                     WHERE token = :token;
                 ', [
@@ -640,8 +636,8 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
 
     public function logout() {
         $this->query('
-            DELETE FROM <?= $entity->getTableName(); ?>_sessions
-            WHERE <?= $entity->getTableName(); ?>_id = :id;
+            DELETE FROM <?= $entity->table; ?>_sessions
+            WHERE <?= $entity->table; ?>_id = :id;
         ', [
             ':id' => $this->getId(),
         ]);
@@ -650,40 +646,40 @@ $entity-><?= $attribute->getPropertyName(); ?> = isset($row['<?= $attribute->get
 <?php endif; ?>
 
     // Attribute accessors
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text', 'Int', 'Decimal'])): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text', 'int', 'decimal')): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+    public function get<?= $attribute->method; ?>() {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value) {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value) {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
-<?php elseif ($attribute->isType(['Bool'])): ?>
+<?php elseif ($attribute->is('bool')): ?>
 
-    public function is<?= $attribute->getMethodName(); ?>() {
-<?php if ($attribute->isNullable()): ?>
-        if ($this-><?= $attribute->getPropertyName(); ?> === null) {
+    public function is<?= $attribute->method; ?>() {
+<?php if ($attribute->nullable): ?>
+        if ($this-><?= $attribute->property; ?> === null) {
             return null;
         }
 <?php endif; ?>
-        return $this-><?= $attribute->getPropertyName(); ?> ? true : false;
+        return $this-><?= $attribute->property; ?> ? true : false;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(bool $value) {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(bool $value) {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
-<?php elseif ($attribute->isType(['Date', 'DateTime'])): ?>
+<?php elseif ($attribute->is('date', 'date-time')): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>() {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+    public function get<?= $attribute->method; ?>() {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(\DateTimeInterface $value = null) {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(\DateTimeInterface $value = null) {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 <?php endif; ?>

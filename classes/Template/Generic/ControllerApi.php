@@ -16,8 +16,8 @@ class ControllerApi extends Controller
         ]);
 
         $this->renderTemplate('generic/classes/controller-api-abstract', 'src/classes/Controller/Api/Generated/AbstractController.php');
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('generic/classes/controller-api', 'src/classes/Controller/Api/Generated/' . $entity->getClassName() . 'ApiController.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate('generic/classes/controller-api', 'src/classes/Controller/Api/Generated/' . $entity->class . 'ApiController.php', [
                 'entity' => $entity,
             ]);
         }
@@ -25,12 +25,12 @@ class ControllerApi extends Controller
 
     public function iterateRoutes()
     {
-        foreach ($this->codegen->getEntities() as $entity) {
-            yield ['get', '/api/v1/' . $entity->getRouteName() . '/index', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'index'];
-            yield ['get', '/api/v1/' . $entity->getRouteName() . '/get/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'get'];
-            yield ['post', '/api/v1/' . $entity->getRouteName() . '/create', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'create'];
-            yield ['post', '/api/v1/' . $entity->getRouteName() . '/update/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'update'];
-            yield ['post', '/api/v1/' . $entity->getRouteName() . '/delete/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->getClassName() . 'ApiController', 'delete'];
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            yield ['get', '/api/v1/' . $entity->route . '/index', $this->getNamespace('controller-api-implemented') . '\\' . $entity->class . 'ApiController', 'index'];
+            yield ['get', '/api/v1/' . $entity->route . '/get/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->class . 'ApiController', 'get'];
+            yield ['post', '/api/v1/' . $entity->route . '/create', $this->getNamespace('controller-api-implemented') . '\\' . $entity->class . 'ApiController', 'create'];
+            yield ['post', '/api/v1/' . $entity->route . '/update/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->class . 'ApiController', 'update'];
+            yield ['post', '/api/v1/' . $entity->route . '/delete/{id}', $this->getNamespace('controller-api-implemented') . '\\' . $entity->class . 'ApiController', 'delete'];
         }
     }
 }

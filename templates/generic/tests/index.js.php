@@ -1,5 +1,5 @@
 <?php foreach ($entities as $entity): ?>
-// <?= $entity->getName(); ?>
+// <?= $entity->name; ?>
 
 require('./api/<?= $entity->getFileName(); ?>.js');
 

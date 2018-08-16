@@ -10,7 +10,7 @@ class Controller extends \Rhino\Codegen\Template\Template
     public function generate()
     {
         $this->renderTemplate('sync/controller', 'src/classes/Controller/Sync/SyncController.php', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
     }
 

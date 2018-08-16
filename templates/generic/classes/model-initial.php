@@ -2,7 +2,7 @@
 
 namespace <?= $this->getNamespace('model-implemented'); ?>;
 
-class <?= $entity->getClassName(); ?> extends \<?= $this->getNamespace('model-generated'); ?>\<?= $entity->getClassName(); ?> {
+class <?= $entity->class; ?> extends \<?= $this->getNamespace('model-generated'); ?>\<?= $entity->class; ?> {
     public function __construct() {
     }
 }

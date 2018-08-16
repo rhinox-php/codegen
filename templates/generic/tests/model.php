@@ -1,147 +1,147 @@
 <?= '<?php'; ?>
 
 namespace <?= $this->getNamespace('test-model'); ?>;
-use <?= $this->getNamespace('model-generated'); ?>\<?= $entity->getClassName(); ?>;
+use <?= $this->getNamespace('model-generated'); ?>\<?= $entity->class; ?>;
 
-class <?= $entity->getClassName(); ?>Test extends <?= $this->getTestBaseClass(); ?> {
+class <?= $entity->class; ?>Test extends <?= $this->getTestBaseClass(); ?> {
     public function testConstructor(): void {
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $<?= $entity->getPropertyName(); ?>);
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $this->assertInstanceOf(<?= $entity->class; ?>::class, $<?= $entity->property; ?>);
     }
 
     public function testCreateAndFetch(): void {
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $<?= $entity->property; ?>->save();
 
-        $id = $<?= $entity->getPropertyName(); ?>->getId();
+        $id = $<?= $entity->property; ?>->getId();
         $this->assertNotNull($id);
-        $fetched = <?= $entity->getClassName(); ?>::findById($id);
-        $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $fetched);
+        $fetched = <?= $entity->class; ?>::findById($id);
+        $this->assertInstanceOf(<?= $entity->class; ?>::class, $fetched);
         $fetched->delete();
 
-        $deleted = <?= $entity->getClassName(); ?>::findById($id);
+        $deleted = <?= $entity->class; ?>::findById($id);
         $this->assertNull($deleted);
     }
 
     public function testIterateAndCount(): void {
         $count = 0;
-        foreach (<?= $entity->getClassName(); ?>::getAll() as $instance) {
-            $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $instance);
+        foreach (<?= $entity->class; ?>::getAll() as $instance) {
+            $this->assertInstanceOf(<?= $entity->class; ?>::class, $instance);
             $count++;
         }
-        $this->assertSame($count, <?= $entity->getClassName(); ?>::countAll());
+        $this->assertSame($count, <?= $entity->class; ?>::countAll());
     }
 
     public function testJsonSerialize(): void {
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $json = json_encode($<?= $entity->getPropertyName(); ?>);
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $json = json_encode($<?= $entity->property; ?>);
         $object = json_decode($json);
         $this->assertTrue(json_last_error() === JSON_ERROR_NONE);
     }
 
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-    public function testGetSet<?= $attribute->getMethodName(); ?>() {
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+    public function testGetSet<?= $attribute->method; ?>() {
         // Create
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $this->assertNull($<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $this->assertNull($<?= $entity->property; ?>->get<?= $attribute->method; ?>());
 
-        $<?= $attribute->getPropertyName(); ?> = <?= $this->generateTestAttribute($attribute); ?>;
+        $<?= $attribute->property; ?> = <?= $this->generateTestAttribute($attribute); ?>;
 
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
-        $this->assertSame($<?= $attribute->getPropertyName(); ?>, $<?= $entity->getPropertyName(); ?>->get<?= $attribute->getMethodName(); ?>());
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($<?= $attribute->property; ?>);
+        $this->assertSame($<?= $attribute->property; ?>, $<?= $entity->property; ?>->get<?= $attribute->method; ?>());
+        $<?= $entity->property; ?>->save();
 
         // Update
-        $<?= $attribute->getPropertyName(); ?> = <?= $this->generateTestAttribute($attribute); ?>;
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $attribute->property; ?> = <?= $this->generateTestAttribute($attribute); ?>;
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($<?= $attribute->property; ?>);
+        $<?= $entity->property; ?>->save();
 
-        $id = $<?= $entity->getPropertyName(); ?>->getId();
+        $id = $<?= $entity->property; ?>->getId();
         $this->assertNotNull($id);
 
-        $fetched = <?= $entity->getClassName(); ?>::findFirstBy<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>);
-        $this->assertNotNull($fetched, 'Could not find <?= $entity->getClassName(); ?> with <?= $attribute->getLabel(); ?> equal to ' . $<?= $attribute->getPropertyName(); ?>);
-        $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $fetched);
+        $fetched = <?= $entity->class; ?>::findFirstBy<?= $attribute->method; ?>($<?= $attribute->property; ?>);
+        $this->assertNotNull($fetched, 'Could not find <?= $entity->class; ?> with <?= $attribute->label; ?> equal to ' . $<?= $attribute->property; ?>);
+        $this->assertInstanceOf(<?= $entity->class; ?>::class, $fetched);
         $this->assertSame($id, $fetched->getId());
-        $this->assertSame($<?= $attribute->getPropertyName(); ?>, $fetched->get<?= $attribute->getMethodName(); ?>());
+        $this->assertSame($<?= $attribute->property; ?>, $fetched->get<?= $attribute->method; ?>());
 
         $count = 0;
-        foreach (<?= $entity->getClassName(); ?>::findBy<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>) as $instance) {
-            $this->assertInstanceOf(<?= $entity->getClassName(); ?>::class, $instance);
+        foreach (<?= $entity->class; ?>::findBy<?= $attribute->method; ?>($<?= $attribute->property; ?>) as $instance) {
+            $this->assertInstanceOf(<?= $entity->class; ?>::class, $instance);
             $count++;
         }
-        $this->assertSame($count, <?= $entity->getClassName(); ?>::countBy<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>));
+        $this->assertSame($count, <?= $entity->class; ?>::countBy<?= $attribute->method; ?>($<?= $attribute->property; ?>));
     }
 
 <?php endforeach; ?>
 <?php foreach ($entity->iterateRelationshipsByType(['BelongsTo']) as $relationship): ?>
 
-    public function test<?= $relationship->getMethodName(); ?>Relationship(): void {
-        $<?= $relationship->getTo()->getPropertyName(); ?> = new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>();
-        $<?= $relationship->getTo()->getPropertyName(); ?>->save();
+    public function test<?= $relationship->method; ?>Relationship(): void {
+        $<?= $relationship->getTo()->property; ?> = new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->class; ?>();
+        $<?= $relationship->getTo()->property; ?>->save();
 
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $this->assertFalse($<?= $entity->getPropertyName(); ?>->has<?= $relationship->getMethodName(); ?>());
-        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getMethodName(); ?>Id($<?= $relationship->getTo()->getPropertyName(); ?>->getId());
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $this->assertFalse($<?= $entity->property; ?>->has<?= $relationship->method; ?>());
+        $<?= $entity->property; ?>->set<?= $relationship->method; ?>Id($<?= $relationship->getTo()->property; ?>->getId());
+        $<?= $entity->property; ?>->save();
 
-        $found = <?= $entity->getClassName(); ?>::findFirstBy<?= $relationship->getMethodName(); ?>Id($<?= $relationship->getTo()->getPropertyName(); ?>->getId());
+        $found = <?= $entity->class; ?>::findFirstBy<?= $relationship->method; ?>Id($<?= $relationship->getTo()->property; ?>->getId());
         $this->assertNotNull($found);
-        $this->assertSame($<?= $entity->getPropertyName(); ?>->getId(), $found->getId());
+        $this->assertSame($<?= $entity->property; ?>->getId(), $found->getId());
 
         $count = 0;
-        foreach (<?= $entity->getClassName(); ?>::findBy<?= $relationship->getMethodName(); ?>Id($<?= $relationship->getTo()->getPropertyName(); ?>->getId()) as $instance) {
+        foreach (<?= $entity->class; ?>::findBy<?= $relationship->method; ?>Id($<?= $relationship->getTo()->property; ?>->getId()) as $instance) {
             $count++;
         }
         $this->assertSame($count, 1);
-        $this->assertSame($count, <?= $entity->getClassName(); ?>::countBy<?= $relationship->getMethodName(); ?>Id($<?= $relationship->getTo()->getPropertyName(); ?>->getId()));
+        $this->assertSame($count, <?= $entity->class; ?>::countBy<?= $relationship->method; ?>Id($<?= $relationship->getTo()->property; ?>->getId()));
 
-        $this->assertInstanceOf(\<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>::class, $<?= $entity->getPropertyName(); ?>->get<?= $relationship->getMethodName(); ?>());
-        $this->assertTrue($<?= $entity->getPropertyName(); ?>->has<?= $relationship->getMethodName(); ?>());
+        $this->assertInstanceOf(\<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->class; ?>::class, $<?= $entity->property; ?>->get<?= $relationship->method; ?>());
+        $this->assertTrue($<?= $entity->property; ?>->has<?= $relationship->method; ?>());
 
-        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getMethodName(); ?>Id(null);
-        $<?= $entity->getPropertyName(); ?>->save();
-        $this->assertFalse($<?= $entity->getPropertyName(); ?>->has<?= $relationship->getMethodName(); ?>());
+        $<?= $entity->property; ?>->set<?= $relationship->method; ?>Id(null);
+        $<?= $entity->property; ?>->save();
+        $this->assertFalse($<?= $entity->property; ?>->has<?= $relationship->method; ?>());
     }
 
 <?php endforeach; ?>
 <?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
 
-    public function test<?= $relationship->getMethodName(); ?>Relationship(): void {
-        $<?= $relationship->getTo()->getPluralPropertyName(); ?> = [
-            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>(),
-            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->getClassName(); ?>(),
+    public function test<?= $relationship->method; ?>Relationship(): void {
+        $<?= $relationship->getTo()->pluralProperty; ?> = [
+            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->class; ?>(),
+            new \<?= $this->getNamespace('model-generated'); ?>\<?= $relationship->getTo()->class; ?>(),
         ];
 
-        $<?= $entity->getPropertyName(); ?> = new <?= $entity->getClassName(); ?>();
-        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>($<?= $relationship->getTo()->getPluralPropertyName(); ?>);
-        $<?= $entity->getPropertyName(); ?>->save();
+        $<?= $entity->property; ?> = new <?= $entity->class; ?>();
+        $<?= $entity->property; ?>->set<?= $relationship->pluralMethod; ?>($<?= $relationship->getTo()->pluralProperty; ?>);
+        $<?= $entity->property; ?>->save();
 
-        $id = $<?= $entity->getPropertyName(); ?>->getId();
-        $<?= $entity->getPropertyName(); ?> = <?= $entity->getClassName(); ?>::findById($id);
+        $id = $<?= $entity->property; ?>->getId();
+        $<?= $entity->property; ?> = <?= $entity->class; ?>::findById($id);
 
         $count = 0;
-        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+        foreach ($<?= $entity->property; ?>->get<?= $relationship->pluralMethod; ?>() as $related) {
             $count++;
         }
-        $this->assertSame(count($<?= $relationship->getTo()->getPluralPropertyName(); ?>), $count);
+        $this->assertSame(count($<?= $relationship->getTo()->pluralProperty; ?>), $count);
 
-        unset($<?= $relationship->getTo()->getPluralPropertyName(); ?>[1]);
-        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>($<?= $relationship->getTo()->getPluralPropertyName(); ?>);
-        $<?= $entity->getPropertyName(); ?>->save();
+        unset($<?= $relationship->getTo()->pluralProperty; ?>[1]);
+        $<?= $entity->property; ?>->set<?= $relationship->pluralMethod; ?>($<?= $relationship->getTo()->pluralProperty; ?>);
+        $<?= $entity->property; ?>->save();
 
         $count = 0;
-        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+        foreach ($<?= $entity->property; ?>->get<?= $relationship->pluralMethod; ?>() as $related) {
             $count++;
         }
-        $this->assertSame(count($<?= $relationship->getTo()->getPluralPropertyName(); ?>), $count);
+        $this->assertSame(count($<?= $relationship->getTo()->pluralProperty; ?>), $count);
 
-        unset($<?= $relationship->getTo()->getPluralPropertyName(); ?>[1]);
-        $<?= $entity->getPropertyName(); ?>->set<?= $relationship->getPluralMethodName(); ?>([]);
-        $<?= $entity->getPropertyName(); ?>->save();
+        unset($<?= $relationship->getTo()->pluralProperty; ?>[1]);
+        $<?= $entity->property; ?>->set<?= $relationship->pluralMethod; ?>([]);
+        $<?= $entity->property; ?>->save();
 
         $count = 0;
-        foreach ($<?= $entity->getPropertyName(); ?>->get<?= $relationship->getPluralMethodName(); ?>() as $related) {
+        foreach ($<?= $entity->property; ?>->get<?= $relationship->pluralMethod; ?>() as $related) {
             $count++;
         }
         $this->assertSame(0, $count);

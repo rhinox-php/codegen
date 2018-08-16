@@ -1,9 +1,9 @@
 <?= '<?php'; ?>
 
 namespace <?= $this->getNamespace('controller-generated'); ?>;
-use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>;
+use <?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>;
 
-class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace('controller-implemented'); ?>\AbstractController {
+class <?= $entity->class; ?>Controller extends \<?= $this->getNamespace('controller-implemented'); ?>\AbstractController {
 
     public function index() {
         $dataTable = $this->getDataTable();
@@ -16,11 +16,11 @@ class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace
     }
 
     public function create() {
-        $this->form(new <?= $entity->getClassName(); ?>());
+        $this->form(new <?= $entity->class; ?>());
     }
 
     public function edit($id) {
-        $entity = <?= $entity->getClassName(); ?>::findById($id);
+        $entity = <?= $entity->class; ?>::findById($id);
         if (!$entity) {
             $this->response->notFound();
             return;
@@ -28,12 +28,12 @@ class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace
         $this->form($entity);
     }
 
-    protected function form(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>) {
+    protected function form(<?= $entity->class; ?> $<?= $entity->property; ?>) {
         if ($this->hasInput()) {
-            $this->processInput($<?= $entity->getPropertyName(); ?>);
-            if ($this->validate($<?= $entity->getPropertyName(); ?>)) {
-                $<?= $entity->getPropertyName(); ?>->save();
-                $this->response->redirect('/<?= $entity->getRouteName(); ?>/edit/' . $<?= $entity->getPropertyName(); ?>->getId());
+            $this->processInput($<?= $entity->property; ?>);
+            if ($this->validate($<?= $entity->property; ?>)) {
+                $<?= $entity->property; ?>->save();
+                $this->response->redirect('/<?= $entity->route; ?>/edit/' . $<?= $entity->property; ?>->getId());
                 return;
             }
         }
@@ -44,20 +44,20 @@ class <?= $entity->getClassName(); ?>Controller extends \<?= $this->getNamespace
     }
 
     protected function getDataTable(): \Rhino\DataTable\DataTable {
-        return <?= $entity->getClassName(); ?>::getDataTable();
+        return <?= $entity->class; ?>::getDataTable();
     }
 
-    protected function processInput(<?= $entity->getClassName(); ?> $<?= $entity->getPropertyName(); ?>): void {
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->string('<?= $attribute->getPropertyName(); ?>'));
+    protected function processInput(<?= $entity->class; ?> $<?= $entity->property; ?>): void {
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string')
+    || $attribute->is('text')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->string('<?= $attribute->property; ?>'));
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->getPropertyName(); ?>')));
+<?php if ($attribute->is('date')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>(new \DateTimeImmutable($this->input->dateTime('<?= $attribute->property; ?>')));
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-        $<?= $entity->getPropertyName(); ?>->set<?= $attribute->getMethodName(); ?>($this->input->bool('<?= $attribute->getPropertyName(); ?>') ? true : false);
+<?php if ($attribute->is('bool')): ?>
+        $<?= $entity->property; ?>->set<?= $attribute->method; ?>($this->input->bool('<?= $attribute->property; ?>') ? true : false);
 <?php endif; ?>
 <?php endforeach; ?>
     }

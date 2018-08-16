@@ -10,8 +10,8 @@ class ModelGenerated extends \Rhino\Codegen\Template\Generic
             'url' => 'git@bitbucket.org:rhino-php/rhino-data-table',
         ]);
         $this->codegen->composer->addDependency('rhinox/data-table', 'dev-master');
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('generic/classes/model-generated', 'src/classes/Model/Generated/' . $entity->getClassName() . '.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate('generic/classes/model-generated', 'src/classes/Model/Generated/' . $entity->class . '.php', [
                 'entity' => $entity,
             ]);
         }

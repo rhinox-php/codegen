@@ -14,10 +14,10 @@ class SwaggerYamlInitial extends \Rhino\Codegen\Template\Template
         $this->renderTemplate('json-api/docs/api.yml', 'docs/api.yml', [
         ]);
         $this->renderTemplate('json-api/docs/definitions.yml', 'docs/definitions.yml', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
         $this->renderTemplate('json-api/docs/paths.yml', 'docs/paths.yml', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
     }
 }

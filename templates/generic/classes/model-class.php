@@ -2,122 +2,122 @@
 
 namespace <?= $this->getNamespace('model-generated'); ?>;
 
-class <?= $entity->getClassName(); ?> {
+class <?= $entity->class; ?> {
 
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['Array'])): ?>
-<?php if ($attribute->isNullable()): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('array')): ?>
+<?php if ($attribute->nullable): ?>
     /** @var array|null <?= $attribute->getPluralName(); ?> */
-    protected $<?= $attribute->getPluralPropertyName(); ?>;
+    protected $<?= $attribute->pluralProperty; ?>;
 <?php else: ?>
     /** @var array <?= $attribute->getPluralName(); ?> */
-    protected $<?= $attribute->getPluralPropertyName(); ?> = [];
+    protected $<?= $attribute->pluralProperty; ?> = [];
 <?php endif; ?>
-<?php elseif ($attribute->isType(['String', 'Text'])): ?>
-    /** @var string|null <?= $attribute->getName(); ?> */
-    protected $<?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('string', 'text')): ?>
+    /** @var string|null <?= $attribute->name; ?> */
+    protected $<?= $attribute->property; ?>;
 
-<?php elseif ($attribute->isType(['Int'])): ?>
-    /** @var int|null <?= $attribute->getName(); ?> */
-    protected $<?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('int')): ?>
+    /** @var int|null <?= $attribute->name; ?> */
+    protected $<?= $attribute->property; ?>;
 
-<?php elseif ($attribute->isType(['Decimal'])): ?>
-    /** @var float|null <?= $attribute->getName(); ?> */
-    protected $<?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('decimal')): ?>
+    /** @var float|null <?= $attribute->name; ?> */
+    protected $<?= $attribute->property; ?>;
 
-<?php elseif ($attribute->isType(['Bool'])): ?>
-    /** @var bool|null <?= $attribute->getName(); ?> */
-    protected $<?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('bool')): ?>
+    /** @var bool|null <?= $attribute->name; ?> */
+    protected $<?= $attribute->property; ?>;
 
 <?php else: ?>
-    /** @var mixed <?= $attribute->getName(); ?> */
-    protected $<?= $attribute->getPropertyName(); ?>;
+    /** @var mixed <?= $attribute->name; ?> */
+    protected $<?= $attribute->property; ?>;
 
 <?php endif; ?>
 <?php endforeach; ?>
 
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isType(['String', 'Text'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>string {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string', 'text')): ?>
+    public function get<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>string {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(string $value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(string $value): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Int'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>int {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('int')): ?>
+    public function get<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>int {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Decimal'])): ?>
-    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>float {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+<?php elseif ($attribute->is('decimal')): ?>
+    public function get<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>float {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Bool'])): ?>
+<?php elseif ($attribute->is('bool')): ?>
 
-    public function is<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>bool {
-<?php if ($attribute->isNullable()): ?>
-        if ($this-><?= $attribute->getPropertyName(); ?> === null) {
+    public function is<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>bool {
+<?php if ($attribute->nullable): ?>
+        if ($this-><?= $attribute->property; ?> === null) {
             return null;
         }
 <?php endif; ?>
-        return $this-><?= $attribute->getPropertyName(); ?> ? true : false;
+        return $this-><?= $attribute->property; ?> ? true : false;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(bool $value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(bool $value): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Date', 'DateTime'])): ?>
+<?php elseif ($attribute->is('date', 'datettime')): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\DateTimeInterface {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+    public function get<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>\DateTimeInterface {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(\DateTimeInterface $value = null): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(\DateTimeInterface $value = null): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Object'])): ?>
+<?php elseif ($attribute->is('object')): ?>
 
-    public function get<?= $attribute->getMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>\<?= $attribute->getClass(); ?> {
-        return $this-><?= $attribute->getPropertyName(); ?>;
+    public function get<?= $attribute->method; ?>(): <?= $attribute->nullable ? '?' : ''; ?>\<?= $attribute->getClass(); ?> {
+        return $this-><?= $attribute->property; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(\<?= $attribute->getClass(); ?> $value): self {
-        $this-><?= $attribute->getPropertyName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(\<?= $attribute->getClass(); ?> $value): self {
+        $this-><?= $attribute->property; ?> = $value;
         return $this;
     }
 
-<?php elseif ($attribute->isType(['Array'])): ?>
+<?php elseif ($attribute->is('array')): ?>
 
-    public function get<?= $attribute->getPluralMethodName(); ?>(): <?= $attribute->isNullable() ? '?' : ''; ?>array {
-        return $this-><?= $attribute->getPluralPropertyName(); ?>;
+    public function get<?= $attribute->pluralMethod; ?>(): <?= $attribute->nullable ? '?' : ''; ?>array {
+        return $this-><?= $attribute->pluralProperty; ?>;
     }
 
-    public function set<?= $attribute->getPluralMethodName(); ?>(array $<?= $attribute->getPluralPropertyName(); ?>): self {
-        $this-><?= $attribute->getPluralPropertyName(); ?> = $<?= $attribute->getPluralPropertyName(); ?>;
+    public function set<?= $attribute->pluralMethod; ?>(array $<?= $attribute->pluralProperty; ?>): self {
+        $this-><?= $attribute->pluralProperty; ?> = $<?= $attribute->pluralProperty; ?>;
         return $this;
     }
 
-    public function add<?= $attribute->getMethodName(); ?>($<?= $attribute->getPropertyName(); ?>): self {
-        $this-><?= $attribute->getPluralPropertyName(); ?>[] = $<?= $attribute->getPropertyName(); ?>;
+    public function add<?= $attribute->method; ?>($<?= $attribute->property; ?>): self {
+        $this-><?= $attribute->pluralProperty; ?>[] = $<?= $attribute->property; ?>;
         return $this;
     }
 

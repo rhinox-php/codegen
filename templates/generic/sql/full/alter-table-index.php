@@ -1,7 +1,7 @@
 <?php foreach ($entities as $entity): ?>
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute->isIndexed()): ?>
-ALTER TABLE `<?= $entity->getTableName(); ?>` ADD INDEX `<?= $attribute->getColumnName(); ?>` (`<?= $attribute->getColumnName(); ?>`);
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->indexed): ?>
+ALTER TABLE `<?= $entity->table; ?>` ADD INDEX `<?= $attribute->column; ?>` (`<?= $attribute->column; ?>`);
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endforeach; ?>

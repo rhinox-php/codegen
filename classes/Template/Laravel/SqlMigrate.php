@@ -15,8 +15,8 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
     {
         $date = date('Y_m_d_His');
         $migrationNumber = count(glob($this->codegen->getPath('database/migrations/*.php')));
-        foreach ($this->codegen->getEntities() as $entity) {
-            $path = $this->getFilePath('generic/sql/migrate', 'database/migrations/' . $date . '_' . $entity->getTableName() . '_' . $migrationNumber . '.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $path = $this->getFilePath('generic/sql/migrate', 'database/migrations/' . $date . '_' . $entity->table . '_' . $migrationNumber . '.php', [
                 'date' => $date,
                 'entity' => $entity,
             ]);
@@ -66,7 +66,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
                     <?php
                     use Illuminate\Database\Schema\Blueprint;
 
-                    class {$entity->getClassName()}{$migrationNumber} extends \Illuminate\Database\Migrations\Migration
+                    class {$entity->class}{$migrationNumber} extends \Illuminate\Database\Migrations\Migration
                     {
                         public function up()
                         {
@@ -95,145 +95,145 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
     private function migrateColumns(Entity $entity, string $path): iterable
     {
         $previous = 'id';
-        foreach ($entity->getAttributes() as $attribute) {
-            $column = $this->codegen->db->getColumn($entity->getPluralTableName(), $attribute->getColumnName());
+        foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute) {
+            $column = $this->codegen->db->getColumn($entity->getPluralTableName(), $attribute->column);
             if (!$column->exists()) {
-                $this->codegen->log('Creating column', $attribute->getColumnName(), 'in', $entity->getPluralTableName());
-                if ($attribute->isType(['int'])) {
+                $this->codegen->log('Creating column', $attribute->column, 'in', $entity->getPluralTableName());
+                if ($attribute->is('int')) {
                     yield [
-                        "\$table->integer('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->integer('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Decimal'])) {
+                } elseif ($attribute->is('decimal')) {
                     yield [
-                        "\$table->decimal('{$attribute->getColumnName()}', 10, 2)->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->decimal('{$attribute->column}', 10, 2)->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Bool'])) {
+                } elseif ($attribute->is('bool')) {
                     yield [
-                        "\$table->bool('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->bool('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Text', 'Json'])) {
+                } elseif ($attribute->is('text', 'json')) {
                     yield [
-                        "\$table->mediumText('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->mediumText('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['String'])) {
+                } elseif ($attribute->is('string')) {
                     yield [
-                        "\$table->string('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->string('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Date'])) {
+                } elseif ($attribute->is('date')) {
                     yield [
-                        "\$table->date('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->date('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['DateTime'])) {
+                } elseif ($attribute->is('date-time')) {
                     yield [
-                        "\$table->dateTime('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->dateTime('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Password'])) {
+                } elseif ($attribute->is('password')) {
                     yield [
-                        "\$table->string('{$attribute->getColumnName()}')->nullable()->after('{$previous}');",
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
+                        "\$table->string('{$attribute->column}')->nullable()->after('{$previous}');",
+                        "\$table->dropColumn('{$attribute->column}');",
                     ];
-                } elseif ($attribute->isType(['Uuid'])) {
-                    $null = $attribute->isNullable() ? 'NULL' : 'NOT NULL';
+                } elseif ($attribute->is('uuid')) {
+                    $null = $attribute->nullable ? 'NULL' : 'NOT NULL';
                     yield [
                         null,
-                        "\$table->dropColumn('{$attribute->getColumnName()}');",
-                        "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` ADD `{$attribute->getColumnName()}` BINARY(16) $null AFTER `{$previous}`;');",
+                        "\$table->dropColumn('{$attribute->column}');",
+                        "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` ADD `{$attribute->column}` BINARY(16) $null AFTER `{$previous}`;');",
                     ];
                 } else {
-                    $this->codegen->log('Unknown column type', $attribute->getColumnName(), get_class($attribute));
+                    $this->codegen->log('Unknown column type', $attribute->column, get_class($attribute));
                 }
             } else {
                 yield from $this->migrateColumn($entity, $attribute, $column, $previous, $path);
             }
-            $previous = $attribute->getColumnName();
+            $previous = $attribute->column;
         }
     }
 
     private function migrateColumn(Entity $entity, Attribute $attribute, MySqlColumn $column, string $previous, string $path): iterable
     {
-        if ($attribute->isType(['Int'])) {
+        if ($attribute->is('int')) {
             if (!$column->isType(MySqlColumn::TYPE_INT) || !$column->isSize(11) || !$column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to INT(11) SIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->integer('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->integer('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Decimal'])) {
+        } elseif ($attribute->is('decimal')) {
             if (!$column->isType(MySqlColumn::TYPE_DECIMAL) || !$column->isDecimalSize(10, 2) || !$column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->decimal('{$attribute->getColumnName()}', 10, 2)->nullable()->change();",
+                    "\$table->decimal('{$attribute->column}', 10, 2)->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Bool'])) {
+        } elseif ($attribute->is('bool')) {
             if (!$column->isType(MySqlColumn::TYPE_TINY_INT) || !$column->isSize(1) || $column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to TINYINT(1) UNSIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to TINYINT(1) UNSIGNED from', $column->getType(), $column->getSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->bool('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->bool('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Text', 'Json'])) {
+        } elseif ($attribute->is('text', 'json')) {
             if (!$column->isType(MySqlColumn::TYPE_MEDIUM_TEXT)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to MEDIUMTEXT from', $column->getType(), 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to MEDIUMTEXT from', $column->getType(), 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->mediumText('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->mediumText('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['String'])) {
+        } elseif ($attribute->is('string')) {
             if (!$column->isType(MySqlColumn::TYPE_VARCHAR) || !$column->isSize(255)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->string('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->string('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Date'])) {
+        } elseif ($attribute->is('date')) {
             if (!$column->isType(MySqlColumn::TYPE_DATE)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DATE from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to DATE from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->date('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->date('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['DateTime'])) {
+        } elseif ($attribute->is('date-time')) {
             if (!$column->isType(MySqlColumn::TYPE_DATE_TIME)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to DATETIME from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to DATETIME from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->dateTime('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->dateTime('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Password'])) {
+        } elseif ($attribute->is('password')) {
             if (!$column->isType(MySqlColumn::TYPE_VARCHAR) || !$column->isSize(255)) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
+                $this->codegen->log('Changing column', $attribute->column, 'to VARCHAR(255) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
                 yield [
-                    "\$table->string('{$attribute->getColumnName()}')->nullable()->change();",
+                    "\$table->string('{$attribute->column}')->nullable()->change();",
                     $this->reverseMigrateColumn($entity, $attribute, $column),
                 ];
             }
-        } elseif ($attribute->isType(['Uuid'])) {
-            if (!$column->isType(MySqlColumn::TYPE_BINARY) || !$column->isSize(16) || $column->isNullable() != $attribute->isNullable()) {
-                $this->codegen->log('Changing column', $attribute->getColumnName(), 'to BINARY(16) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
-                $null = $attribute->isNullable() ? 'NULL' : 'NOT NULL';
+        } elseif ($attribute->is('uuid')) {
+            if (!$column->isType(MySqlColumn::TYPE_BINARY) || !$column->isSize(16) || $column->nullable != $attribute->nullable) {
+                $this->codegen->log('Changing column', $attribute->column, 'to BINARY(16) from', $column->getType(), $column->getSize(), 'in', $entity->getPluralTableName());
+                $null = $attribute->nullable ? 'NULL' : 'NOT NULL';
                 yield [
                     null,
                     $this->reverseMigrateColumn($entity, $attribute, $column),
-                    "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` BINARY(16) $null;');",
+                    "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` CHANGE `{$attribute->column}` `{$attribute->column}` BINARY(16) $null;');",
                 ];
             }
         } else {
-            $this->codegen->log('Unknown column type', $attribute->getColumnName(), get_class($attribute));
+            $this->codegen->log('Unknown column type', $attribute->column, get_class($attribute));
         }
 
         // @todo check indexes
@@ -244,35 +244,35 @@ class SqlMigrate extends \Rhino\Codegen\Template\Laravel implements \Rhino\Codeg
     private function reverseMigrateColumn(Entity $entity, Attribute $attribute, MySqlColumn $column): ?string
     {
         if ($column->isType(MySqlColumn::TYPE_INT)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to INT(11) SIGNED in', $entity->getPluralTableName());
-            return "\$table->integer('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to INT(11) SIGNED in', $entity->getPluralTableName());
+            return "\$table->integer('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_DECIMAL)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to DECIMAL(10, 2) in', $entity->getPluralTableName());
-            return "\$table->decimal('{$attribute->getColumnName()}', 10, 2)->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to DECIMAL(10, 2) in', $entity->getPluralTableName());
+            return "\$table->decimal('{$attribute->column}', 10, 2)->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_TINY_INT)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to TINYINT(1) UNSIGNED in', $entity->getPluralTableName());
-            return "\$table->bool('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to TINYINT(1) UNSIGNED in', $entity->getPluralTableName());
+            return "\$table->bool('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_MEDIUM_TEXT)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to MEDIUMTEXT in', $entity->getPluralTableName());
-            return "\$table->mediumText('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to MEDIUMTEXT in', $entity->getPluralTableName());
+            return "\$table->mediumText('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_VARCHAR)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to VARCHAR(255) in', $entity->getPluralTableName());
-            return "\$table->string('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to VARCHAR(255) in', $entity->getPluralTableName());
+            return "\$table->string('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_DATE)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to DATE in', $entity->getPluralTableName());
-            return "\$table->date('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to DATE in', $entity->getPluralTableName());
+            return "\$table->date('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_DATE_TIME)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to DATETIME in', $entity->getPluralTableName());
-            return "\$table->dateTime('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to DATETIME in', $entity->getPluralTableName());
+            return "\$table->dateTime('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_VARCHAR)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to VARCHAR(255) in', $entity->getPluralTableName());
-            return "\$table->string('{$attribute->getColumnName()}')->nullable()->change();";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to VARCHAR(255) in', $entity->getPluralTableName());
+            return "\$table->string('{$attribute->column}')->nullable()->change();";
         } elseif ($column->isType(MySqlColumn::TYPE_BINARY)) {
-            $this->codegen->log('[DOWN] Reverting column', $attribute->getColumnName(), 'to BINARY(16) in', $entity->getPluralTableName());
-            $null = $attribute->isNullable() ? 'NULL' : 'NOT NULL';
-            return "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` CHANGE `{$attribute->getColumnName()}` `{$attribute->getColumnName()}` BINARY(16) $null;');";
+            $this->codegen->log('[DOWN] Reverting column', $attribute->column, 'to BINARY(16) in', $entity->getPluralTableName());
+            $null = $attribute->nullable ? 'NULL' : 'NOT NULL';
+            return "\DB::statement('ALTER TABLE `{$entity->getPluralTableName()}` CHANGE `{$attribute->column}` `{$attribute->column}` BINARY(16) $null;');";
         } else {
-            $this->codegen->log('Unknown column type', $attribute->getColumnName(), get_class($attribute));
+            $this->codegen->log('Unknown column type', $attribute->column, get_class($attribute));
         }
 
         // @todo check indexes

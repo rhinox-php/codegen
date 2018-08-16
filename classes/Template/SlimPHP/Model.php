@@ -10,11 +10,11 @@ class Model extends SlimPhp
     public function generate()
     {
         $this->renderTemplate('classes/models/model-abstract', 'AbstractModel.php');
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate($this->getTemplate(), 'Base' . $entity->getClassName() . '.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate($this->getTemplate(), 'Base' . $entity->class . '.php', [
                 'entity' => $entity,
             ]);
-            $this->renderTemplate('classes/models/model-initial', $entity->getClassName() . '.php', [
+            $this->renderTemplate('classes/models/model-initial', $entity->class . '.php', [
                 'entity' => $entity,
             ]);
         }

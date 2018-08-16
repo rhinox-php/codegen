@@ -2,16 +2,16 @@
 
 namespace <?= $this->getNamespace('model-generated'); ?>;
 
-class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSerializable {
+class <?= $entity->class; ?> extends AbstractModel implements \JsonSerializable {
 
 <?php if ($entity->hasRelationshipsByType(['HasMany'])): ?>
     // Has many related entities
 
 <?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
     /**
-     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[]|null Array of related <?= $relationship->getClassName(); ?> instances or null if they haven't been fetched yet.
+     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>[]|null Array of related <?= $relationship->class; ?> instances or null if they haven't been fetched yet.
      */
-    protected $<?= $relationship->getTo()->getPluralPropertyName(); ?> = null;
+    protected $<?= $relationship->getTo()->pluralProperty; ?> = null;
 
 <?php endforeach; ?>
 <?php endif; ?>
@@ -20,18 +20,18 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
 
 <?php foreach ($entity->iterateRelationshipsByType(['HasOne']) as $relationship): ?>
     /**
-     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>|null Related <?= $relationship->getClassName(); ?> instance or null if it hasn't been fetched yet.
+     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>|null Related <?= $relationship->class; ?> instance or null if it hasn't been fetched yet.
      */
-    protected $<?= $relationship->getPropertyName(); ?> = null;
+    protected $<?= $relationship->property; ?> = null;
 <?php endforeach; ?>
 
     // Belongs to related entities
 
 <?php foreach ($entity->iterateRelationshipsByType(['BelongsTo']) as $relationship): ?>
     /**
-     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>|null Related <?= $relationship->getClassName(); ?> instance or null if it hasn't been fetched yet.
+     * @var \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>|null Related <?= $relationship->class; ?> instance or null if it hasn't been fetched yet.
      */
-    protected $<?= $relationship->getPropertyName(); ?> = null;
+    protected $<?= $relationship->property; ?> = null;
 <?php endforeach; ?>
 
     // Datatable
@@ -39,13 +39,13 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
         $table = new \Mea\DataTable\LaravelDataTable('<?= $entity->getPluralTableName(); ?>');
         $table->addAction(function($row) use($table) {
             return $table->createButton()
-                ->setUrl('/<?= $entity->getRouteName(); ?>/edit/'.$row['id'])
+                ->setUrl('/<?= $entity->route; ?>/edit/'.$row['id'])
                 ->setText('Edit')
                 ->addClass('btn btn-default btn-xs');
         });
         $table->addColumn('id')->setHeader('ID');
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-        $table->addColumn('<?= $attribute->getColumnName(); ?>')->setHeader('<?= $attribute->getLabel(); ?>');
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+        $table->addColumn('<?= $attribute->column; ?>')->setHeader('<?= $attribute->label; ?>');
 <?php endforeach; ?>
         return $table;
     }
@@ -54,8 +54,8 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     public function jsonSerialize() {
         return [
             'id' => $this->getId(),
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-            '<?= $attribute->getPropertyName(); ?>' => $this-><?= $attribute->getGetterName(); ?>(),
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+            '<?= $attribute->property; ?>' => $this-><?= $attribute->getGetterName(); ?>(),
 <?php endforeach; ?>
             'created' => $this->getCreated(),
             'updated' => $this->getUpdated(),
@@ -63,24 +63,24 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     }
 
     // Find methods
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute ||
-        $attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string') ||
+        $attribute->is('int')): ?>
 
-    // Find by attribute <?= $attribute->getName(); ?>
+    // Find by attribute <?= $attribute->name; ?>
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>[] Returns an array of instances where the <?= $attribute->getName(); ?> attribute matches the supplied value.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>[] Returns an array of instances where the <?= $attribute->name; ?> attribute matches the supplied value.
      */
-    public static function findBy<?= $attribute->getMethodName(); ?>($value) {
-        return iterator_to_array(static::where('<?= $attribute->getColumnName(); ?>', $value)->get());
+    public static function findBy<?= $attribute->method; ?>($value) {
+        return iterator_to_array(static::where('<?= $attribute->column; ?>', $value)->get());
     }
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?>
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>
      */
-    public static function findFirstBy<?= $attribute->getMethodName(); ?>($value) {
-        return static::where('<?= $attribute->getColumnName(); ?>', $value)->first();
+    public static function findFirstBy<?= $attribute->method; ?>($value) {
+        return static::where('<?= $attribute->column; ?>', $value)->first();
     }
 <?php endif; ?>
 <?php endforeach; ?>
@@ -88,17 +88,17 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     public function saveRelated()
     {
 <?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
-        if ($this-><?= $relationship->getPluralPropertyName(); ?> !== null) {
-            foreach ($this-><?= $relationship->getPluralPropertyName(); ?> as $<?= $relationship->getPropertyName(); ?>) {
-                $<?= $relationship->getPropertyName(); ?>->set<?= $entity->getClassName(); ?>Id($this->getId());
-                $<?= $relationship->getPropertyName(); ?>->save();
+        if ($this-><?= $relationship->pluralProperty; ?> !== null) {
+            foreach ($this-><?= $relationship->pluralProperty; ?> as $<?= $relationship->property; ?>) {
+                $<?= $relationship->property; ?>->set<?= $entity->class; ?>Id($this->getId());
+                $<?= $relationship->property; ?>->save();
             }
         }
 <?php endforeach; ?>
 <?php foreach ($entity->iterateRelationshipsByType(['HasOne']) as $relationship): ?>
-        if ($this-><?= $relationship->getPropertyName(); ?> !== null && $this->get<?= $relationship->getClassName(); ?>Id() != $this-><?= $relationship->getPropertyName(); ?>->getId()) {
-            $this-><?= $relationship->getPropertyName(); ?>->save();
-            $this->set<?= $relationship->getClassName(); ?>Id($this-><?= $relationship->getPropertyName(); ?>->getId());
+        if ($this-><?= $relationship->property; ?> !== null && $this->get<?= $relationship->class; ?>Id() != $this-><?= $relationship->property; ?>->getId()) {
+            $this-><?= $relationship->property; ?>->save();
+            $this->set<?= $relationship->class; ?>Id($this-><?= $relationship->property; ?>->getId());
             parent::save();
         }
 <?php endforeach; ?>
@@ -108,41 +108,41 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
 <?php foreach ($entity->iterateRelationshipsByType(['HasMany']) as $relationship): ?>
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany Returns the Eloquent relationship to <?= $relationship->getClassName(); ?>.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany Returns the Eloquent relationship to <?= $relationship->class; ?>.
      */
-    protected function <?= $relationship->getTo()->getPluralPropertyName(); ?>() {
-        return $this->hasMany(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::class);
+    protected function <?= $relationship->getTo()->pluralProperty; ?>() {
+        return $this->hasMany(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>::class);
     }
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[] Returns an array of related <?= $relationship->getClassName(); ?> instances.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>[] Returns an array of related <?= $relationship->class; ?> instances.
      */
-    public function get<?= $relationship->getTo()->getPluralClassName(); ?>() {
-        if ($this-><?= $relationship->getTo()->getPluralPropertyName(); ?> === null) {
-            $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = iterator_to_array($this-><?= $relationship->getTo()->getPluralPropertyName(); ?>()->get());
+    public function get<?= $relationship->getTo()->pluralClass; ?>() {
+        if ($this-><?= $relationship->getTo()->pluralProperty; ?> === null) {
+            $this-><?= $relationship->getTo()->pluralProperty; ?> = iterator_to_array($this-><?= $relationship->getTo()->pluralProperty; ?>()->get());
         }
-        return $this-><?= $relationship->getTo()->getPluralPropertyName(); ?>;
+        return $this-><?= $relationship->getTo()->pluralProperty; ?>;
     }
 
     /**
-     * @param integer $id The ID of the <?= $relationship->getClassName(); ?> instance to find.
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>|null Returns a related <?= $relationship->getClassName(); ?> instance matching the supplied ID.
+     * @param integer $id The ID of the <?= $relationship->class; ?> instance to find.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>|null Returns a related <?= $relationship->class; ?> instance matching the supplied ID.
      */
-    public function get<?= $relationship->getTo()->getClassName(); ?>ById($id) {
-        foreach ($this->get<?= $relationship->getTo()->getPluralClassName(); ?>() as $<?= $relationship->getTo()->getPropertyName(); ?>) {
-            if ($<?= $relationship->getTo()->getPropertyName(); ?>->getId() == $id) {
-                return $<?= $relationship->getTo()->getPropertyName(); ?>;
+    public function get<?= $relationship->getTo()->class; ?>ById($id) {
+        foreach ($this->get<?= $relationship->getTo()->pluralClass; ?>() as $<?= $relationship->getTo()->property; ?>) {
+            if ($<?= $relationship->getTo()->property; ?>->getId() == $id) {
+                return $<?= $relationship->getTo()->property; ?>;
             }
         }
         return null;
     }
 
     /**
-     * @param \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>[] $<?= $relationship->getTo()->getPluralPropertyName(); ?> An array of <?= $relationship->getClassName(); ?> instances to associate to this <?= $entity->getClassName(); ?> instance.
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     * @param \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>[] $<?= $relationship->getTo()->pluralProperty; ?> An array of <?= $relationship->class; ?> instances to associate to this <?= $entity->class; ?> instance.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> This instance for method chaining.
      */
-    public function set<?= $relationship->getTo()->getPluralClassName(); ?>(array $<?= $relationship->getTo()->getPluralPropertyName(); ?>) {
-        $this-><?= $relationship->getTo()->getPluralPropertyName(); ?> = $<?= $relationship->getTo()->getPluralPropertyName(); ?>;
+    public function set<?= $relationship->getTo()->pluralClass; ?>(array $<?= $relationship->getTo()->pluralProperty; ?>) {
+        $this-><?= $relationship->getTo()->pluralProperty; ?> = $<?= $relationship->getTo()->pluralProperty; ?>;
         return $this;
     }
 
@@ -151,24 +151,24 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     // Has one related accessors
 <?php foreach ($entity->iterateRelationshipsByType(['HasOne']) as $relationship): ?>
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne Returns the Eloquent relationship to <?= $relationship->getClassName(); ?>.
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne Returns the Eloquent relationship to <?= $relationship->class; ?>.
      */
-    protected function <?= $relationship->getPropertyName(); ?>() {
-        return $this->belongsTo(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::class);
+    protected function <?= $relationship->property; ?>() {
+        return $this->belongsTo(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>::class);
     }
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>|null Returns the related <?= $relationship->getClassName(); ?> instance, or returns null if none is assigned.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>|null Returns the related <?= $relationship->class; ?> instance, or returns null if none is assigned.
      */
-    public function get<?= $relationship->getClassName(); ?>() {
-        if ($this-><?= $relationship->getPropertyName(); ?> === null) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this-><?= $relationship->getPropertyName(); ?>()->first();
+    public function get<?= $relationship->class; ?>() {
+        if ($this-><?= $relationship->property; ?> === null) {
+            $this-><?= $relationship->property; ?> = $this-><?= $relationship->property; ?>()->first();
         }
-        return $this-><?= $relationship->getPropertyName(); ?>;
+        return $this-><?= $relationship->property; ?>;
     }
 
-    public function set<?= $relationship->getClassName(); ?>(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?> $<?= $relationship->getPropertyName(); ?> = null) {
-        $this-><?= $relationship->getPropertyName(); ?> = $<?= $relationship->getPropertyName(); ?>;
+    public function set<?= $relationship->class; ?>(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?> $<?= $relationship->property; ?> = null) {
+        $this-><?= $relationship->property; ?> = $<?= $relationship->property; ?>;
         return $this;
     }
 
@@ -177,110 +177,110 @@ class <?= $entity->getClassName(); ?> extends AbstractModel implements \JsonSeri
     // Belongs to related accessors
 <?php foreach ($entity->iterateRelationshipsByType(['BelongsTo']) as $relationship): ?>
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo Returns the Eloquent relationship to <?= $relationship->getClassName(); ?>.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo Returns the Eloquent relationship to <?= $relationship->class; ?>.
      */
-    protected function <?= $relationship->getPropertyName(); ?>() {
-        return $this->belongsTo(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>::class);
+    protected function <?= $relationship->property; ?>() {
+        return $this->belongsTo(\<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>::class);
     }
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->getClassName(); ?>|null Returns the related <?= $relationship->getClassName(); ?> instance, or returns null if none is assigned.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->getTo()->class; ?>|null Returns the related <?= $relationship->class; ?> instance, or returns null if none is assigned.
      */
-    public function get<?= $relationship->getClassName(); ?>() {
-        if ($this-><?= $relationship->getPropertyName(); ?> === null) {
-            $this-><?= $relationship->getPropertyName(); ?> = $this-><?= $relationship->getPropertyName(); ?>()->first();
+    public function get<?= $relationship->class; ?>() {
+        if ($this-><?= $relationship->property; ?> === null) {
+            $this-><?= $relationship->property; ?> = $this-><?= $relationship->property; ?>()->first();
         }
-        return $this-><?= $relationship->getPropertyName(); ?>;
+        return $this-><?= $relationship->property; ?>;
     }
 
     /**
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> This instance for method chaining.
      */
-    public function set<?= $relationship->getClassName(); ?>(<?= $relationship->getClassName(); ?> $<?= $relationship->getPropertyName(); ?>) {
-        $this-><?= $relationship->getPropertyName(); ?> = $<?= $relationship->getPropertyName(); ?>;
+    public function set<?= $relationship->class; ?>(<?= $relationship->class; ?> $<?= $relationship->property; ?>) {
+        $this-><?= $relationship->property; ?> = $<?= $relationship->property; ?>;
         return $this;
     }
 
 <?php endforeach; ?>
 
     // Attribute accessors
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\StringAttribute
-    || $attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('string')
+    || $attribute->is('text')): ?>
     /**
-     * @return string|null Returns the <?= $attribute->getName(); ?> attribute, or null if not set.
+     * @return string|null Returns the <?= $attribute->name; ?> attribute, or null if not set.
      */
     public function <?= $attribute->getGetterName(); ?>() {
-        return $this-><?= $attribute->getColumnName(); ?>;
+        return $this-><?= $attribute->column; ?>;
     }
 
     /**
-     * @param string|null $value Sets the <?= $attribute->getName(); ?> attribute.
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     * @param string|null $value Sets the <?= $attribute->name; ?> attribute.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> This instance for method chaining.
      */
-    public function set<?= $attribute->getMethodName(); ?>(string $value): self {
-        $this-><?= $attribute->getColumnName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(string $value): self {
+        $this-><?= $attribute->column; ?> = $value;
         return $this;
     }
 
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
+<?php if ($attribute->is('int')): ?>
     /**
-     * @return integer|null Returns the <?= $attribute->getName(); ?> attribute, or null if not set.
+     * @return integer|null Returns the <?= $attribute->name; ?> attribute, or null if not set.
      */
     public function <?= $attribute->getGetterName(); ?>() {
-        return $this-><?= $attribute->getColumnName(); ?>;
+        return $this-><?= $attribute->column; ?>;
     }
 
     /**
-     * @param integer|null $value Sets the <?= $attribute->getName(); ?> attribute.
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     * @param integer|null $value Sets the <?= $attribute->name; ?> attribute.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> This instance for method chaining.
      */
-    public function set<?= $attribute->getMethodName(); ?>($value) {
-        $this-><?= $attribute->getColumnName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value) {
+        $this-><?= $attribute->column; ?> = $value;
         return $this;
     }
 
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DecimalAttribute): ?>
+<?php if ($attribute->is('decimal')): ?>
     /**
-     * @return float|null Returns the <?= $attribute->getName(); ?> attribute, or null if not set.
+     * @return float|null Returns the <?= $attribute->name; ?> attribute, or null if not set.
      */
     public function <?= $attribute->getGetterName(); ?>() {
-        return $this-><?= $attribute->getColumnName(); ?>;
+        return $this-><?= $attribute->column; ?>;
     }
 
     /**
-     * @param float|null $value Sets the <?= $attribute->getName(); ?> attribute.
-     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->getClassName(); ?> This instance for method chaining.
+     * @param float|null $value Sets the <?= $attribute->name; ?> attribute.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?> This instance for method chaining.
      */
-    public function set<?= $attribute->getMethodName(); ?>($value) {
-        $this-><?= $attribute->getColumnName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value) {
+        $this-><?= $attribute->column; ?> = $value;
         return $this;
     }
 
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
+<?php if ($attribute->is('date')): ?>
     public function <?= $attribute->getGetterName(); ?>() {
-        return $this-><?= $attribute->getColumnName(); ?>;
+        return $this-><?= $attribute->column; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>(\DateTimeInterface $value = null) {
-        $this-><?= $attribute->getColumnName(); ?> = $value;
+    public function set<?= $attribute->method; ?>(\DateTimeInterface $value = null) {
+        $this-><?= $attribute->column; ?> = $value;
         return $this;
     }
 
 <?php endif; ?>
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
+<?php if ($attribute->is('bool')): ?>
     public function <?= $attribute->getGetterName(); ?>() {
-        if ($this-><?= $attribute->getColumnName(); ?> === null) {
+        if ($this-><?= $attribute->column; ?> === null) {
             return null;
         }
-        return (bool) $this-><?= $attribute->getColumnName(); ?>;
+        return (bool) $this-><?= $attribute->column; ?>;
     }
 
-    public function set<?= $attribute->getMethodName(); ?>($value) {
-        $this-><?= $attribute->getColumnName(); ?> = $value;
+    public function set<?= $attribute->method; ?>($value) {
+        $this-><?= $attribute->column; ?> = $value;
         return $this;
     }
 

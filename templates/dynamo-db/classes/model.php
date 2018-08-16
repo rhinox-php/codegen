@@ -2,6 +2,6 @@
 
 namespace <?= $codegen->getNamespace(); ?>\Models;
 
-class <?= $entity->getClassName(); ?> extends \<?= $codegen->getNamespace(); ?>\Models\Generated\<?= $entity->getClassName(); ?> {
-    
+class <?= $entity->class; ?> extends \<?= $codegen->getNamespace(); ?>\Models\Generated\<?= $entity->class; ?> {
+
 }

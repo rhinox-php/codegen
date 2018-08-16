@@ -1,20 +1,20 @@
 <?php $previous = null; ?>
-<?php foreach ($entity->getAttributes() as $attribute): ?>
-ALTER TABLE <?= $entity->getTableName(); ?>
+<?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+ALTER TABLE <?= $entity->table; ?>
 
-<?php if ($attribute instanceof \Rhino\Codegen\Attribute\IntAttribute): ?>
-ADD <?= $attribute->getColumnName(); ?> INT NULL AFTER <?= $previous ?: 'id'; ?>;
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\BoolAttribute): ?>
-ADD <?= $attribute->getColumnName(); ?> TINYINT(1) UNSIGNED NULL AFTER <?= $previous ?: 'id'; ?>;
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\TextAttribute): ?>
-ADD <?= $attribute->getColumnName(); ?> MEDIUMTEXT NULL AFTER <?= $previous ?: 'id'; ?>;
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\DateAttribute): ?>
-ADD <?= $attribute->getColumnName(); ?> DATE NULL AFTER <?= $previous ?: 'id'; ?>;
-<?php elseif ($attribute instanceof \Rhino\Codegen\Attribute\DateTimeAttribute): ?>
-ADD <?= $attribute->getColumnName(); ?> DATETIME NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php if ($attribute->is('int')): ?>
+ADD <?= $attribute->column; ?> INT NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute->is('bool')): ?>
+ADD <?= $attribute->column; ?> TINYINT(1) UNSIGNED NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute->is('text')): ?>
+ADD <?= $attribute->column; ?> MEDIUMTEXT NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute->is('date')): ?>
+ADD <?= $attribute->column; ?> DATE NULL AFTER <?= $previous ?: 'id'; ?>;
+<?php elseif ($attribute->is('date-time')): ?>
+ADD <?= $attribute->column; ?> DATETIME NULL AFTER <?= $previous ?: 'id'; ?>;
 <?php else: ?>
-ADD <?= $attribute->getColumnName(); ?> VARCHAR(255) NULL AFTER <?= $previous ?: 'id'; ?>;
+ADD <?= $attribute->column; ?> VARCHAR(255) NULL AFTER <?= $previous ?: 'id'; ?>;
 <?php endif; ?>
-<?php $previous = $attribute->getColumnName(); ?>
+<?php $previous = $attribute->column; ?>
 
 <?php endforeach; ?>

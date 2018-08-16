@@ -11,7 +11,7 @@ class BinServer extends \Rhino\Codegen\Template\Generic
         $this->renderTemplate('generic/bin/server.sh', 'bin/server.sh');
         $this->renderTemplate('generic/bin/router', 'bin/router.php');
         $this->renderTemplate('generic/public/index', 'public/index.php', [
-            'entities' => $this->codegen->getEntities(),
+            'entities' => $this->codegen->node->children('entity'),
         ]);
     }
 

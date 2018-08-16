@@ -8,7 +8,7 @@
                 <div class="cga-body-header-bread-crumbs">Bread / Crumbs</div>
             </div>
             <div class="pull-right">
-                <a href="/admin/<?= $entity->getRouteName(); ?>/create" class="btn btn-primary">Create</a>
+                <a href="/admin/<?= $entity->route; ?>/create" class="btn btn-primary">Create</a>
             </div>
         </div>
     </div>

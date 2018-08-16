@@ -13,8 +13,8 @@ class Model extends \Rhino\Codegen\Template\Template
     public function generate()
     {
         $this->renderTemplate('classes/abstract-model', $this->path . 'AbstractModel.php');
-        foreach ($this->codegen->getEntities() as $entity) {
-            $this->renderTemplate('classes/generated-model', $this->path . $entity->getClassName() . '.php', [
+        foreach ($this->codegen->node->children('entity') as $entity) {
+            $this->renderTemplate('classes/generated-model', $this->path . $entity->class . '.php', [
                 'entity' => $entity,
             ]);
         }
@@ -22,10 +22,10 @@ class Model extends \Rhino\Codegen\Template\Template
 
     public function getAttributeType(Attribute $attribute)
     {
-        if ($attribute->isType(['String', 'Text', 'Date', 'DateTime'])) {
+        if ($attribute->is('string', 'text', 'date', 'date-time')) {
             return 'S';
         }
-        if ($attribute->isType(['Int', 'Decimal', 'Bool'])) {
+        if ($attribute->is('int', 'decimal', 'bool')) {
             return 'N';
         }
         throw new \Exception('Unknown DynamoDB attribute type.');
