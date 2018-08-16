@@ -5,7 +5,7 @@ class XmlParser
 {
     protected $file;
     protected $codegen;
-    protected $names = [];
+    protected $names;
 
     public function __construct(Codegen $codegen, $file)
     {
@@ -38,6 +38,9 @@ class XmlParser
     }
 
     public function name(Node $node) {
+        if (!$this->names) {
+            throw new \Exception('XML parser naming function not set');
+        }
         $method = $this->names;
         return $method($node);
     }

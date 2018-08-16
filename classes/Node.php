@@ -24,6 +24,9 @@ class Node
 
     public function __get($name)
     {
+        if (!isset($this->names[$name])) {
+            throw new \Exception('Unknown name: ' . $name);
+        }
         return $this->names[$name];
     }
 
