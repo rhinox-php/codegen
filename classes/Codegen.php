@@ -41,6 +41,7 @@ class Codegen
 
     public function __construct()
     {
+        $this->node = new NodeRoot();
     }
 
     public function validate(): self

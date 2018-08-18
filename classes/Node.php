@@ -80,15 +80,17 @@ class Node
         return null;
     }
 
-    public function children(string ...$types): \Generator
+    public function children(string ...$types): array
     {
+        $result = [];
         foreach ($this->children as $node) {
             foreach ($types as $type) {
                 if ($node->type == $type) {
-                    yield $node;
+                    $result[] = $node;
                 }
             }
         }
+        return $result;
     }
 
     public function find($type, $name) {

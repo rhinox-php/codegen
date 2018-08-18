@@ -26,7 +26,8 @@ class XmlParser
                     return "$error->line:$error->column $error->message";
                 }, libxml_get_errors())));
             }
-            $this->codegen->node = new Node($xml, $this);
+            $node = new Node($xml, $this);
+            $this->codegen->node->merge($node);
         } catch (\Exception $exception) {
             throw new \Exception('Error parsing XML in ' . $file, 1, $exception);
         } finally {
@@ -39,7 +40,7 @@ class XmlParser
 
     public function name(Node $node) {
         if (!$this->names) {
-            throw new \Exception('XML parser naming function not set');
+            return [];
         }
         $method = $this->names;
         return $method($node);
