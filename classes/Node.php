@@ -81,6 +81,18 @@ class Node
         return null;
     }
 
+    public function child(string ...$types): ?Node
+    {
+        foreach ($this->children as $node) {
+            foreach ($types as $type) {
+                if ($node->type == $type) {
+                    return $node;
+                }
+            }
+        }
+        return null;
+    }
+
     public function children(string ...$types): array
     {
         $result = [];
