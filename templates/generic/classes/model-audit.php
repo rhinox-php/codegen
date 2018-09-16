@@ -199,9 +199,21 @@ class <?= $entity->class; ?> {
 
         if (isset($diff['entity'])) {
 <?php foreach ($entity->children('string', 'int', 'decimal', 'date', 'date-time', 'bool', 'text') as $attribute): ?>
+<?php if ($attribute->is('date-time')): ?>
+            if (isset($diff['entity']['<?= $attribute->property; ?>'][0])) {
+                $diff['entity']['<?= $attribute->property; ?>'][0] = (new \DateTime($diff['entity']['<?= $attribute->property; ?>'][0]))->setTimezone(tz())->format(DATE_ISO8601);
+            }
+            if (isset($diff['entity']['<?= $attribute->property; ?>'][1])) {
+                $diff['entity']['<?= $attribute->property; ?>'][1] = (new \DateTime($diff['entity']['<?= $attribute->property; ?>'][1]))->setTimezone(tz())->format(DATE_ISO8601);
+            }
             if (!$mapper->filterAttribute('<?= $entity->class; ?>', '<?= $attribute->property; ?>')) {
                 $result .= static::diffAttribute($diff['entity'], '<?= $attribute->property; ?>', '<?= $attribute->label; ?>', $mapper, '<?= $entity->class; ?>');
             }
+<?php else: ?>
+            if (!$mapper->filterAttribute('<?= $entity->class; ?>', '<?= $attribute->property; ?>')) {
+                $result .= static::diffAttribute($diff['entity'], '<?= $attribute->property; ?>', '<?= $attribute->label; ?>', $mapper, '<?= $entity->class; ?>');
+            }
+<?php endif; ?>
 <?php endforeach; ?>
         }
 
