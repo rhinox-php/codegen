@@ -43,7 +43,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                 if ($attribute->is('int')) {
                     $type = 'INT(11) SIGNED NULL';
                 } elseif ($attribute->is('decimal')) {
-                    $type = 'DECIMAL(10, 2) NULL';
+                    $type = 'DECIMAL(20, 4) NULL';
                 } elseif ($attribute->is('bool')) {
                     $type = 'TINYINT(1) UNSIGNED NULL';
                 } elseif ($attribute->is('text', 'json', 'html')) {
@@ -76,9 +76,9 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                 yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` INT(11) SIGNED NULL AFTER `$previous`;";
             }
         } elseif ($attribute->is('decimal')) {
-            if (!$column->isType(MySqlColumn::TYPE_DECIMAL) || !$column->isDecimalSize(10, 2) || !$column->isSigned()) {
-                $this->codegen->log('Changing column', $attribute->column, 'to DECIMAL(10, 2) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
-                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DECIMAL(10, 2) AFTER `$previous`;";
+            if (!$column->isType(MySqlColumn::TYPE_DECIMAL) || !$column->isDecimalSize(20, 4) || !$column->isSigned()) {
+                $this->codegen->log('Changing column', $attribute->column, 'to DECIMAL(20, 4) from', $column->getType(), $column->getDecimalSize(), $column->isSigned() ? 'SIGNED' : 'UNSIGNED', 'in', $entity->table);
+                yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$attribute->column}` `{$attribute->column}` DECIMAL(20, 4) AFTER `$previous`;";
             }
         } elseif ($attribute->is('bool')) {
             if (!$column->isType(MySqlColumn::TYPE_TINY_INT) || !$column->isSize(1) || $column->isSigned()) {
