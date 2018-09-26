@@ -82,6 +82,7 @@ class Codegen
         $this->validate();
         $this->readManifest();
         $this->manifest->clean();
+        $this->writeManifest();
     }
 
     public function getManifest() {

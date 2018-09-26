@@ -8,15 +8,18 @@ class Manifest implements \JsonSerializable
     /** @var array Files */
     protected $files = [];
 
-    public function __construct(Codegen $codegen) {
+    public function __construct(Codegen $codegen)
+    {
         $this->codegen = $codegen;
     }
 
-    public function clean() {
-        foreach ($this->files as $file => $hash) {
-            $file = $this->codegen->getPath($file);
+    public function clean()
+    {
+        foreach ($this->files as $manifestFile => $hash) {
+            $file = $this->codegen->getPath($manifestFile);
             if (!is_file($file)) {
                 $this->codegen->debug('Manifest file does not exist: ' . $file);
+                unset($this->files[$manifestFile]);
                 continue;
             }
             $file = realpath($file);
@@ -28,31 +31,67 @@ class Manifest implements \JsonSerializable
             $this->codegen->log('Deleting ' . $file);
             if (!$this->codegen->isDryRun()) {
                 unlink($file);
+                unset($this->files[$manifestFile]);
             }
         }
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize()
+    {
         ksort($this->files);
         return $this->files;
     }
 
-    public function getFiles(): array {
+    public function getFiles(): array
+    {
         return $this->files;
     }
 
-    public function setFiles(array $files): self {
+    public function setFiles(array $files): self
+    {
         $this->files = $files;
         return $this;
     }
 
-    public function addFile(string $file): self {
+    public function addFile(string $file): self
+    {
         assert(is_file($file), new \Exception('Manifest expects files to exist'));
         $hash = md5_file($file);
-        $file = preg_replace('/^' . preg_quote(realpath($this->codegen->getPath()), '/') . '/', '', realpath($file));
-        $file = str_replace('\\', '/', $file);
-        $file = trim($file, '/');
+        $file = $this->getRelativePath($this->codegen->getPath(), $file);
         $this->files[$file] = $hash;
         return $this;
+    }
+
+    private function getRelativePath($from, $to)
+    {
+        // some compatibility fixes for Windows paths
+        $from = is_dir($from) ? rtrim($from, '\/') . '/' : $from;
+        $to = is_dir($to) ? rtrim($to, '\/') . '/' : $to;
+        $from = str_replace('\\', '/', $from);
+        $to = str_replace('\\', '/', $to);
+
+        $from = explode('/', $from);
+        $to = explode('/', $to);
+        $relPath = $to;
+
+        foreach ($from as $depth => $dir) {
+            // find first non-matching dir
+            if ($dir === $to[$depth]) {
+                // ignore this directory
+                array_shift($relPath);
+            } else {
+                // get number of remaining dirs to $from
+                $remaining = count($from) - $depth;
+                if ($remaining > 1) {
+                    // add traversals up to first matching dir
+                    $padLength = (count($relPath) + $remaining - 1) * -1;
+                    $relPath = array_pad($relPath, $padLength, '..');
+                    break;
+                } else {
+                    $relPath[0] = './' . $relPath[0];
+                }
+            }
+        }
+        return implode('/', $relPath);
     }
 }

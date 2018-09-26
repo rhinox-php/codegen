@@ -20,7 +20,7 @@ class Description
     public function describe()
     {
         $output = new BufferedOutput();
-        foreach ($this->codegen->node->children as $entity) {
+        foreach ($this->codegen->node->children('entity') as $entity) {
             yield 'Entity:';
             (new Table($output))
                 ->setHeaders(['Name', 'Class Name', 'Property Name'])
