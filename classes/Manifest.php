@@ -13,20 +13,22 @@ class Manifest implements \JsonSerializable
         $this->codegen = $codegen;
     }
 
-    public function clean()
+    public function clean(bool $force = false)
     {
         foreach ($this->files as $manifestFile => $hash) {
             $file = $this->codegen->getPath($manifestFile);
             if (!is_file($file)) {
-                $this->codegen->debug('Manifest file does not exist: ' . $file);
+                $this->codegen->log('Manifest file does not exist: ' . $file);
                 unset($this->files[$manifestFile]);
                 continue;
             }
             $file = realpath($file);
             $currentHash = md5_file($file);
             if ($currentHash !== $hash) {
-                $this->codegen->debug('Manifest file hash does not match: ' . $file . ' ' . $currentHash . ':' . $hash);
-                continue;
+                $this->codegen->log('Manifest file hash does not match: ' . $file . ' ' . $currentHash . ':' . $hash);
+                if (!$force) {
+                    continue;
+                }
             }
             $this->codegen->log('Deleting ' . $file);
             if (!$this->codegen->isDryRun()) {

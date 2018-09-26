@@ -12,12 +12,13 @@ class Clean extends AbstractCommand
     {
         parent::configure();
         $this->setName('clean')
-            ->setDescription('Delete all generated files (that are recorded in the manifest)');
+            ->setDescription('Delete all generated files (that are recorded in the manifest)')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Delete even if hashes don\'t match');;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
-            ->clean();
+            ->clean($input->getOption('force'));
     }
 }

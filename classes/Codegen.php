@@ -78,10 +78,10 @@ class Codegen
         return $this;
     }
 
-    public function clean() {
+    public function clean(bool $force = false) {
         $this->validate();
         $this->readManifest();
-        $this->manifest->clean();
+        $this->manifest->clean($force);
         $this->writeManifest();
     }
 
