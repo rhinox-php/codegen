@@ -25,7 +25,7 @@ class Node
     public function __get($name)
     {
         if (!isset($this->names[$name])) {
-            // throw new \Exception('Unknown name: ' . $name);
+            $name = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $name));
             return $this->attr($name)->string();
         }
         return $this->names[$name];
