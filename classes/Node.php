@@ -28,6 +28,12 @@ class Node
     {
         if (!isset($this->names[$name])) {
             $name = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $name));
+            if ($this->attr($name)->string() === 'true') {
+                return true;
+            }
+            if ($this->attr($name)->string() === 'false') {
+                return false;
+            }
             return $this->attr($name)->string();
         }
         return $this->names[$name];
