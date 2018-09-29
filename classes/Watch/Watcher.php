@@ -34,6 +34,7 @@ class Watcher
 
     public function scan()
     {
+        echo '.';
         $files = [];
         $directories = $this->directories;
         while (!empty($directories)) {
@@ -46,6 +47,7 @@ class Watcher
                 $file = realpath($directory . '/' . $file);
                 if (is_dir($file)) {
                     $directories[] = $file;
+                    // echo '*' . $file . PHP_EOL;
                     continue;
                 }
                 $files[$file] = $this->checkFile($file);
@@ -54,16 +56,16 @@ class Watcher
         $changed = [];
         foreach ($files as $file => $check) {
             if (!isset($this->lastFiles[$file])) {
-                echo '+' . $check . ':' . $file . PHP_EOL;
+                echo PHP_EOL . '+' . $check . ':' . $file;
                 $changed[$file] = $check;
             } elseif ($this->lastFiles[$file] != $check) {
-                echo '#' . $check . '/' . $this->lastFiles[$file] . ':' . $file . PHP_EOL;
+                echo PHP_EOL . '#' . $check . '/' . $this->lastFiles[$file] . ':' . $file . PHP_EOL;
                 $changed[$file] = $check;
             }
         }
         foreach ($this->lastFiles as $file => $check) {
             if (!isset($files[$file])) {
-                echo '-' . $check . ':' . $file . PHP_EOL;
+                echo PHP_EOL . '-' . $check . ':' . $file . PHP_EOL;
                 $changed[$file] = $check;
             }
         }
@@ -71,6 +73,7 @@ class Watcher
         ksort($files);
         $key = md5(implode(':', $files));
         if ($key != $this->lastKey) {
+            echo PHP_EOL;
             $this->triggerCallback(array_keys($changed));
         }
         $this->lastKey = $key;

@@ -3,6 +3,7 @@ namespace Rhino\Codegen;
 
 class Node
 {
+    private $xmlNode;
     private $attributes = [];
     private $names = [];
     public $children = [];
@@ -10,6 +11,7 @@ class Node
 
     public function __construct(\SimpleXMLElement $xmlNode, XmlParser $xmlParser)
     {
+        $this->xmlNode = $xmlNode;
         $this->type = $xmlNode->getName();
         foreach ($xmlNode->attributes() as $name => $value) {
             $this->attributes[(string) $name] = $value;
@@ -31,7 +33,7 @@ class Node
         return $this->names[$name];
     }
 
-    public function attr(string ...$names): NodeAttribute
+    public function attr(string...$names): NodeAttribute
     {
         foreach ($names as $name) {
             if (isset($this->attributes[$name])) {
@@ -41,7 +43,7 @@ class Node
         return new NodeAttribute();
     }
 
-    public function has(string ...$names): bool
+    public function has(string...$names): bool
     {
         foreach ($names as $name) {
             if (isset($this->attributes[$name])) {
@@ -51,11 +53,22 @@ class Node
         return false;
     }
 
-    public function bool($name, bool $default) {
+    public function bool($name, bool $default)
+    {
         return $this->attr($name)->bool($default);
     }
 
-    public function is(string ...$types): bool
+    public function xml()
+    {
+        $tag = $this->xmlNode->getName();
+        $value = $this->xmlNode->__toString();
+        if ('' === $value) {
+            return null;
+        }
+        return preg_replace('!<' . $tag . '(?:[^>]*)>(.*)</' . $tag . '>!Ums', '$1', $this->xmlNode->asXml());
+    }
+
+    public function is(string...$types): bool
     {
         foreach ($types as $type) {
             if ($this->type == $type) {
@@ -81,7 +94,7 @@ class Node
         return null;
     }
 
-    public function child(string ...$types): ?Node
+    public function child(string...$types): ?Node
     {
         foreach ($this->children as $node) {
             foreach ($types as $type) {
@@ -93,7 +106,7 @@ class Node
         return null;
     }
 
-    public function children(string ...$types): array
+    public function children(string...$types): array
     {
         $result = [];
         foreach ($this->children as $node) {
@@ -106,7 +119,8 @@ class Node
         return $result;
     }
 
-    public function find($type, $name) {
+    public function find($type, $name)
+    {
         foreach ($this->children as $node) {
             if ($node->type == $type && $node->name == $name) {
                 return $node;
