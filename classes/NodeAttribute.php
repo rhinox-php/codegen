@@ -56,7 +56,7 @@ class NodeAttribute
         $result = $inflector->camelize($result);
         $result = $inflector->underscore($result);
         $result = preg_replace('/([0-9]+)/', '_$1', $result);
-        $result = preg_replace('/[^a-z0-9-_]/i', '', $result);
+        $result = preg_replace('/[^a-z0-9-_]+/i', '_', $result);
         return new static($this->name, $result);
     }
 
@@ -67,7 +67,7 @@ class NodeAttribute
         $result = preg_replace('/\s+/', '_', $result);
         $result = $inflector->camelize($result);
         $result = $inflector->hyphenate($result);
-        $result = preg_replace('/[^a-z0-9-_]/i', '', $result);
+        $result = preg_replace('/[^a-z0-9-_]+/i', '-', $result);
         return new static($this->name, $result);
     }
 
@@ -77,7 +77,7 @@ class NodeAttribute
         $result = $this->string();
         $result = preg_replace('/\s+/', '_', $result);
         $result = $inflector->camelize($result, $lowercaseFirstLetter);
-        $result = preg_replace('/[^a-z0-9-_]/i', '', $result);
+        $result = preg_replace('/[^a-z0-9-_]+/i', '', $result);
         return new static($this->name, $result);
     }
 
