@@ -18,7 +18,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
-    protected function getCodegen(?string $schema, bool $dryRun, bool $debug): \Rhino\Codegen\Codegen
+    protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false): \Rhino\Codegen\Codegen
     {
         if (!$schema) {
             $currentDirectory = getcwd();
@@ -38,6 +38,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
         }
         $codegen = require $schema;
         $codegen->setDryRun($dryRun);
+        $codegen->setForce($force);
         if ($debug) {
             $codegen->setOutputLevel(Codegen::OUTPUT_LEVEL_DEBUG);
         }

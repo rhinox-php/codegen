@@ -39,7 +39,7 @@ class MySql implements ColumnInterface
 
     public function isType(string $type): bool
     {
-        return $this->getType() == $type;
+        return $this->getType() == strtolower($type);
     }
 
     public function getSize()
@@ -61,7 +61,7 @@ class MySql implements ColumnInterface
         return null;
     }
 
-    public function isSize(int $size, int $dp = null): bool
+    public function isSize(int $size): bool
     {
         return $this->getSize() == $size;
     }
@@ -79,7 +79,7 @@ class MySql implements ColumnInterface
 
     public function isNullable()
     {
-        return $this->getDescription()['Null'] === 'Yes';
+        return strtolower($this->getDescription()['Null']) === 'yes';
     }
 
     public function isIndexed()

@@ -21,6 +21,7 @@ class Codegen
     protected $namespace;
     protected $projectName;
     protected $dryRun = self::DRY_RUN_INITIALIZING;
+    protected $force = false;
     protected $xmlParser;
     protected $templatePath;
     protected $viewPathPrefix;
@@ -78,10 +79,10 @@ class Codegen
         return $this;
     }
 
-    public function clean(bool $force = false) {
+    public function clean() {
         $this->validate();
         $this->readManifest();
-        $this->manifest->clean($force);
+        $this->manifest->clean($this->isForce());
         $this->writeManifest();
     }
 
@@ -357,6 +358,17 @@ class Codegen
         return $this;
     }
 
+    public function isForce(): bool
+    {
+        return $this->force;
+    }
+
+    public function setForce(bool $force): self
+    {
+        $this->force = $force;
+        return $this;
+    }
+
     public function getTemplatePath(): string
     {
         return $this->templatePath;
@@ -533,6 +545,10 @@ class Codegen
         if (is_file($file)) {
             if (md5($content) === md5_file($file)) {
                 $this->debug('No changes to', $file);
+                return false;
+            }
+            if (!$this->isForce() && md5_file($file) !== $this->manifest->getHash($file)) {
+                $this->log('Local modifications to file, not overwriting', $file, md5_file($file) ?: 'null', $this->manifest->getHash($file) ?: 'null');
                 return false;
             }
         }

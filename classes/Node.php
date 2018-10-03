@@ -4,8 +4,8 @@ namespace Rhino\Codegen;
 class Node
 {
     private $xmlNode;
-    private $attributes = [];
     private $names = [];
+    public $attributes = [];
     public $children = [];
     public $type;
 

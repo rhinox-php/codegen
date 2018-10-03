@@ -12,12 +12,13 @@ class Gen extends AbstractCommand
     {
         parent::configure();
         $this->setName('gen')
-            ->setDescription('Generate code');
+            ->setDescription('Generate code')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite local changes to files');;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
+        $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'))
             ->generate();
     }
 }

@@ -64,6 +64,15 @@ class Manifest implements \JsonSerializable
         return $this;
     }
 
+    public function getHash(string $file): ?string
+    {
+        $file = $this->getRelativePath($this->codegen->getPath(), $file);
+        if (isset($this->files[$file])) {
+            return $this->files[$file];
+        }
+        return null;
+    }
+
     private function getRelativePath($from, $to)
     {
         // some compatibility fixes for Windows paths
@@ -94,6 +103,8 @@ class Manifest implements \JsonSerializable
                 }
             }
         }
-        return implode('/', $relPath);
+        $relPath = implode('/', $relPath);
+        $relPath = preg_replace('~^./~', '', $relPath);
+        return $relPath;
     }
 }
