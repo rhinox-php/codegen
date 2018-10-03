@@ -547,7 +547,7 @@ class Codegen
                 $this->debug('No changes to', $file);
                 return false;
             }
-            if (!$this->isForce() && md5_file($file) !== $this->manifest->getHash($file)) {
+            if (!$this->isForce() && filesize($file) > 0 && $this->manifest->getHash($file) && md5_file($file) !== $this->manifest->getHash($file)) {
                 $this->log('Local modifications to file, not overwriting', $file, md5_file($file) ?: 'null', $this->manifest->getHash($file) ?: 'null');
                 return false;
             }

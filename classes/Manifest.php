@@ -59,7 +59,7 @@ class Manifest implements \JsonSerializable
     {
         assert(is_file($file), new \Exception('Manifest expects files to exist'));
         $hash = md5_file($file);
-        $file = $this->getRelativePath($this->codegen->getPath(), $file);
+        $file = $this->getRelativePath($this->codegen->getPath(), realpath($file));
         $this->files[$file] = $hash;
         return $this;
     }
@@ -105,6 +105,7 @@ class Manifest implements \JsonSerializable
         }
         $relPath = implode('/', $relPath);
         $relPath = preg_replace('~^./~', '', $relPath);
+        $relPath = str_replace('//', '/', $relPath);
         return $relPath;
     }
 }
