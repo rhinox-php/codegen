@@ -61,8 +61,15 @@ class MySql implements ColumnInterface
         return null;
     }
 
-    public function isSize(int $size): bool
+    public function isSize($size): bool
     {
+        if (!preg_match('/^[0-9]+$/', $size)) {
+            $decimalSize = explode(',', $size);
+            if (count($decimalSize) === 2) {
+                return $this->isDecimalSize((int) trim($decimalSize[0]), (int) trim($decimalSize[1]));
+            }
+            return false;
+        }
         return $this->getSize() == $size;
     }
 

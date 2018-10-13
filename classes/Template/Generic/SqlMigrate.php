@@ -14,6 +14,9 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
 
     public function iterateDatabaseMigrateSql(\PDO $pdo, string $date): iterable
     {
+        if (!$this->columnMapper) {
+            throw new \Exception('SQL migrate requires a column mapper');
+        }
         foreach ($this->codegen->node->children('entity') as $entity) {
             $path = $this->getFilePath('generic/sql/migrate', 'src/sql/up/' . $date . '.sql', [
                 'date' => $date,
