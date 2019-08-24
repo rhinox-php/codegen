@@ -277,7 +277,7 @@ $entity-><?= $attribute->property; ?> = isset($row['<?= $attribute->column; ?>']
     // Find methods
 
     /**
-     * @return <?= $entity->class; ?> The instance matching the ID, or null.
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $entity->class; ?>|null The instance matching the ID, or null.
      */
     public static function findById($id) {
         return static::fetch<?= $entity->class; ?>(static::query('
@@ -483,7 +483,7 @@ $entity-><?= $attribute->property; ?> = isset($row['<?= $attribute->column; ?>']
      * Returns an array of all related <?= $relationship->class; ?>,
      * and caches the fetch call into a property.
      *
-     * @return <?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>[]
+     * @return \<?= $this->getNamespace('model-implemented'); ?>\<?= $relationship->class; ?>[]
      */
     public function get<?= $relationship->pluralMethod; ?>() {
         if ($this-><?= $relationship->pluralProperty; ?> === null) {

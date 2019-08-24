@@ -95,7 +95,10 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
             yield $path => "ALTER TABLE `{$entity->table}` CHANGE `{$columnName}` `{$columnName}` $type AFTER `$previous`;";
         }
 
-        // @todo check indexes
+        $indexed = $columnSchema['indexed'] ?? false;
+        if ($indexed && !$column->isIndexed()) {
+            yield $path => "ALTER TABLE `{$entity->table}` ADD INDEX `{$columnName}` (`{$columnName}`);";
+        }
         // @todo check collation
     }
 

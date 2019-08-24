@@ -14,7 +14,7 @@ class NodeAttribute
         $this->value = $value;
     }
 
-    public function bool($default)
+    public function bool(?bool $default = false): ?bool
     {
         $value = $this->string();
         if ($value === 'true') {
@@ -29,9 +29,14 @@ class NodeAttribute
         return $this->string();
     }
 
-    public function string()
+    public function string(): string
     {
         return (string) $this->value;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
     }
 
     public function getInflector(): \ICanBoogie\Inflector

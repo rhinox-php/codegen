@@ -91,6 +91,14 @@ class MySql implements ColumnInterface
 
     public function isIndexed()
     {
+        $statement = $this->mysql->pdo->prepare('SHOW INDEX FROM `' . $this->tableName . '`');
+        $statement->execute();
+        foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $index) {
+            if ($index['Column_name'] == $this->columnName) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function getDescription(): array

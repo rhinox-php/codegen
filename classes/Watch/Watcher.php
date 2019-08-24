@@ -15,6 +15,7 @@ class Watcher
         '/^vendor$/',
         '/^node_modules$/',
         '/^bower_components$/',
+        '/^storage$/',
     ];
     protected $lastKey = null;
     protected $lastFiles = [];
