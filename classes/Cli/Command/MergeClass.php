@@ -22,6 +22,6 @@ class MergeClass extends AbstractCommand
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
         $file1 = $input->getOption('file-1');
         $file2 = $input->getOption('file-2');
-        \Rhino\Codegen\MergeClass::merge($codegen, $file1, $file2);
+        \Rhino\Codegen\MergeClass::mergeFiles($codegen, $file1, $file2);
     }
 }

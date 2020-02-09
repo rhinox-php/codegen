@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen;
 
 use Microsoft\PhpParser\DiagnosticsProvider;
@@ -31,7 +32,7 @@ class MergeClass
         return $this;
     }
 
-    public static function merge(Codegen $codegen, string $fromFile, string $intoFile): self
+    public static function mergeFiles(Codegen $codegen, string $fromFile, string $intoFile): self
     {
         $realFromFile = realpath($fromFile);
         if (!$realFromFile) {
@@ -55,6 +56,19 @@ class MergeClass
         return $instance;
     }
 
+    public static function mergeStrings(Codegen $codegen, string $fromString, string $intoString): string
+    {
+        $instance = new static($codegen);
+        $instance->setClassSourceFrom($fromString);
+        $instance->setClassSourceInto($intoString);
+        $instance->parse();
+
+        $output = $instance->getOutput();
+        $output = FormatPhp::formatString($output);
+
+        return $output;
+    }
+
     public function parse()
     {
         $this->parser = new Parser();
@@ -69,7 +83,6 @@ class MergeClass
         $this->codegen->log('Parsing "into" class source...');
         $this->root2 = $this->parser->parseSourceFile($this->output);
 
-        $errors = DiagnosticsProvider::getDiagnostics($this->root2);
         if (!$this->validate($this->classSourceInto, $this->root2)) {
             return $this;
         }
@@ -100,11 +113,22 @@ class MergeClass
                     $error->start,
                     $root->getFileContents()
                 );
-                $this->codegen->log($content, $error->message, 'line', $lineCharacterPosition->line);
-                return false;
+                $this->codegen->log($this->prependLineNumbers($content), $error->message, 'line', $lineCharacterPosition->line);
+                throw new \Exception('Error parsing PHP source: ' . $error->message . ' line: ' . $lineCharacterPosition->line);
             }
         }
         return true;
+    }
+
+    private function prependLineNumbers(string $content)
+    {
+        $lineNumber = 1;
+        $result = [];
+        foreach (preg_split('/((\r?\n)|(\r\n?))/', $content) as $line) {
+            $result[] = $lineNumber . ': ' . $line;
+            $lineNumber++;
+        }
+        return implode(PHP_EOL, $result);
     }
 
     protected function parseClass(Node\Statement\ClassDeclaration $class)
@@ -180,7 +204,8 @@ class MergeClass
         // @todo create class if it doesn't exist
     }
 
-    protected function checkDiff($a, $b) {
+    protected function checkDiff($a, $b)
+    {
         $a = $this->removeEmptyLines($a);
         $b = $this->removeEmptyLines($b);
         if (preg_replace('/\s+/', '', $a) != preg_replace('/\s+/', '', $b)) {
@@ -190,15 +215,17 @@ class MergeClass
         return false;
     }
 
-    protected function removeEmptyLines(string $text): string {
+    protected function removeEmptyLines(string $text): string
+    {
         $text = explode(PHP_EOL, $text);
-        $text = array_filter($text, function($line) {
+        $text = array_filter($text, function ($line) {
             return trim($line) != '';
         });
         return implode(PHP_EOL, $text);
     }
 
-    protected function getPropertyName($member, $root) {
+    protected function getPropertyName($member, $root)
+    {
         $text = $member->propertyElements->getText($root);
         preg_match('/\$([a-z0-9_]+)/i', $text, $matches);
         return $matches[1];
@@ -241,7 +268,8 @@ class MergeClass
         $this->root2 = $this->parser->parseSourceFile($this->output);
     }
 
-    protected function logDiff($a, $b) {
+    protected function logDiff($a, $b)
+    {
         $a = explode(PHP_EOL, $a);
         $b = explode(PHP_EOL, $b);
         $cols = exec('tput cols');

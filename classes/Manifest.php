@@ -57,9 +57,14 @@ class Manifest implements \JsonSerializable
 
     public function addFile(string $file): self
     {
-        assert(is_file($file), new \Exception('Manifest expects files to exist'));
+        assert(is_file($file), new \Exception('Manifest expects files to exist: ' . $file));
         $hash = md5_file($file);
         $file = $this->getRelativePath($this->codegen->getPath(), realpath($file));
+        if (isset($this->files[$file])) {
+            $this->codegen->debug('Updating file in manifest', $file, $this->files[$file], '->', $hash);
+        } else {
+            $this->codegen->debug('Adding file to manifest', $file, $hash);
+        }
         $this->files[$file] = $hash;
         return $this;
     }

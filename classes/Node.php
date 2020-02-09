@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen;
 
 class Node
@@ -39,7 +40,7 @@ class Node
         return $this->names[$name];
     }
 
-    public function attr(string...$names): NodeAttribute
+    public function attr(string ...$names): NodeAttribute
     {
         foreach ($names as $name) {
             if (isset($this->attributes[$name])) {
@@ -49,7 +50,7 @@ class Node
         return new NodeAttribute();
     }
 
-    public function has(string...$names): bool
+    public function has(string ...$names): bool
     {
         foreach ($names as $name) {
             if (isset($this->attributes[$name])) {
@@ -74,7 +75,7 @@ class Node
         return preg_replace('!<' . $tag . '(?:[^>]*)>(.*)</' . $tag . '>!Ums', '$1', $this->xmlNode->asXml());
     }
 
-    public function is(string...$types): bool
+    public function is(string ...$types): bool
     {
         foreach ($types as $type) {
             if ($this->type == $type) {
@@ -100,7 +101,7 @@ class Node
         return null;
     }
 
-    public function child(string...$types): ?Node
+    public function child(string ...$types): ?Node
     {
         foreach ($this->children as $node) {
             foreach ($types as $type) {
@@ -112,7 +113,12 @@ class Node
         return null;
     }
 
-    public function children(string...$types): array
+    public function hasChild(string ...$types): bool
+    {
+        return $this->child(...$types) ? true : false;
+    }
+
+    public function children(string ...$types): array
     {
         $result = [];
         foreach ($this->children as $node) {

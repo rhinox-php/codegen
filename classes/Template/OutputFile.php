@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Template;
 
 class OutputFile
@@ -28,6 +29,11 @@ class OutputFile
             return $this->chmod(0755);
         }
         return $this->chmod(0644);
+    }
+
+    public function getContents(): string
+    {
+        return file_get_contents($this->path);
     }
 
     public function getPath(): string

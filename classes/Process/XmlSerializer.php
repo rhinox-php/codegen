@@ -12,23 +12,23 @@ use Symfony\Component\Console\Helper\Table;
 
 class XmlSerializer
 {
-    protected $codegen;
+    protected $entities;
 
-    public function __construct(Codegen $codegen) {
-        $this->codegen = $codegen;
+    public function __construct(array $entities) {
+        $this->entities = $entities;
     }
 
     public function serialize()
     {
         $xml = new \SimpleXMLElement('<codegen/>');
-        foreach ($this->codegen->getEntities() as $entity) {
+        foreach ($this->entities as $entity) {
             $nodeEntity = $xml->addChild('entity');
             $nodeEntity['name'] = $entity->getName();
 
             foreach ($entity->getAttributes() as $attribute) {
-                if ($attribute->isForeignKey()) {
-                    continue;
-                }
+                // if ($attribute->isForeignKey()) {
+                //     continue;
+                // }
                 switch ($attribute->getType()) {
                     case 'string': {
                         $nodeAttribute = $nodeEntity->addChild('string-attribute');
@@ -50,18 +50,18 @@ class XmlSerializer
                 $nodeAttribute['name'] = $attribute->getName();
             }
 
-            foreach ($entity->getRelationships() as $relationship) {
-                if ($relationship->getFrom() == $entity) {
-                    if ($relationship instanceof Relationship\BelongsTo) {
-                        $nodeAttribute = $nodeEntity->addChild('belongs-to');
-                    } elseif ($relationship instanceof Relationship\HasMany) {
-                        $nodeAttribute = $nodeEntity->addChild('has-many');
-                    } elseif ($relationship instanceof Relationship\HasOne) {
-                        $nodeAttribute = $nodeEntity->addChild('has-one');
-                    }
-                    $nodeAttribute['entity'] = $relationship->getName();
-                }
-            }
+            // foreach ($entity->getRelationships() as $relationship) {
+            //     if ($relationship->getFrom() == $entity) {
+            //         if ($relationship instanceof Relationship\BelongsTo) {
+            //             $nodeAttribute = $nodeEntity->addChild('belongs-to');
+            //         } elseif ($relationship instanceof Relationship\HasMany) {
+            //             $nodeAttribute = $nodeEntity->addChild('has-many');
+            //         } elseif ($relationship instanceof Relationship\HasOne) {
+            //             $nodeAttribute = $nodeEntity->addChild('has-one');
+            //         }
+            //         $nodeAttribute['entity'] = $relationship->getName();
+            //     }
+            // }
         }
 
         $dom = new \DOMDocument('1.0');

@@ -41,7 +41,7 @@ class Merge extends AbstractCommand
                     $writeFile = $path . '/merged/' . basename($existingFile);
                     $codegen->copyFile($existingFile, $writeFile);
                 }
-                \Rhino\Codegen\MergeClass::merge($codegen, $generatedFile, $writeFile);
+                \Rhino\Codegen\MergeClass::mergeFiles($codegen, $generatedFile, $writeFile);
             }
         }
     }

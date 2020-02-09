@@ -17,6 +17,7 @@ class Codegen
     public $pdo;
     public $db;
     public $node;
+    public $manifest;
 
     protected $namespace;
     protected $projectName;
@@ -37,8 +38,8 @@ class Codegen
     protected $outputLevel = self::OUTPUT_LEVEL_LOG;
     protected $loggedOnce = [];
     protected $hooks = [];
-    protected $manifest;
     protected $mergeFileMapper = null;
+    protected $manifestFile;
 
     public function __construct()
     {
@@ -91,7 +92,12 @@ class Codegen
     }
 
     protected function getManifestFile() {
-        return $this->getPath('codegen-manifest.json');
+        return $this->manifestFile ?: $this->getPath('codegen-manifest.json');
+    }
+
+    public function setManifestFile(string $manifestFile) {
+        $this->manifestFile = $manifestFile;
+        return $this;
     }
 
     public function readManifest() {
@@ -543,7 +549,7 @@ class Codegen
         assert(!!$file, new \Exception('Invalid file to write ' . $file));
 
         if (is_file($file)) {
-            if (md5($content) === md5_file($file)) {
+            if (!$this->isForce() && !$this->isFileDifferent($file, $content)) {
                 $this->debug('No changes to', $file);
                 return false;
             }
@@ -559,6 +565,17 @@ class Codegen
             return true;
         }
         return false;
+    }
+
+    private function isFileDifferent(string $file, string $content): bool {
+        if (!is_file($file)) {
+            return true;
+        }
+        $fileContent = file_get_contents($file);
+        assert($fileContent !== false, new \Exception('Could not read file ' . $file));
+        $fileContent = preg_replace('/\s+/', '', $fileContent);
+        $content = preg_replace('/\s+/', '', $content);
+        return $fileContent != $content;
     }
 
     public function copyFile(string $from, string $to): bool
@@ -617,7 +634,7 @@ class Codegen
     public function hook(string $hookName, array $parameters): array
     {
         if (isset($this->hooks[$hookName])) {
-            $this->log('Running hook', $hookName);
+            $this->debug('Running hook', $hookName);
             foreach ($this->hooks[$hookName] as $hook) {
                 $parameters = $hook->process(...$parameters);
             }

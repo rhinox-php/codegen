@@ -11,8 +11,9 @@ class Callback extends Hook
         $this->hook = $hook;
         $this->callback = $callback;
     }
-    
-    public function process()
+
+    public function process(\Rhino\Codegen\Template\OutputFile $outputFile): array
     {
+        return ($this->callback)($outputFile);
     }
 }

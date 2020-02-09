@@ -25,7 +25,7 @@ class Web extends \Rhino\Codegen\Codegen
     public function generate()
     {
         parent::generate();
-        $this->gitIgnore->generate();
+        // $this->gitIgnore->generate();
         $this->composer->generate();
         // $this->npm->generate();
         $this->env->generate();

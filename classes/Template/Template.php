@@ -3,6 +3,7 @@ namespace Rhino\Codegen\Template;
 
 use Rhino\Codegen\Codegen;
 use Rhino\Codegen\Hook;
+use Rhino\Codegen\MergeClass;
 
 abstract class Template
 {
@@ -44,6 +45,11 @@ abstract class Template
     {
         $this->paths[$template] = $path;
         return $this;
+    }
+
+    public function getPath(string $template): ?string
+    {
+        return $this->paths[$template];
     }
 
     public function getNamespace(string $type): string
@@ -164,6 +170,23 @@ abstract class Template
         [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
         if ($this->codegen->writeFile($outputPath, $output)) {
             $this->hook('gen:write', [$outputFile]);
+            $this->codegen->manifest->addFile($outputFile->getPath());
+        }
+        return $outputFile;
+    }
+
+    protected function mergeTemplateFile(string $templateFile, string $outputPath, array $data = []): ?OutputFile
+    {
+        if (!file_exists($outputPath)) {
+            return $this->renderTemplateFile($templateFile, $outputPath, $data);
+        }
+        $outputFile = new OutputFile($outputPath);
+        $output = $this->bufferTemplateFile($templateFile, $data);
+        $output = MergeClass::mergeStrings($this->codegen, $output, $outputFile->getContents());
+        [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
+        if ($this->codegen->writeFile($outputPath, $output)) {
+            $this->hook('gen:write', [$outputFile]);
+            $this->codegen->manifest->addFile($outputFile->getPath());
         }
         return $outputFile;
     }

@@ -3,7 +3,7 @@
     "require": {
         "icanboogie/inflector": "^1.4",
         "symfony/console": "^3.2",
-        "microsoft/tolerant-php-parser": "^0.0.3",
+        "microsoft/tolerant-php-parser": "^0.0.19",
         "friendsofphp/php-cs-fixer": "^2.7",
         "phpfmt-next/fmt": "^19.6"
     },

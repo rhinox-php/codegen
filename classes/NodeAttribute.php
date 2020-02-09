@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen;
 
 class NodeAttribute
@@ -25,7 +26,17 @@ class NodeAttribute
         return $default;
     }
 
-    public function __toString() {
+    public function int(int $default = 0): int
+    {
+        $value = $this->string();
+        if (!preg_match('/^[0-9]+$/', $value)) {
+            return $default;
+        }
+        return (int) $value;
+    }
+
+    public function __toString()
+    {
         return $this->string();
     }
 
