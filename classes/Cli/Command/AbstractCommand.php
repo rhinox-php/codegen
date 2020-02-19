@@ -21,7 +21,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
     protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false): \Rhino\Codegen\Codegen
     {
         if (!$schema) {
-            $currentDirectory = getcwd();
+            $currentDirectory = getcwd() . '/codegen/';
             while (is_dir($currentDirectory) ) {
                 if (is_file($currentDirectory . '/codegen.php')) {
                     $schema = $currentDirectory . '/codegen.php';
