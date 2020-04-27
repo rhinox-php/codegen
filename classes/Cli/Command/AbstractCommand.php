@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Rhino\Codegen\Codegen;
@@ -22,7 +23,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
     {
         if (!$schema) {
             $currentDirectory = getcwd() . '/codegen/';
-            while (is_dir($currentDirectory) ) {
+            do {
                 if (is_file($currentDirectory . '/codegen.php')) {
                     $schema = $currentDirectory . '/codegen.php';
                     break;
@@ -31,7 +32,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
                     break;
                 }
                 $currentDirectory = dirname($currentDirectory);
-            }
+            } while (is_dir($currentDirectory));
         }
         if (!is_file($schema)) {
             throw new \Exception('Could not find codegen schema file: ' . $schema);
