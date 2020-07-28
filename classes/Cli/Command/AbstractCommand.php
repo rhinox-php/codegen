@@ -21,8 +21,8 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
     protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false, bool $overwrite = false, ?string $filter = ''): \Rhino\Codegen\Codegen
     {
         if (!$schema) {
-            $currentDirectory = getcwd();
-            while (is_dir($currentDirectory) ) {
+            $currentDirectory = getcwd() . '/codegen/';
+            do {
                 if (is_file($currentDirectory . '/codegen.php')) {
                     $schema = $currentDirectory . '/codegen.php';
                     break;
@@ -31,7 +31,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
                     break;
                 }
                 $currentDirectory = dirname($currentDirectory);
-            }
+            } while (is_dir($currentDirectory));
         }
         if (!is_file($schema)) {
             throw new \Exception('Could not find codegen schema file: ' . $schema);
