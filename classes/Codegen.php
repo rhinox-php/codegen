@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen;
 
 class Codegen
@@ -23,6 +24,7 @@ class Codegen
     protected $projectName;
     protected $dryRun = self::DRY_RUN_INITIALIZING;
     protected $force = false;
+    protected $overwrite = false;
     protected $xmlParser;
     protected $templatePath;
     protected $viewPathPrefix;
@@ -80,27 +82,32 @@ class Codegen
         return $this;
     }
 
-    public function clean() {
+    public function clean()
+    {
         $this->validate();
         $this->readManifest();
         $this->manifest->clean($this->isForce());
         $this->writeManifest();
     }
 
-    public function getManifest() {
+    public function getManifest()
+    {
         return $this->manifest;
     }
 
-    protected function getManifestFile() {
+    protected function getManifestFile()
+    {
         return $this->manifestFile ?: $this->getPath('codegen-manifest.json');
     }
 
-    public function setManifestFile(string $manifestFile) {
+    public function setManifestFile(string $manifestFile)
+    {
         $this->manifestFile = $manifestFile;
         return $this;
     }
 
-    public function readManifest() {
+    public function readManifest()
+    {
         $this->log('Reading manifest...');
         $this->manifest = new Manifest($this);
         $manifest = $this->getManifestFile();
@@ -122,7 +129,8 @@ class Codegen
         return $this;
     }
 
-    public function writeManifest() {
+    public function writeManifest()
+    {
         if (!$this->dryRun) {
             $manifest = $this->getManifestFile();
             $this->log('Writing manifest: ' . $manifest);
@@ -375,6 +383,37 @@ class Codegen
         return $this;
     }
 
+    public function isOverwrite(): bool
+    {
+        return $this->overwrite;
+    }
+
+    public function setOverwrite(bool $overwrite): self
+    {
+        $this->overwrite = $overwrite;
+        return $this;
+    }
+
+    public function isFiltered(string $string): bool
+    {
+        if (preg_match('/' . $this->getFilter() . '/i', $string)) {
+            $this->log('Filtering', $string, 'on', '/' . $this->getFilter() . '/i');
+            return false;
+        }
+        return true;
+    }
+
+    public function getFilter(): ?string
+    {
+        return $this->filter;
+    }
+
+    public function setFilter(?string $filter): self
+    {
+        $this->filter = $filter;
+        return $this;
+    }
+
     public function getTemplatePath(): string
     {
         return $this->templatePath;
@@ -553,12 +592,12 @@ class Codegen
                 $this->debug('No changes to', $file);
                 return false;
             }
-            if (!$this->isForce() && filesize($file) > 0 && $this->manifest->getHash($file) && md5_file($file) !== $this->manifest->getHash($file)) {
-                $this->log('Local modifications to file, not overwriting', $file, md5_file($file) ?: 'null', $this->manifest->getHash($file) ?: 'null');
+            if (!$this->isForce() && !$this->isOverwrite() && filesize($file) > 0 && $this->manifest->getHash($file) && md5_file($file) !== $this->manifest->getHash($file)) {
+                $this->log('Local modifications to file, not overwriting', $file, 'current hash:', md5_file($file) ?: 'null', 'manifest hash:', $this->manifest->getHash($file) ?: 'null');
                 return false;
             }
         }
-        $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file);
+        $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file, md5($content));
         if (!$this->isDryRun()) {
             file_put_contents($file, $content);
             $this->manifest->addFile($file);
@@ -567,7 +606,8 @@ class Codegen
         return false;
     }
 
-    private function isFileDifferent(string $file, string $content): bool {
+    private function isFileDifferent(string $file, string $content): bool
+    {
         if (!is_file($file)) {
             return true;
         }

@@ -75,6 +75,11 @@ class Node
         return preg_replace('!<' . $tag . '(?:[^>]*)>(.*)</' . $tag . '>!Ums', '$1', $this->xmlNode->asXml());
     }
 
+    public function getContent(): string
+    {
+        return (string) $this->xmlNode;
+    }
+
     public function is(string ...$types): bool
     {
         foreach ($types as $type) {

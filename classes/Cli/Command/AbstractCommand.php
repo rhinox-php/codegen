@@ -18,7 +18,7 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
-    protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false): \Rhino\Codegen\Codegen
+    protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false, bool $overwrite = false, ?string $filter = ''): \Rhino\Codegen\Codegen
     {
         if (!$schema) {
             $currentDirectory = getcwd();
@@ -36,9 +36,12 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
         if (!is_file($schema)) {
             throw new \Exception('Could not find codegen schema file: ' . $schema);
         }
+        /** @var Codegen */
         $codegen = require $schema;
         $codegen->setDryRun($dryRun);
         $codegen->setForce($force);
+        $codegen->setOverwrite($overwrite);
+        $codegen->setFilter($filter);
         if ($debug) {
             $codegen->setOutputLevel(Codegen::OUTPUT_LEVEL_DEBUG);
         }

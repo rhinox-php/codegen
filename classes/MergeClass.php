@@ -146,6 +146,7 @@ class MergeClass
         }
         $previousMethodName = null;
         $previousPropertyName = null;
+        $previousConstName = null;
         foreach ($members as $member) {
             if ($member instanceof Node\MethodDeclaration) {
                 $this->replaceClassMethod($className, $member->name->getText($this->root1), $member->getFullText(), $previousMethodName);
@@ -153,6 +154,9 @@ class MergeClass
             } elseif ($member instanceof Node\PropertyDeclaration) {
                 $this->replaceClassProperty($className, $this->getPropertyName($member, $this->root1), $member->getFullText(), $previousPropertyName);
                 $previousPropertyName = $this->getPropertyName($member, $this->root1);
+            } elseif ($member instanceof Node\ClassConstDeclaration) {
+                $this->replaceClassConst($className, $this->getConstName($member, $this->root1), $member->getFullText(), $previousConstName);
+                $previousConstName = $this->getConstName($member, $this->root1);
             }
         }
     }
@@ -190,9 +194,7 @@ class MergeClass
                 return;
             }
             $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
-            $oldOutput = $this->output;
             $this->setOutput(substr_replace($this->output, $replacement, $start, 0));
-            $this->logDiff($oldOutput, $this->output);
         }
         // @todo create class if it doesn't exist
     }
@@ -243,6 +245,51 @@ class MergeClass
         // @todo create class if it doesn't exist
     }
 
+    protected function replaceClassConst(string $className1, string $memberName, string $replacement, ?string $previousConstName)
+    {
+        $this->codegen->debug('Found class const', $className1, $memberName);
+        $found = false;
+        foreach ($this->iterateClassMembers($className1, $this->root2, Node\ClassConstDeclaration::class) as $member) {
+            if ($this->getConstName($member, $this->root2) == $memberName) {
+                $found = true;
+                if ($this->checkDiff($member->getFullText(), $replacement)) {
+                    $this->codegen->log('Replacing class const', $className1, $memberName);
+                    $this->setOutput(str_replace($member->getFullText(), $replacement, $this->output));
+                    $found = true;
+                }
+            }
+        }
+        if (!$found) {
+            $this->codegen->log('Class const not found, appending', $className1, $memberName);
+
+            $start = null;
+            if ($previousConstName) {
+                $constDeclaration = $this->getConstDeclaration($className1, $previousConstName, $this->root2);
+                if ($constDeclaration) {
+                    $start = $constDeclaration->semicolon->start + 1;
+                }
+            }
+            if (!$start) {
+                $classDeclaration = $this->getClassDeclaration($className1, $this->root2);
+                if ($classDeclaration) {
+                    $start = $classDeclaration->classMembers->closeBrace->start;
+                }
+            }
+            if (!$start) {
+                $this->codegen->log('Cannot find replacement start point', $className1, $memberName);
+                return;
+            }
+
+
+            $classDeclaration = $this->getClassDeclaration($className1, $this->root2);
+            if (!$classDeclaration) {
+                return;
+            }
+            $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
+            $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
+        }
+    }
+
     protected function checkDiff($a, $b)
     {
         $a = $this->removeEmptyLines($a);
@@ -267,6 +314,13 @@ class MergeClass
     {
         $text = $member->propertyElements->getText($root);
         preg_match('/\$([a-z0-9_]+)/i', $text, $matches);
+        return $matches[1];
+    }
+
+    protected function getConstName($member, $root)
+    {
+        $text = $member->constElements->getText($root);
+        preg_match('/^([a-z0-9_]+)/i', $text, $matches);
         return $matches[1];
     }
 
@@ -300,6 +354,17 @@ class MergeClass
             $propertyName2 = $this->getPropertyName($propertyDeclaration, $root);
             if ($propertyName1 == $propertyName2) {
                 return $propertyDeclaration;
+            }
+        }
+        return null;
+    }
+
+    protected function getConstDeclaration($className1, $constName1, $root)
+    {
+        foreach ($this->iterateClassMembers($className1, $root, Node\ClassConstDeclaration::class) as $constDeclaration) {
+            $constName2 = $this->getConstName($constDeclaration, $root);
+            if ($constName1 == $constName2) {
+                return $constDeclaration;
             }
         }
         return null;
