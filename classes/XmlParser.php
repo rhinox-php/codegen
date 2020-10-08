@@ -1,11 +1,16 @@
 <?php
+
 namespace Rhino\Codegen;
+
+use SimpleXMLElement;
+use SimpleXMLIterator;
 
 class XmlParser
 {
     protected $file;
     protected $codegen;
     protected $names;
+    protected array $expanders = [];
 
     public function __construct(Codegen $codegen, $file)
     {
@@ -20,12 +25,14 @@ class XmlParser
         $errorMode = libxml_use_internal_errors(true);
         try {
             $file = $this->getFile();
-            $xml = simplexml_load_file($file);
+            $xml = new SimpleXMLIterator(file_get_contents($file));
             if (!$xml) {
                 throw new \Exception('Could not read XML: ' . implode(PHP_EOL, array_map(function ($error) {
                     return "$error->line:$error->column $error->message";
                 }, libxml_get_errors())));
             }
+            $this->expand($xml);
+            // echo $xml->asXML() . PHP_EOL;
             $node = new Node($xml, $this);
             $this->codegen->node->merge($node);
         } catch (\Exception $exception) {
@@ -38,7 +45,34 @@ class XmlParser
         return $this->codegen;
     }
 
-    public function name(Node $node) {
+    private function expand(\SimpleXMLIterator $sxi, \SimpleXMLIterator $parent = null)
+    {
+        for ($sxi->rewind(); $sxi->valid(); $sxi->next()) {
+            [$key, $node] = [$sxi->key(), $sxi->current()];
+            // var_dump($node);
+            if (isset($this->expanders[$key])) {
+                // echo $key . PHP_EOL;
+                $xml = '<root>' . $this->expanders[$key] . '</root>';
+                $xml = preg_replace_callback('/{{\s*(?<expression>.*?)\s*}}/', function ($matches) use($node) {
+                    return $node[$matches['expression']];
+                }, $xml);
+                $insert = new SimpleXMLIterator($xml);
+                for ($insert->rewind(); $insert->valid(); $insert->next()) {
+                    $insertedNode = $sxi->addChild($insert->key());
+                    // echo $insert->key() . PHP_EOL;
+                    foreach ($insert->current()->attributes() as $attributeKey => $attributeValue) {
+                        $insertedNode->addAttribute($attributeKey, $attributeValue);
+                    }
+                }
+            }
+            if ($sxi->hasChildren()) {
+                $this->expand($node, $sxi);
+            }
+        }
+    }
+
+    public function name(Node $node)
+    {
         if (!$this->names) {
             return [];
         }
@@ -51,8 +85,15 @@ class XmlParser
         return $this->file;
     }
 
-    public function setNames(callable $names) {
+    public function setNames(callable $names)
+    {
         $this->names = $names;
+        return $this;
+    }
+
+    public function addExpander(string $node, string $expandedXml)
+    {
+        $this->expanders[$node] = $expandedXml;
         return $this;
     }
 }

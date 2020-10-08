@@ -21,7 +21,7 @@ class Node
             $this->children[] = new static($value, $xmlParser);
         }
         foreach ($xmlParser->name($this) as $name => $value) {
-            $this->names[$name] = $value;
+            $this->names[$name] = (string) $value;
         }
     }
 

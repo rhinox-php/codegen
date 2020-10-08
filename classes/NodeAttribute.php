@@ -114,8 +114,8 @@ class NodeAttribute
     {
         $inflector = $this->getInflector();
         $result = $this->string();
-        $result = $inflector->underscore($result);
-        $result = $inflector->humanize($result);
+        $result = preg_replace('/\bid\b/i', 'ID', $result);
+        $result = preg_replace('/\buuid\b/i', 'UUID', $result);
         return new static($this->name, $result);
     }
 }
