@@ -21,6 +21,14 @@ class FormatPhp
 
     public static function formatString(string $fileContent): string
     {
-        return $fileContent;
+        try {
+            $file = tmpfile();
+            fwrite($file, $fileContent);
+            $path = stream_get_meta_data($file)['uri'];
+            static::formatFile($path);
+            return file_get_contents($path);
+        } finally {
+            fclose($file);
+        }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Watch;
 
 class Watcher
@@ -36,24 +37,7 @@ class Watcher
     public function scan()
     {
         echo '.';
-        $files = [];
-        $directories = $this->directories;
-        while (!empty($directories)) {
-            $directory = array_shift($directories);
-            foreach (scandir($directory) as $file) {
-                usleep($this->sleepTime);
-                if ($this->isIgnored($file)) {
-                    continue;
-                }
-                $file = realpath($directory . '/' . $file);
-                if (is_dir($file)) {
-                    $directories[] = $file;
-                    // echo '*' . $file . PHP_EOL;
-                    continue;
-                }
-                $files[$file] = $this->checkFile($file);
-            }
-        }
+        [$files, $key] = $this->scanFiles();
         $changed = [];
         foreach ($files as $file => $check) {
             if (!isset($this->lastFiles[$file])) {
@@ -77,18 +61,46 @@ class Watcher
             echo PHP_EOL;
             $this->triggerCallback(array_keys($changed));
         }
+        // Re-scan files after running callback
+        [$files, $key] = $this->scanFiles();
         $this->lastKey = $key;
         $this->lastFiles = $files;
     }
 
-    protected function checkFile(string $file) {
+    private function scanFiles(): array
+    {
+        $files = [];
+        $directories = $this->directories;
+        while (!empty($directories)) {
+            $directory = array_shift($directories);
+            foreach (scandir($directory) as $file) {
+                usleep($this->sleepTime);
+                if ($this->isIgnored($file)) {
+                    continue;
+                }
+                $file = realpath($directory . '/' . $file);
+                if (is_dir($file)) {
+                    $directories[] = $file;
+                    // echo '*' . $file . PHP_EOL;
+                    continue;
+                }
+                $files[$file] = $this->checkFile($file);
+            }
+        }
+        ksort($files);
+        $key = md5(implode(':', $files));
+        return [$files, $key];
+    }
+
+    protected function checkFile(string $file)
+    {
         switch ($this->method) {
             case static::METHOD_MODIFIED_TIME: {
-                return filemtime($file);
-            }
+                    return filemtime($file);
+                }
             case static::METHOD_HASH: {
-                return md5_file($file);
-            }
+                    return md5_file($file);
+                }
         }
     }
 

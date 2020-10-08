@@ -12,6 +12,7 @@ class Application extends \Symfony\Component\Console\Application
         $this->add(new Command\DescTree());
         $this->add(new Command\Gen());
         $this->add(new Command\GenReverse());
+        $this->add(new Command\GenStub());
         $this->add(new Command\Clean());
         $this->add(new Command\Init());
         $this->add(new Command\MakeMigration());

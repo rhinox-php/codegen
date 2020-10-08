@@ -396,8 +396,11 @@ class Codegen
 
     public function isFiltered(string $string): bool
     {
+        if (!$this->getFilter()) {
+            return false;
+        }
         if (preg_match('/' . $this->getFilter() . '/i', $string)) {
-            $this->log('Filtering', $string, 'on', '/' . $this->getFilter() . '/i');
+            $this->debug('Filtering', $string, 'on', '/' . $this->getFilter() . '/i');
             return false;
         }
         return true;
