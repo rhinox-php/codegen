@@ -60,7 +60,7 @@ class Node
         return false;
     }
 
-    public function bool($name, bool $default)
+    public function bool($name, ?bool $default)
     {
         return $this->attr($name)->bool($default);
     }
