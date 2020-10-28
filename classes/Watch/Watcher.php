@@ -10,7 +10,7 @@ class Watcher
     protected $callback;
     protected $directories;
     protected $method = self::METHOD_MODIFIED_TIME;
-    protected $sleepTime = 2;
+    protected $sleepTime;
     protected $ignore = [
         '/^\./',
         '/^vendor$/',
@@ -21,9 +21,10 @@ class Watcher
     protected $lastKey = null;
     protected $lastFiles = [];
 
-    public function __construct(callable $callback)
+    public function __construct(callable $callback, int $sleepTime = 2)
     {
         $this->callback = $callback;
+        $this->sleepTime = $sleepTime;
     }
 
     public function start()
@@ -59,7 +60,7 @@ class Watcher
         $key = md5(implode(':', $files));
         if ($key != $this->lastKey) {
             echo PHP_EOL;
-            $this->triggerCallback(array_keys($changed));
+            $this->triggerCallback(array_keys($changed), $files);
         }
         // Re-scan files after running callback
         [$files, $key] = $this->scanFiles();
@@ -114,9 +115,9 @@ class Watcher
         return false;
     }
 
-    public function triggerCallback(array $changed): self
+    public function triggerCallback(array $changed, array $files): self
     {
-        call_user_func($this->callback, $changed);
+        call_user_func($this->callback, $changed, $files);
         return $this;
     }
 

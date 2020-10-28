@@ -21,7 +21,7 @@ class Node
             $this->children[] = new static($value, $xmlParser);
         }
         foreach ($xmlParser->name($this) as $name => $value) {
-            $this->names[$name] = $value;
+            $this->names[$name] = (string) $value;
         }
     }
 
@@ -60,7 +60,7 @@ class Node
         return false;
     }
 
-    public function bool($name, bool $default)
+    public function bool($name, ?bool $default)
     {
         return $this->attr($name)->bool($default);
     }

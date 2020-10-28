@@ -1,6 +1,6 @@
 <?php
 
-namespace Rhino\Codegen\Cli\Command;
+namespace Rhino\Codegen;
 
 use Microsoft\PhpParser\Parser;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,31 +11,27 @@ use Microsoft\PhpParser\DiagnosticsProvider;
 use Microsoft\PhpParser\Node;
 use Microsoft\PhpParser\PositionUtilities;
 use Rhino\Codegen\FormatPhp;
-use Rhino\Codegen\Stub;
 
-class GenStub extends AbstractCommand
+class Stub
 {
-    protected function configure()
+    private Codegen $codegen;
+    private string $file;
+
+    public function __construct(Codegen $codegen, string $file)
     {
-        parent::configure();
-        $this->setName('gen:stub')
-            ->setDescription('Generate code')
-            ->addArgument('file', InputArgument::REQUIRED, 'Class file');
+        $this->codegen = $codegen;
+        $this->file = $file;
+
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function generate(): string
     {
-        $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'), $input->getOption('overwrite'), $input->getOption('filter'));
-        $stub = new Stub($codegen, $input->getArgument('file'));
-        var_dumP($stub);
-        return;
-        $file = $input->getArgument('file');
-        if (!is_file($file)) {
-            throw new \Exception('Invalid file: ' . $file);
+        if (!is_file($this->file)) {
+            throw new \Exception('Invalid file: ' . $this->file);
         }
-        $output->writeln('Generating stub for: ' . $file);
+        $this->codegen->log('Generating stub for: ' . $this->file);
         $parser = new Parser();
-        $root = $parser->parseSourceFile(file_get_contents($file));
+        $root = $parser->parseSourceFile(file_get_contents($this->file));
 
         ob_start();
         echo "<?php" . PHP_EOL;
@@ -48,7 +44,7 @@ class GenStub extends AbstractCommand
             }
         }
         $stub = ob_get_clean();
-        echo FormatPhp::formatString($stub);
+        return FormatPhp::formatString($stub);
     }
 
     protected function parseClass(Node\SourceFileNode $root, Node\Statement\ClassDeclaration $class)

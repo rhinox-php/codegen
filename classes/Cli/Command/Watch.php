@@ -19,6 +19,7 @@ class Watch extends AbstractCommand
         parent::configure();
         $this->setName('watch')
             ->setDescription('Watch code for changes and trigger generation automatically')
+            ->addOption('sleep', null, InputOption::VALUE_REQUIRED, 'Sleep time (microseconds)', 2)
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force regenerating all files')
             ->addOption('overwrite', 'o', InputOption::VALUE_NONE, 'Overwrite local changes to files')
             ->addOption('filter', 'i', InputOption::VALUE_REQUIRED, 'Filter entities');
@@ -27,7 +28,8 @@ class Watch extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'), $input->getOption('overwrite'), $input->getOption('filter'));
-        $watcher = new \Rhino\Codegen\Watch\Watcher(function ($changed) use ($input, $output, $codegen) {
+        $watcher = new \Rhino\Codegen\Watch\Watcher(function ($changed, $files) use ($input, $output, $codegen) {
+            $codegen->log('Watched files', count($files));
             $codegen->log('Files changed', array_slice($changed, 0, 3));
 
             $executableFinder = new PhpExecutableFinder();
@@ -67,7 +69,7 @@ class Watch extends AbstractCommand
                     $output->write($buffer);
                 }
             });
-        });
+        }, $input->getOption('sleep'));
         $watcher->addDirectory(__DIR__ . '/../../../');
         $watcher->addDirectory('.');
         $watcher->start();

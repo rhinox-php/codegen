@@ -28,7 +28,8 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
                     CREATE TABLE IF NOT EXISTS `{$entity->table}` (
                         `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                         `created_at` DATETIME NOT NULL,
-                        `updated_at` DATETIME NULL
+                        `updated_at` DATETIME NULL,
+                        `deleted_at` DATETIME NULL
                     )
                     ENGINE = InnoDB
                     DEFAULT CHARSET = {$this->codegen->getDatabaseCharset()}

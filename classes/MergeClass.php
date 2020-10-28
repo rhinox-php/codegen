@@ -79,6 +79,10 @@ class MergeClass
             return $this;
         }
 
+        if (strlen($this->classSourceInto) === 0) {
+            $this->output = $this->classSourceFrom;
+            return $this;
+        }
         $this->output = $this->classSourceInto;
         $this->codegen->debug('Parsing "into" class source...');
         $this->root2 = $this->parser->parseSourceFile($this->output);
@@ -104,7 +108,6 @@ class MergeClass
     protected function validate($content, $root)
     {
         assert(is_string($content), new \InvalidArgumentException('Expected source to be a string.'));
-        assert(strlen($content) > 0, new \InvalidArgumentException('Expected source string to not be empty.'));
 
         $errors = DiagnosticsProvider::getDiagnostics($root);
         if (!empty($errors)) {
