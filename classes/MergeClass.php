@@ -240,7 +240,8 @@ class MergeClass
                 return;
             }
             $replacement = PHP_EOL . '    ' . trim($replacement) . PHP_EOL;
-            $this->setOutput(substr_replace($this->output, $replacement, $classDeclaration->classMembers->closeBrace->start, 0));
+
+            $this->setOutput(substr_replace($this->output, $replacement, $start, 0));
         }
         // @todo create class if it doesn't exist
     }
