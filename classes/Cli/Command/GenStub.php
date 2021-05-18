@@ -55,7 +55,7 @@ class GenStub extends AbstractCommand
     {
         $className = $class->name->getText($root);
         echo "die('This file should not be included, only analyzed by your IDE');" . PHP_EOL;
-        echo "class $className extends \Illuminate\Support\Facades\Facade {" . PHP_EOL;
+        echo "class $className {" . PHP_EOL;
         foreach ($class->classMembers as $member) {
             $this->parseClassMember($root, $className, $member);
         }
