@@ -49,17 +49,20 @@ class XmlParser
     {
         for ($sxi->rewind(); $sxi->valid(); $sxi->next()) {
             [$key, $node] = [$sxi->key(), $sxi->current()];
-            // var_dump($node);
             if (isset($this->expanders[$key])) {
-                // echo $key . PHP_EOL;
                 $xml = '<root>' . $this->expanders[$key] . '</root>';
                 $xml = preg_replace_callback('/{{\s*(?<expression>.*?)\s*}}/', function ($matches) use($node) {
+                    foreach (explode('|', $matches['expression']) as $attribute) {
+                        $attribute = trim($attribute);
+                        if (isset($node[$attribute]) && $node[$attribute]) {
+                            return $node[$attribute];
+                        }
+                    }
                     return $node[$matches['expression']];
                 }, $xml);
                 $insert = new SimpleXMLIterator($xml);
                 for ($insert->rewind(); $insert->valid(); $insert->next()) {
                     $insertedNode = $sxi->addChild($insert->key());
-                    // echo $insert->key() . PHP_EOL;
                     foreach ($insert->current()->attributes() as $attributeKey => $attributeValue) {
                         $insertedNode->addAttribute($attributeKey, $attributeValue);
                     }
