@@ -118,4 +118,18 @@ class NodeAttribute
         $result = preg_replace('/\buuid\b/i', 'UUID', $result);
         return new static($this->name, $result);
     }
+
+    public function lowercase(): self
+    {
+        $result = $this->string();
+        $result = strtolower($result);
+        return new static($this->name, $result);
+    }
+
+    public function uppercase(): self
+    {
+        $result = $this->string();
+        $result = strtoupper($result);
+        return new static($this->name, $result);
+    }
 }
