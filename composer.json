@@ -4,7 +4,6 @@
         "symfony/console": "^3.2",
         "microsoft/tolerant-php-parser": "^0.0.19",
         "friendsofphp/php-cs-fixer": "^2.7",
-        "phpfmt-next/fmt": "^19.6",
         "icanboogie/inflector": "^2.0"
     },
     "autoload": {
