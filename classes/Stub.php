@@ -83,8 +83,8 @@ class Stub
                     echo $member->parameters->getText($root);
                 }
                 echo ')';
-                if ($member->returnType) {
-                    echo ': ' . $member->returnType->getText($root);
+                if ($member->returnTypeList) {
+                    echo ': ' . $member->returnTypeList->getText($root);
                 }
                 foreach ($member->getChildNodes() as $child) {
                     // var_dump(get_class($child));
