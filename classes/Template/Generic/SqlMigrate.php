@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Template\Generic;
 
 use Rhino\Codegen\Database\Column\MySql as MySqlColumn;
@@ -73,7 +74,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
             $this->codegen->log('Change table column type', $entity->table, $columnName, $columnSchema['type'], $column->getType());
         }
         if (isset($columnSchema['size'])) {
-            if (!$column->isSize($columnSchema['size'])) {
+            if ($column->getSize() !== null && !$column->isSize($columnSchema['size'])) {
                 $alter = true;
                 $this->codegen->log('Change table column size', $entity->table, $columnName, $columnSchema['size'], $column->getSize());
             }
@@ -81,7 +82,7 @@ class SqlMigrate extends \Rhino\Codegen\Template\Generic implements \Rhino\Codeg
         if (isset($columnSchema['signed'])) {
             if ($column->isSigned() != $columnSchema['signed']) {
                 $alter = true;
-                $this->codegen->log('Change table column sign', $entity->table, $columnName, $columnSchema['signed'], $column->isSigned());
+                $this->codegen->log('Change table column sign', $entity->table, $columnName, $column->isSigned() ? 'signed' : 'unsigned', 'to', $columnSchema['signed'] ? 'signed' : 'unsigned');
             }
         }
         if (isset($columnSchema['nullable'])) {

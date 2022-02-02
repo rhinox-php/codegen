@@ -81,7 +81,7 @@ class MySql implements ColumnInterface
 
     public function isSigned(): bool
     {
-        return !preg_match('/^[a-z]+\([0-9]+\) unsigned/', $this->getDescription()['Type']);
+        return !preg_match('/^[a-z]+(\([0-9]+\))? unsigned/', $this->getDescription()['Type']);
     }
 
     public function isNullable()
@@ -101,7 +101,7 @@ class MySql implements ColumnInterface
         return false;
     }
 
-    protected function getDescription(): array
+    public function getDescription(): array
     {
         try {
             $statement = $this->mysql->pdo->prepare("SHOW COLUMNS FROM `$this->tableName` LIKE ?");
