@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,7 +18,7 @@ class Merge extends AbstractCommand
             ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter files to merge.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $filter = $input->getOption('filter');
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
@@ -44,5 +45,6 @@ class Merge extends AbstractCommand
                 \Rhino\Codegen\MergeClass::mergeFiles($codegen, $generatedFile, $writeFile);
             }
         }
+        return 0;
     }
 }

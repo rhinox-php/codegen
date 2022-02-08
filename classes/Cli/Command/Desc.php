@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Rhino\Codegen\Codegen;
@@ -20,7 +21,7 @@ class Desc extends AbstractCommand
             ->addOption('full', 'f', InputOption::VALUE_NONE, 'Output full descriptions.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
         $description = new Description($codegen);
@@ -41,5 +42,6 @@ class Desc extends AbstractCommand
                 $output->writeln($line);
             }
         }
+        return 0;
     }
 }

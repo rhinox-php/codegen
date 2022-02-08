@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,9 +16,10 @@ class Info extends AbstractCommand
             ->setDescription('List namespaces and paths');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
             ->codegenInfo();
+        return 0;
     }
 }

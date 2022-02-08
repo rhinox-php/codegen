@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,9 +17,10 @@ class DbReset extends AbstractCommand
             ->addArgument('entity', InputArgument::OPTIONAL, 'Entity type to reset.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
             ->dbReset();
+        return 0;
     }
 }

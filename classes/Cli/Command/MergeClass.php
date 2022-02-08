@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,11 +18,12 @@ class MergeClass extends AbstractCommand
             ->addOption('file-2', null, InputOption::VALUE_REQUIRED, 'File 2');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
         $file1 = $input->getOption('file-1');
         $file2 = $input->getOption('file-2');
         \Rhino\Codegen\MergeClass::mergeFiles($codegen, $file1, $file2);
+        return 0;
     }
 }

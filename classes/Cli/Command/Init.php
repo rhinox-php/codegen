@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,7 +17,7 @@ class Init extends AbstractCommand
             ->setDescription('Init codegen files');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $path = $input->getOption('path');
         if (!is_dir($path)) {
@@ -44,5 +45,6 @@ class Init extends AbstractCommand
                 }
             }
         }
+        return 0;
     }
 }

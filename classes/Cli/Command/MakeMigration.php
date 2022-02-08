@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,7 +16,7 @@ class MakeMigration extends AbstractCommand
             ->addArgument('migrationName', InputArgument::REQUIRED, 'Name of migration.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $migrationName = $input->getArgument('migrationName');
         $migrationName = strtolower($migrationName);
@@ -26,5 +27,6 @@ class MakeMigration extends AbstractCommand
             $output->writeln($file);
             file_put_contents($file, '');
         }
+        return 0;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,10 +16,11 @@ class GenReverse extends AbstractCommand
             ->setDescription('Reverse engineer database to Codegen XML');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'));
         $reverse = new \Rhino\Codegen\Process\ReverseMySql($codegen);
         $reverse->getXml();
+        return 0;
     }
 }

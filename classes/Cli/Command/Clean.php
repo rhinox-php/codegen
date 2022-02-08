@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,9 +17,10 @@ class Clean extends AbstractCommand
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Delete even if hashes don\'t match');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'))
             ->clean();
+        return 0;
     }
 }

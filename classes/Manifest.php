@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen;
 
 class Manifest implements \JsonSerializable
@@ -38,7 +39,7 @@ class Manifest implements \JsonSerializable
         }
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         ksort($this->files);
         return $this->files;

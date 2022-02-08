@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,9 +18,10 @@ class DbMigrate extends AbstractCommand
             ->addOption('run', 'r', InputOption::VALUE_NONE, 'Run migrations.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'))
             ->dbMigrate($input->getOption('write'), $input->getOption('run'));
+        return 0;
     }
 }
