@@ -96,12 +96,11 @@ class Watcher
     protected function checkFile(string $file)
     {
         switch ($this->method) {
-            case static::METHOD_MODIFIED_TIME: {
-                    return filemtime($file);
-                }
-            case static::METHOD_HASH: {
-                    return md5_file($file);
-                }
+            case static::METHOD_MODIFIED_TIME:
+                return filemtime($file);
+
+            case static::METHOD_HASH:
+                return md5_file($file);
         }
     }
 

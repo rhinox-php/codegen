@@ -42,6 +42,10 @@ class Codegen
     protected $hooks = [];
     protected $mergeFileMapper = null;
     protected $manifestFile;
+    protected $watchDirectories = [
+        __DIR__ . '/',
+        '.',
+    ];
 
     public function __construct()
     {
@@ -710,6 +714,17 @@ class Codegen
     public function setMergeFileMapper(callable $mergeFileMapper): self
     {
         $this->mergeFileMapper = $mergeFileMapper;
+        return $this;
+    }
+
+    public function getWatchDirectories(): array
+    {
+        return $this->watchDirectories;
+    }
+
+    public function setWatchDirectories(array $watchDirectories): self
+    {
+        $this->watchDirectories = $watchDirectories;
         return $this;
     }
 }

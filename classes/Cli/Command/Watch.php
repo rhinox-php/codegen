@@ -25,7 +25,7 @@ class Watch extends AbstractCommand
             ->addOption('filter', 'i', InputOption::VALUE_REQUIRED, 'Filter entities');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $codegen = $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'), $input->getOption('overwrite'), $input->getOption('filter'));
         $watcher = new \Rhino\Codegen\Watch\Watcher(function ($changed, $files) use ($input, $output, $codegen) {
@@ -70,8 +70,10 @@ class Watch extends AbstractCommand
                 }
             });
         }, $input->getOption('sleep'));
-        $watcher->addDirectory(__DIR__ . '/../../../');
-        $watcher->addDirectory('.');
+        foreach ($codegen->getWatchDirectories() as $directory) {
+            $watcher->addDirectory($directory);
+        }
         $watcher->start();
+        return 0;
     }
 }
