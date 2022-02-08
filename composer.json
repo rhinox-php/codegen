@@ -1,10 +1,10 @@
 {
     "name": "rhinox/codegen",
     "require": {
-        "symfony/console": "^3.2",
-        "microsoft/tolerant-php-parser": "^0.1",
-        "friendsofphp/php-cs-fixer": "^2.7",
-        "icanboogie/inflector": "^2.0"
+        "friendsofphp/php-cs-fixer": "^3.5",
+        "symfony/console": "^6.0",
+        "microsoft/tolerant-php-parser": "^0.1.1",
+        "icanboogie/inflector": "^2.2"
     },
     "autoload": {
         "psr-4": {

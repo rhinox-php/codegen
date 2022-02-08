@@ -9,7 +9,9 @@ class PhpCsFixer extends Hook
 
     public function process(OutputFile $outputFile): array
     {
-        \Rhino\Codegen\FormatPhp::formatFile($outputFile->getPath());
+        if ($outputFile->getExtension() === 'php') {
+            \Rhino\Codegen\FormatPhp::formatFile($outputFile->getPath());
+        }
         return [$outputFile];
     }
 }

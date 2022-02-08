@@ -46,4 +46,9 @@ class OutputFile
         $this->path = $value;
         return $this;
     }
+
+    public function getExtension(): string
+    {
+        return pathinfo($this->path, PATHINFO_EXTENSION);
+    }
 }

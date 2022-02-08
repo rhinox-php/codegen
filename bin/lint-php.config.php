@@ -2,10 +2,10 @@
 
 $finder = \PhpCsFixer\Finder::create()
     ->in([
-        realpath('.'),
+        realpath(__DIR__ . '/../classes'),
     ]);
 
-return \PhpCsFixer\Config::create()
+return (new \PhpCsFixer\Config())
     ->setUsingCache(false)
     ->setRules([
         '@PSR2' => true,
@@ -29,7 +29,7 @@ return \PhpCsFixer\Config::create()
         'blank_line_before_statement' => false,
         'class_attributes_separation' => [
             'elements' => [
-                'method',
+                'method' => 'one',
             ],
         ],
         'no_unused_imports' => true,
@@ -38,20 +38,22 @@ return \PhpCsFixer\Config::create()
         ],
         'single_quote' => true,
         'ordered_class_elements' => [
-            'use_trait',
-            'constant_public',
-            'constant_protected',
-            'constant_private',
-            // 'property_public',
-            // 'property_protected',
-            // 'property_private',
-            // 'construct',
-            // 'destruct',
-            // 'magic',
-            // 'phpunit',
-            // 'method_public',
-            // 'method_protected',
-            // 'method_private',
+            'order' => [
+                'use_trait',
+                'constant_public',
+                'constant_protected',
+                'constant_private',
+                'property_public',
+                'property_protected',
+                'property_private',
+                'construct',
+                'destruct',
+                // 'magic',
+                // 'phpunit',
+                // 'method_public',
+                // 'method_protected',
+                // 'method_private',
+            ],
         ],
     ])
     ->setFinder($finder);
