@@ -1,6 +1,8 @@
 <?php
 namespace Rhino\Codegen\Hook;
 
+use Rhino\Codegen\TempFile;
+
 class Callback extends Hook
 {
     protected $hook;
@@ -12,8 +14,8 @@ class Callback extends Hook
         $this->callback = $callback;
     }
 
-    public function process(\Rhino\Codegen\Template\OutputFile $outputFile): array
+    public function process(TempFile $tempFile): array
     {
-        return ($this->callback)($outputFile);
+        return ($this->callback)($tempFile);
     }
 }

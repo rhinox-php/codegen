@@ -18,9 +18,9 @@ class TempFile
         }
     }
 
-    public static function createUnique()
+    public static function createUnique($extension): static
     {
-        return new static(sys_get_temp_dir() . '/' . uniqid('codegen-', true));
+        return new static(sys_get_temp_dir() . '/' . uniqid('codegen-', true) . ($extension ? '.' . $extension : ''));
     }
 
     public function getPath(): string
@@ -51,6 +51,11 @@ class TempFile
         copy($path, $this->path);
     }
 
+    public function copyTo(string $path)
+    {
+        copy($this->path, $path);
+    }
+
     public function putContents($data)
     {
         $this->createDirectory();
@@ -65,5 +70,10 @@ class TempFile
     public function getSize(): int
     {
         return filesize($this->path);
+    }
+
+    public function getExtension(): string
+    {
+        return pathinfo($this->path, PATHINFO_EXTENSION);
     }
 }

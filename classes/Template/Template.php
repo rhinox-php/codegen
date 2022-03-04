@@ -1,9 +1,11 @@
 <?php
+
 namespace Rhino\Codegen\Template;
 
 use Rhino\Codegen\Codegen;
 use Rhino\Codegen\Hook;
 use Rhino\Codegen\MergeClass;
+use Rhino\Codegen\TempFile;
 
 abstract class Template
 {
@@ -154,7 +156,21 @@ abstract class Template
         return file_get_contents($templateFile);
     }
 
-    protected function renderTemplateFile(string $templateFile, string $outputPath, array $data = [], bool $overwrite = true): ?OutputFile
+    protected function queueTemplateFile(string $templateFile, string $outputPath, array $data = [], bool $overwrite = true)
+    {
+        $dataFile = \Rhino\Codegen\ROOT . '/temp/' . uniqid('data-', true) . '.ser';
+        file_put_contents($dataFile, serialize($data));
+        $command = $this->getCodegen()->getCliArguments('render:template-file', [
+            '--template' => static::class,
+            '--template-file' => $templateFile,
+            '--output-file' => $outputPath,
+            '--data-file' => $dataFile,
+            // '--overwrite' => $overwrite,
+        ]);
+        $this->getCodegen()->queue($command);
+    }
+
+    public function renderTemplateFile(string $templateFile, string $outputPath, array $data = [], bool $overwrite = true)
     {
         if (file_exists($outputPath)) {
             $outputPath = realpath($outputPath);
@@ -163,33 +179,56 @@ abstract class Template
                 return null;
             }
         }
-        $outputFile = new OutputFile($outputPath);
+        $this->codegen->log('Rendering', $outputPath, $templateFile);
         $output = $this->bufferTemplateFile($templateFile, $data);
+        $generatedHash = md5($output);
+        $fileHash = md5_file($outputPath);
+        if ($fileHash != md5('')) {
+            $manifestHashes = $this->codegen->manifest->getHashes($outputPath);
+            if ($generatedHash === ($manifestHashes['generatedHash'] ?? null) && ($manifestHashes['generatedHash'] ?? null) && !$this->codegen->isForce()) {
+                $this->codegen->log('No changes detected.', $generatedHash, $manifestHashes['generatedHash'] ?? null);
+                return;
+            } else {
+                $this->codegen->debug('Changes detected.', $generatedHash, $manifestHashes['generatedHash'] ?? null);
+            }
+            if ($fileHash !== ($manifestHashes['formattedHash'] ?? null) && ($manifestHashes['formattedHash'] ?? null) && !$this->codegen->isForce()) {
+                $this->codegen->log('Changes detected in generated file, not overwriting.', $fileHash, $manifestHashes['formattedHash'] ?? null);
+                return;
+            }
+        }
+
+        $this->codegen->log('Formatting generated code.');
+        $tempFile = TempFile::createUnique(pathinfo($outputPath, PATHINFO_EXTENSION));
+        $tempFile->putContents($output);
+        $this->hook('format', [$tempFile]);
+        $formattedHash = md5_file($tempFile->getPath());
+
+        $this->codegen->manifest->addFile($outputPath, [
+            'generatedHash' => $generatedHash,
+            'formattedHash' => $formattedHash,
+        ]);
+
+        $this->codegen->log('Writing output file.');
         $directory = dirname($outputPath);
         $this->codegen->createDirectory($directory);
-        [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
-        if ($this->codegen->writeFile($outputPath, $output)) {
-            $this->hook('gen:write', [$outputFile]);
-            $this->codegen->manifest->addFile($outputFile->getPath());
-        }
-        return $outputFile;
+        $tempFile->copyTo($outputPath);
     }
 
-    protected function mergeTemplateFile(string $templateFile, string $outputPath, array $data = []): ?OutputFile
-    {
-        if (!file_exists($outputPath)) {
-            return $this->renderTemplateFile($templateFile, $outputPath, $data);
-        }
-        $outputFile = new OutputFile($outputPath);
-        $output = $this->bufferTemplateFile($templateFile, $data);
-        $output = MergeClass::mergeStrings($this->codegen, $output, $outputFile->getContents());
-        [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
-        if ($this->codegen->writeFile($outputPath, $output)) {
-            $this->hook('gen:write', [$outputFile]);
-            $this->codegen->manifest->addFile($outputFile->getPath());
-        }
-        return $outputFile;
-    }
+    // protected function mergeTemplateFile(string $templateFile, string $outputPath, array $data = []): ?OutputFile
+    // {
+    //     if (!file_exists($outputPath)) {
+    //         return $this->renderTemplateFile($templateFile, $outputPath, $data);
+    //     }
+    //     $outputFile = new OutputFile($outputPath);
+    //     $output = $this->bufferTemplateFile($templateFile, $data);
+    //     $output = MergeClass::mergeStrings($this->codegen, $output, $outputFile->getContents());
+    //     // [$output, $outputFile] = $this->hook('gen:post', [$output, $outputFile]);
+    //     if ($this->codegen->writeFile($outputPath, $output)) {
+    //         $this->hook('gen:write', [$outputFile]);
+    //         $this->codegen->manifest->addFile($outputFile->getPath());
+    //     }
+    //     return $outputFile;
+    // }
 
     protected function getTemplateFile(string $name): string
     {
@@ -209,7 +248,8 @@ abstract class Template
         throw new \Exception('Could not find template file: ' . $name . ' tried ' . implode(', ', $possibilities));
     }
 
-    public function setTemplateFile(string $name, string $path): self {
+    public function setTemplateFile(string $name, string $path): self
+    {
         if (!is_file($path)) {
             throw new \Exception('Template override path is not a valid file: ' . $path);
         }
@@ -217,7 +257,8 @@ abstract class Template
         return $this;
     }
 
-    protected function copy(string $from, string $to) {
+    protected function copy(string $from, string $to)
+    {
         $from = __DIR__ . '/../../templates/' . $from;
         $to = $this->getFilePath(null, $to);
         $this->codegen->createDirectory($to);

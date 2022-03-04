@@ -1,17 +1,17 @@
 <?php
 namespace Rhino\Codegen\Hook;
 
-use Rhino\Codegen\Template\OutputFile;
+use Rhino\Codegen\TempFile;
 
 class PhpCsFixer extends Hook
 {
-    protected $hook = 'gen:write';
+    protected $hook = 'format';
 
-    public function process(OutputFile $outputFile): array
+    public function process(TempFile $tempFile): array
     {
-        if ($outputFile->getExtension() === 'php') {
-            \Rhino\Codegen\FormatPhp::formatFile($outputFile->getPath());
+        if ($tempFile->getExtension() === 'php') {
+            \Rhino\Codegen\FormatPhp::formatFile($tempFile->getPath());
         }
-        return [$outputFile];
+        return [$tempFile];
     }
 }

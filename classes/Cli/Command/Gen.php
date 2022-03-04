@@ -21,7 +21,14 @@ class Gen extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->getCodegen($input->getOption('schema'), !$input->getOption('execute'), $input->getOption('debug'), $input->getOption('force'), $input->getOption('overwrite'), $input->getOption('filter'))
+        $this->getCodegen(
+            $input->getOption('schema'),
+            !$input->getOption('execute'),
+            $input->getOption('debug'),
+            $input->getOption('force'),
+            $input->getOption('overwrite'),
+            $input->getOption('filter'),
+        )
             ->generate();
         return 0;
     }

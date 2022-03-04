@@ -55,5 +55,8 @@ return (new \PhpCsFixer\Config())
                 // 'method_private',
             ],
         ],
+        'braces' => true,
+        'array_indentation' => true,
+        'method_chaining_indentation' => true,
     ])
     ->setFinder($finder);

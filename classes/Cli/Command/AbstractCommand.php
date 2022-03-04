@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\Codegen\Cli\Command;
 
 use Rhino\Codegen\Codegen;
@@ -18,26 +19,12 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Enable debug output');
     }
 
-    protected function getCodegen(?string $schema, bool $dryRun, bool $debug, bool $force = false, bool $overwrite = false, ?string $filter = ''): \Rhino\Codegen\Codegen
+    protected function getCodegen(?string $schemaFileOverride, bool $dryRun, bool $debug, bool $force = false, bool $overwrite = false, ?string $filter = ''): \Rhino\Codegen\Codegen
     {
-        if (!$schema) {
-            $currentDirectory = getcwd() . '/codegen/';
-            do {
-                if (is_file($currentDirectory . '/codegen.php')) {
-                    $schema = $currentDirectory . '/codegen.php';
-                    break;
-                }
-                if (dirname($currentDirectory) == $currentDirectory) {
-                    break;
-                }
-                $currentDirectory = dirname($currentDirectory);
-            } while (is_dir($currentDirectory));
-        }
-        if (!is_file($schema)) {
-            throw new \Exception('Could not find codegen schema file: ' . $schema);
-        }
+        $schemaFile = $this->getSchemaFile($schemaFileOverride);
         /** @var Codegen */
-        $codegen = require $schema;
+        $codegen = require $schemaFile;
+        $codegen->setSchemaFile(realpath($schemaFile));
         $codegen->setDryRun($dryRun);
         $codegen->setForce($force);
         $codegen->setOverwrite($overwrite);
@@ -46,5 +33,37 @@ abstract class AbstractCommand extends \Symfony\Component\Console\Command\Comman
             $codegen->setOutputLevel(Codegen::OUTPUT_LEVEL_DEBUG);
         }
         return $codegen;
+    }
+
+    protected function getSchemaFile(?string $schemaFileOverride): string
+    {
+        if ($schemaFileOverride) {
+            if (!is_file($schemaFileOverride)) {
+                throw new \Exception('Could not find codegen schema file: ' . $schemaFileOverride);
+            }
+            return $schemaFileOverride;
+        }
+
+        $schemaFile = null;
+        $currentDirectory = getcwd();
+        do {
+            if (is_file($currentDirectory . '/codegen.php')) {
+                $schemaFile = $currentDirectory . '/codegen.php';
+                break;
+            }
+            if (is_file($currentDirectory . '/codegen/codegen.php')) {
+                $schemaFile = $currentDirectory . '/codegen/codegen.php';
+                break;
+            }
+            if (dirname($currentDirectory) == $currentDirectory) {
+                break;
+            }
+            $currentDirectory = dirname($currentDirectory);
+        } while (is_dir($currentDirectory));
+
+        if (!$schemaFile) {
+            throw new \Exception('Could not find codegen schema file');
+        }
+        return $schemaFile;
     }
 }

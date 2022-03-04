@@ -2,81 +2,65 @@
 
 namespace Rhino\Codegen;
 
-class Manifest implements \JsonSerializable
+class Manifest
 {
-    protected $codegen;
-
-    /** @var array Files */
-    protected $files = [];
-
-    public function __construct(Codegen $codegen)
-    {
-        $this->codegen = $codegen;
+    public function __construct(
+        private Codegen $codegen,
+        private string $manifestFile
+    ) {
     }
 
     public function clean(bool $force = false)
     {
-        foreach ($this->files as $manifestFile => $hash) {
-            $file = $this->codegen->getPath($manifestFile);
-            if (!is_file($file)) {
-                $this->codegen->log('Manifest file does not exist: ' . $file);
-                unset($this->files[$manifestFile]);
-                continue;
-            }
-            $file = realpath($file);
-            $currentHash = md5_file($file);
-            if ($currentHash !== $hash) {
-                $this->codegen->log('Manifest file hash does not match: ' . $file . ' ' . $currentHash . ':' . $hash);
-                if (!$force) {
+        $this->lock(function ($manifest) use ($force) {
+            foreach ($manifest as $file => $hash) {
+                $file = $this->codegen->getPath($file);
+                if (!is_file($file)) {
+                    $this->codegen->log('Manifest file does not exist: ' . $file);
+                    unset($manifest[$file]);
                     continue;
                 }
+                $file = realpath($file);
+                $currentHash = md5_file($file);
+                if ($currentHash !== $hash) {
+                    $this->codegen->log('Manifest file hash does not match: ' . $file . ' ' . $currentHash . ':' . $hash);
+                    if (!$force) {
+                        continue;
+                    }
+                }
+                $this->codegen->log('Deleting ' . $file);
+                if (!$this->codegen->isDryRun()) {
+                    unlink($file);
+                    unset($manifest[$file]);
+                }
             }
-            $this->codegen->log('Deleting ' . $file);
-            if (!$this->codegen->isDryRun()) {
-                unlink($file);
-                unset($this->files[$manifestFile]);
-            }
-        }
+            return $manifest;
+        });
     }
 
-    public function jsonSerialize(): mixed
-    {
-        ksort($this->files);
-        return $this->files;
-    }
-
-    public function getFiles(): array
-    {
-        return $this->files;
-    }
-
-    public function setFiles(array $files): self
-    {
-        $this->files = $files;
-        return $this;
-    }
-
-    public function addFile(string $file): self
+    public function addFile(string $file, array $hashes): self
     {
         assert(is_file($file), new \Exception('Manifest expects files to exist: ' . $file));
-        $hash = md5_file($file);
         $file = $this->getRelativePath($this->codegen->getPath(), realpath($file));
-        if (isset($this->files[$file])) {
-            $this->codegen->debug('Updating file in manifest', $file, $this->files[$file], '->', $hash);
-        } else {
-            $this->codegen->debug('Adding file to manifest', $file, $hash);
-        }
-        $this->files[$file] = $hash;
+        $this->lock(function ($manifest) use ($file, $hashes) {
+            if (isset($manifest[$file])) {
+                $this->codegen->debug('Updating file in manifest', $file, $manifest[$file], '->', $hashes);
+                $manifest[$file] = $hashes;
+            } else {
+                $this->codegen->debug('Adding file to manifest', $file, $hashes);
+                $manifest[$file] = $hashes;
+            }
+            ksort($manifest);
+            return $manifest;
+        });
         return $this;
     }
 
-    public function getHash(string $file): ?string
+    public function getHashes(string $file): array
     {
-        $file = $this->getRelativePath($this->codegen->getPath(), $file);
-        if (isset($this->files[$file])) {
-            return $this->files[$file];
-        }
-        return null;
+        $file = $this->getRelativePath($this->codegen->getPath(), realpath($file));
+        $manifest = $this->readManifest();
+        return isset($manifest[$file]) && is_array($manifest[$file]) ? $manifest[$file] : [];
     }
 
     private function getRelativePath($from, $to)
@@ -113,5 +97,40 @@ class Manifest implements \JsonSerializable
         $relPath = preg_replace('~^./~', '', $relPath);
         $relPath = str_replace('//', '/', $relPath);
         return $relPath;
+    }
+
+    private function readManifest(): array
+    {
+        return json_decode(file_get_contents($this->manifestFile), true) ?: [];
+    }
+
+    private function lock(callable $callback)
+    {
+        $handle = fopen($this->manifestFile, 'r+');
+        if (!$handle) {
+            throw new \Exception('Unable to open manifest file: ' . $this->manifestFile);
+        }
+        try {
+            if (flock($handle, LOCK_EX)) {
+                $size = filesize($this->manifestFile);
+                if ($size > 0) {
+                    $content = fread($handle, $size);
+                    $json = json_decode($content, true);
+                } else {
+                    $json = [];
+                }
+                $json = $callback($json);
+                ftruncate($handle, 0);
+                fseek($handle, 0);
+                fwrite($handle, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                flock($handle, LOCK_UN);
+            } else {
+                throw new \Exception('Could not lock manifest file: ' . $this->manifestFile);
+            }
+        } finally {
+            if ($handle && is_resource($handle)) {
+                @fclose($handle);
+            }
+        }
     }
 }

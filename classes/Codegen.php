@@ -2,6 +2,9 @@
 
 namespace Rhino\Codegen;
 
+use BluePsyduck\SymfonyProcessManager\ProcessManager;
+use Symfony\Component\Process\Process;
+
 class Codegen
 {
     use Inflector;
@@ -36,7 +39,6 @@ class Codegen
     protected $databasePassword;
     protected $databaseCharset = 'utf8mb4';
     protected $databaseCollation = 'utf8mb4_unicode_520_ci';
-    protected $path;
     protected $outputLevel = self::OUTPUT_LEVEL_LOG;
     protected $loggedOnce = [];
     protected $hooks = [];
@@ -46,21 +48,17 @@ class Codegen
         __DIR__ . '/',
         '.',
     ];
+    protected $queue = [];
 
-    public function __construct()
-    {
+    public function __construct(
+        private string $path,
+    ) {
+        assert(is_dir($path), 'Expected path to be a valid directory: ' . $path);
         $this->node = new NodeRoot();
+        $this->manifest = new Manifest($this, $this->getPath('codegen-manifest.json'));
     }
 
-    public function validate(): self
-    {
-        if (!$this->namespace) {
-            throw new \Exception('Codegen base namespace not set.');
-        }
-        return $this;
-    }
-
-    public function codegenInfo(): self
+    public function codegenInfo(): static
     {
         $this->info('Namespaces:');
         foreach ($this->iterateTemplates() as $template) {
@@ -73,35 +71,56 @@ class Codegen
 
     public function generate()
     {
-        $this->validate();
-        $this->readManifest();
         $this->log('Generating templates...');
         assert(is_dir($this->getPath()), 'Codegen path not set, or does not exist: ' . $this->getPath());
         foreach ($this->getTemplates() as $template) {
             $this->debug(get_class($template));
             $template->generate();
         }
+
+        $this->log('Starting queue:', count($this->queue));
+        $processManager = new ProcessManager($this->getProcessorCoreCount(), 100, 10);
+        $processManager->setProcessStartCallback(function (Process $process): void {
+            $this->debug('Running:', $process->getCommandLine());
+        });
+        $processManager->setProcessFinishCallback(function (Process $process): void {
+            $this->debug('Finished:', $process->getCommandLine());
+            if (trim($process->getOutput())) {
+                $this->log(trim($process->getOutput()) . PHP_EOL);
+            }
+            if (trim($process->getErrorOutput())) {
+                $this->log(trim($process->getErrorOutput()) . PHP_EOL);
+            }
+        });
+
+        while (count($this->queue) > 0) {
+            $command = array_shift($this->queue);
+            $processManager->addProcess(Process::fromShellCommandline($command));
+        }
+        $processManager->waitForAllProcesses();
+
         $this->log('Generating templates complete!');
-        $this->writeManifest();
         return $this;
+    }
+
+    private function getProcessorCoreCount()
+    {
+        if (PHP_OS_FAMILY == 'Windows') {
+            $cores = shell_exec('echo %NUMBER_OF_PROCESSORS%');
+        } else {
+            $cores = shell_exec('nproc');
+        }
+        return (int) $cores;
     }
 
     public function clean()
     {
-        $this->validate();
-        $this->readManifest();
         $this->manifest->clean($this->isForce());
-        $this->writeManifest();
     }
 
     public function getManifest()
     {
         return $this->manifest;
-    }
-
-    protected function getManifestFile()
-    {
-        return $this->manifestFile ?: $this->getPath('codegen-manifest.json');
     }
 
     public function setManifestFile(string $manifestFile)
@@ -110,47 +129,8 @@ class Codegen
         return $this;
     }
 
-    public function readManifest()
+    public function dbMigrate(bool $write, bool $run): static
     {
-        $this->log('Reading manifest...');
-        $this->manifest = new Manifest($this);
-        $manifest = $this->getManifestFile();
-        if (!is_file($manifest)) {
-            $this->log('Manifest doesn\'t exist.');
-            return;
-        }
-        $content = file_get_contents($manifest);
-        if (!$content) {
-            $this->log('Manifest is empty.');
-            return;
-        }
-        $files = json_decode($content, true);
-        if (!is_array($files)) {
-            $this->log('Manifest was not a valid JSON array.');
-            return;
-        }
-        $this->manifest->setFiles($files);
-        return $this;
-    }
-
-    public function writeManifest()
-    {
-        if (!$this->dryRun) {
-            $manifest = $this->getManifestFile();
-            $this->log('Writing manifest: ' . $manifest);
-            $content = json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            if (is_file($manifest) && md5($content) === md5_file($manifest)) {
-                $this->debug('No changes to', $manifest);
-                return $this;
-            }
-            file_put_contents($manifest, $content);
-        }
-        return $this;
-    }
-
-    public function dbMigrate(bool $write, bool $run): self
-    {
-        $this->readManifest();
         $pdo = $this->getPdo(false);
         if (!$this->db->databaseExists($this->getDatabaseName())) {
             $this->log('Database doesn\'t exist: ' . $this->getDatabaseName());
@@ -212,7 +192,7 @@ class Codegen
         return $this;
     }
 
-    public function dbReset(): self
+    public function dbReset(): static
     {
         $pdo = $this->getPdo(false);
         $this->log('Dropping and recreating database', $this->getDatabaseName(), $this->getDatabaseCharset(), $this->getDatabaseCollation());
@@ -277,7 +257,7 @@ class Codegen
         return $this;
     }
 
-    public function debug(...$messages): self
+    public function debug(...$messages): static
     {
         if ($this->outputLevel < static::OUTPUT_LEVEL_DEBUG) {
             return $this;
@@ -296,7 +276,7 @@ class Codegen
         return $this;
     }
 
-    public function info(...$messages): self
+    public function info(...$messages): static
     {
         if ($this->outputLevel < static::OUTPUT_LEVEL_INFO) {
             return $this;
@@ -315,7 +295,7 @@ class Codegen
         return $this;
     }
 
-    public function log(...$messages): self
+    public function log(...$messages): static
     {
         if ($this->outputLevel < static::OUTPUT_LEVEL_LOG) {
             return $this;
@@ -334,7 +314,7 @@ class Codegen
         return $this;
     }
 
-    public function infoOnce(...$messages): self
+    public function infoOnce(...$messages): static
     {
         $key = md5(implode(' ', $messages));
         if (!isset($this->loggedOnce[$key])) {
@@ -344,7 +324,7 @@ class Codegen
         return $this;
     }
 
-    public function logOnce(...$messages): self
+    public function logOnce(...$messages): static
     {
         $key = md5(implode(' ', $messages));
         if (!isset($this->loggedOnce[$key])) {
@@ -359,9 +339,20 @@ class Codegen
         return $this->projectName;
     }
 
-    public function setProjectName(string $projectName): self
+    public function setProjectName(string $projectName): static
     {
         $this->projectName = $projectName;
+        return $this;
+    }
+
+    public function getSchemaFile(): string
+    {
+        return $this->schemaFile;
+    }
+
+    public function setSchemaFile($schemaFile): static
+    {
+        $this->schemaFile = $schemaFile;
         return $this;
     }
 
@@ -370,7 +361,7 @@ class Codegen
         return $this->dryRun > 0;
     }
 
-    public function setDryRun($dryRun): self
+    public function setDryRun($dryRun): static
     {
         $this->dryRun = (int) $dryRun;
         return $this;
@@ -381,7 +372,7 @@ class Codegen
         return $this->force;
     }
 
-    public function setForce(bool $force): self
+    public function setForce(bool $force): static
     {
         $this->force = $force;
         return $this;
@@ -392,7 +383,7 @@ class Codegen
         return $this->overwrite;
     }
 
-    public function setOverwrite(bool $overwrite): self
+    public function setOverwrite(bool $overwrite): static
     {
         $this->overwrite = $overwrite;
         return $this;
@@ -415,7 +406,7 @@ class Codegen
         return $this->filter;
     }
 
-    public function setFilter(?string $filter): self
+    public function setFilter(?string $filter): static
     {
         $this->filter = $filter;
         return $this;
@@ -426,7 +417,7 @@ class Codegen
         return $this->templatePath;
     }
 
-    public function setTemplatePath(string $templatePath): self
+    public function setTemplatePath(string $templatePath): static
     {
         $this->templatePath = $templatePath;
         return $this;
@@ -437,13 +428,13 @@ class Codegen
         return $this->viewPathPrefix;
     }
 
-    public function setViewPathPrefix(string $viewPathPrefix): self
+    public function setViewPathPrefix(string $viewPathPrefix): static
     {
         $this->viewPathPrefix = $viewPathPrefix;
         return $this;
     }
 
-    public function setDatabase(string $databaseDsn, string $databaseName, string $databaseUser, string $databasePassword): self
+    public function setDatabase(string $databaseDsn, string $databaseName, string $databaseUser, string $databasePassword): static
     {
         $this->databaseDsn = $databaseDsn;
         $this->databaseName = $databaseName;
@@ -482,37 +473,37 @@ class Codegen
         return $this->databaseCollation;
     }
 
-    public function setDatabaseDsn(string $databaseDsn): self
+    public function setDatabaseDsn(string $databaseDsn): static
     {
         $this->databaseDsn = $databaseDsn;
         return $this;
     }
 
-    public function setDatabaseName(string $databaseName): self
+    public function setDatabaseName(string $databaseName): static
     {
         $this->databaseName = $databaseName;
         return $this;
     }
 
-    public function setDatabaseUser(string $databaseUser): self
+    public function setDatabaseUser(string $databaseUser): static
     {
         $this->databaseUser = $databaseUser;
         return $this;
     }
 
-    public function setDatabasePassword(string $databasePassword): self
+    public function setDatabasePassword(string $databasePassword): static
     {
         $this->databasePassword = $databasePassword;
         return $this;
     }
 
-    public function setDatabaseCharset(string $databaseCharset): self
+    public function setDatabaseCharset(string $databaseCharset): static
     {
         $this->databaseCharset = $databaseCharset;
         return $this;
     }
 
-    public function setDatabaseCollation(string $databaseCollation): self
+    public function setDatabaseCollation(string $databaseCollation): static
     {
         $this->databaseCollation = $databaseCollation;
         return $this;
@@ -542,7 +533,7 @@ class Codegen
         return $this->templates;
     }
 
-    public function setTemplates(array $templates): self
+    public function setTemplates(array $templates): static
     {
         $this->templates = $templates;
         return $this;
@@ -572,13 +563,6 @@ class Codegen
         return $this->path . '/' . $path;
     }
 
-    public function setPath(string $path): self
-    {
-        assert(is_dir($path), 'Expected path to be a valid directory: ' . $path);
-        $this->path = $path;
-        return $this;
-    }
-
     public function getFile(string $file): string
     {
         $file = $this->getPath($file);
@@ -590,28 +574,28 @@ class Codegen
         return $file;
     }
 
-    public function writeFile(string $file, string $content): bool
-    {
-        assert(!!$file, new \Exception('Invalid file to write ' . $file));
+    // public function writeFile(string $file, string $content, string $hash): bool
+    // {
+    //     assert(!!$file, new \Exception('Invalid file to write ' . $file));
 
-        if (is_file($file)) {
-            if (!$this->isForce() && !$this->isFileDifferent($file, $content)) {
-                $this->debug('No changes to', $file);
-                return false;
-            }
-            if (!$this->isForce() && !$this->isOverwrite() && filesize($file) > 0 && $this->manifest->getHash($file) && md5_file($file) !== $this->manifest->getHash($file)) {
-                $this->log('Local modifications to file, not overwriting', $file, 'current hash:', md5_file($file) ?: 'null', 'manifest hash:', $this->manifest->getHash($file) ?: 'null');
-                return false;
-            }
-        }
-        $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file, md5($content));
-        if (!$this->isDryRun()) {
-            file_put_contents($file, $content);
-            $this->manifest->addFile($file);
-            return true;
-        }
-        return false;
-    }
+    //     if (is_file($file)) {
+    //         if (!$this->isForce() && !$this->isFileDifferent($file, $content)) {
+    //             $this->debug('No changes to', $file);
+    //             return false;
+    //         }
+    //         if (!$this->isForce() && !$this->isOverwrite() && filesize($file) > 0 && $this->manifest->getHash($file) && md5_file($file) !== $this->manifest->getHash($file)) {
+    //             $this->log('Local modifications to file, not overwriting', $file, 'current hash:', md5_file($file) ?: 'null', 'manifest hash:', $this->manifest->getHash($file) ?: 'null');
+    //             return false;
+    //         }
+    //     }
+    //     $this->log(is_file($file) ? 'Overwriting' : 'Writing', strlen($content), 'bytes to', $file, md5($content));
+    //     if (!$this->isDryRun()) {
+    //         file_put_contents($file, $content);
+    //         $this->manifest->addFile($file);
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     private function isFileDifferent(string $file, string $content): bool
     {
@@ -650,7 +634,7 @@ class Codegen
         return $this->debug;
     }
 
-    public function setDebug(bool $debug): self
+    public function setDebug(bool $debug): static
     {
         $this->debug = $debug;
         return $this;
@@ -661,7 +645,7 @@ class Codegen
         return $this->namespace;
     }
 
-    public function setNamespace(string $namespace): self
+    public function setNamespace(string $namespace): static
     {
         $this->namespace = $namespace;
         return $this;
@@ -672,7 +656,7 @@ class Codegen
         return $this->outputLevel;
     }
 
-    public function setOutputLevel(int $outputLevel): self
+    public function setOutputLevel(int $outputLevel): static
     {
         $this->outputLevel = $outputLevel;
         return $this;
@@ -681,21 +665,21 @@ class Codegen
     public function hook(string $hookName, array $parameters): array
     {
         if (isset($this->hooks[$hookName])) {
-            $this->debug('Running hook', $hookName);
             foreach ($this->hooks[$hookName] as $hook) {
+                $this->debug('Running hook', $hookName, $hook::class);
                 $parameters = $hook->process(...$parameters);
             }
         }
         return $parameters;
     }
 
-    public function addHook(Hook\Hook $hook): self
+    public function addHook(Hook\Hook $hook): static
     {
         $this->hooks[$hook->getHook()][] = $hook;
         return $this;
     }
 
-    public function addHookCallback(string $hookName, callable $callback): self
+    public function addHookCallback(string $hookName, callable $callback): static
     {
         $this->hooks[$hookName][] = new Hook\Callback($hookName, $callback);
         return $this;
@@ -711,7 +695,7 @@ class Codegen
         return $this->mergeFileMapper;
     }
 
-    public function setMergeFileMapper(callable $mergeFileMapper): self
+    public function setMergeFileMapper(callable $mergeFileMapper): static
     {
         $this->mergeFileMapper = $mergeFileMapper;
         return $this;
@@ -722,9 +706,46 @@ class Codegen
         return $this->watchDirectories;
     }
 
-    public function setWatchDirectories(array $watchDirectories): self
+    public function setWatchDirectories(array $watchDirectories): static
     {
         $this->watchDirectories = $watchDirectories;
+        return $this;
+    }
+
+    public function getCliArguments(string $command, array $options = []): string
+    {
+        $cliArguments = [];
+        $cliArguments[] = 'codegen';
+        $cliArguments[] = $command;
+        $cliArguments[] = '--schema=' . escapeshellarg($this->getSchemaFile());
+        if ($this->getFilter()) {
+            $cliArguments[] = '--filter=' . escapeshellarg($this->getFilter());
+        }
+        if (!$this->isDryRun()) {
+            $cliArguments[] = '--execute';
+        }
+        if ($this->getOutputLevel() === static::OUTPUT_LEVEL_DEBUG) {
+            $cliArguments[] = '--debug';
+        }
+        if ($this->isForce()) {
+            $cliArguments[] = '--force';
+        }
+        if ($this->isOverwrite()) {
+            $cliArguments[] = '--overwrite';
+        }
+        foreach ($options as $key => $value) {
+            if ($value) {
+                $cliArguments[] = $key . '=' . escapeshellarg($value);
+            } else {
+                $cliArguments[] = $key;
+            }
+        }
+        return implode(' ', $cliArguments);
+    }
+
+    public function queue($command): static
+    {
+        $this->queue[] = $command;
         return $this;
     }
 }

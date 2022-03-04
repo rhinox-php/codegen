@@ -1,17 +1,18 @@
 <?php
+
 namespace Rhino\Codegen\Hook;
 
-use Rhino\Codegen\Template\OutputFile;
+use Rhino\Codegen\TempFile;
 
 class RemoveDoubleLines extends Hook
 {
-    protected $hook = 'gen:write';
+    protected $hook = 'format';
 
-    public function process(OutputFile $outputFile): array
+    public function process(TempFile $tempFile): array
     {
-        $contents = file_get_contents($outputFile->getPath());
+        $contents = file_get_contents($tempFile->getPath());
         $contents = preg_replace('/\n\n+/', "\n\n", $contents);
-        file_put_contents($outputFile->getPath(), $contents);
-        return [$outputFile];
+        file_put_contents($tempFile->getPath(), $contents);
+        return [$tempFile];
     }
 }

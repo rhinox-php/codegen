@@ -4,18 +4,20 @@ namespace Rhino\Codegen;
 
 class Node
 {
-    private $xmlNode;
-    private $names = [];
-    public $attributes = [];
-    public $children = [];
-    public $type;
+    private array $names = [];
+    public array $attributes = [];
+    public array $children = [];
+    public string $type;
+    public ?string $xml;
+    public string $content;
 
     public function __construct(\SimpleXMLElement $xmlNode, XmlParser $xmlParser)
     {
-        $this->xmlNode = $xmlNode;
         $this->type = $xmlNode->getName();
+        $this->xml = $this->toXml($xmlNode);
+        $this->content = (string) $xmlNode;
         foreach ($xmlNode->attributes() as $name => $value) {
-            $this->attributes[(string) $name] = $value;
+            $this->attributes[(string) $name] = (string) $value;
         }
         foreach ($xmlNode->children() as $name => $value) {
             $this->children[] = new static($value, $xmlParser);
@@ -65,19 +67,24 @@ class Node
         return $this->attr($name)->bool($default);
     }
 
-    public function xml()
+    private function toXml(\SimpleXMLElement $xmlNode): ?string
     {
-        $tag = $this->xmlNode->getName();
-        $value = $this->xmlNode->__toString();
+        $tag = $xmlNode->getName();
+        $value = $xmlNode->__toString();
         if ('' === $value) {
             return null;
         }
-        return preg_replace('!<' . $tag . '(?:[^>]*)>(.*)</' . $tag . '>!Ums', '$1', $this->xmlNode->asXml());
+        return preg_replace('!<' . $tag . '(?:[^>]*)>(.*)</' . $tag . '>!Ums', '$1', $xmlNode->asXml());
+    }
+
+    public function xml(): ?string
+    {
+        return $this->xml;
     }
 
     public function getContent(): string
     {
-        return (string) $this->xmlNode;
+        return $this->content;
     }
 
     public function is(string ...$types): bool
@@ -136,13 +143,23 @@ class Node
         return $result;
     }
 
-    public function find($type, $name)
+    public function find($type)
     {
         foreach ($this->children as $node) {
-            if ($node->type == $type && $node->name == $name) {
+            if ($node->type == $type) {
                 return $node;
             }
         }
         return null;
     }
+
+    // public function find($type, $name)
+    // {
+    //     foreach ($this->children as $node) {
+    //         if ($node->type == $type && $node->name == $name) {
+    //             return $node;
+    //         }
+    //     }
+    //     return null;
+    // }
 }

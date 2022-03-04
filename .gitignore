@@ -1,6 +1,7 @@
+.php_cs.cache
+/internal/generated/
+/nbproject/
+/nbproject/private/
+/temp/
 example
 vendor
-.php_cs.cache
-/nbproject/private/
-/nbproject/
-/internal/generated/
